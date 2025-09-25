@@ -154,7 +154,7 @@
         </div>
 
         <!-- Hàng 2 -->
-        <div class="col-md-4">
+        <%-- <div class="col-md-4">
             <div class="banner-item bg-lightgray">
               <a href="https://www.son3ce.com/"><img src="${pageContext.request.contextPath}/IMG/bst3.png" alt=""></a>  
             </div>
@@ -195,8 +195,8 @@
                 </a>
               
             </div>
-        </div>
-    </div>
+        </div>   --%>
+    </div> 
 
 <div class="container mt-4 text-center">
         <h2 class="text-center text-uppercase fw-bold " style="color: #f76c85;">
