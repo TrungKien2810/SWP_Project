@@ -216,12 +216,12 @@
                 <p>🌍 <a href="${pageContext.request.contextPath}/View/home.jsp" target="_blank" style="color: #24e454; text-decoration: none;" >pinkycloud.vn</a></p>
 
                 <h3>Hệ Thống Phòng Kinh Doanh</h3>
-                <h5>PINKYCLOUD Hồ Chí Minh</h5>
-                <p>📍 Số 57, đường Quang Trung, quận Gò Vấp, TP. HCM</p>
+                <h5>TOCEPO THỊ NẠI</h5>
+                <p>📍 224 Đống Đa, Thị Nải, Quy Nhơn, Bình Định, Việt Nam</p>
                 <p>📞 0888.004.444 - 0888.885.884 (Zalo)</p>
 
-                <h5>PINKYCLOUD Đà Nẵng</h5>
-                <p>📍 56 Nguyễn Hữu Dật, P. Hải Châu, TP. Đà Nẵng</p>
+                <h5>Quán Nhậu Aking 2</h5>
+                <p>📍153-155 Bùi Xuân Phái, Trần Hưng Đạo, Quy Nhơn, Bình Định, Việt Nam</p>
                 <p>📞 0833.55.4444 (Zalo)</p>
 
                 <h3>Nhà Phân Phối KEEPFLY</h3>
