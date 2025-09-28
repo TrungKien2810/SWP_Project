@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -59,22 +60,7 @@ public class login extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        HttpSession session = request.getSession();
-        String email = request.getParameter("email");
-        String password = request.getParameter("password");
-        UserDB ud = new UserDB();
-        if (ud.getUserByEmail(email) == null) {
-            request.setAttribute("error", "account is not exist, you aren't sign up?");
-            request.getRequestDispatcher("/View/log.jsp").forward(request, response);
-        }
-        if (ud.login(email, password)) {
-            session.setAttribute("user", ud.getUserByEmail(email));
-            request.getRequestDispatcher("/View/home.jsp").forward(request, response);
-        }
-        else{
-            request.setAttribute("error", "Email or password is invalid, please try again");
-            request.getRequestDispatcher("/View/log.jsp").forward(request, response);
-        }
+        request.getRequestDispatcher("/View/log.jsp").forward(request, response);
     }
 
     /**
@@ -88,7 +74,43 @@ public class login extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        HttpSession session = request.getSession();
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+        String remember = request.getParameter("remember");
+        UserDB ud = new UserDB();
+        if (remember != null) {
+                Cookie cEmail = new Cookie("email", email);
+                Cookie cPass = new Cookie("password", password);
+                // Thời gian sống 7 ngày (tính bằng giây)
+                cEmail.setMaxAge(7 * 24 * 60 * 60);
+                cPass.setMaxAge(7 * 24 * 60 * 60);
+                // Tùy chọn bảo mật
+                cEmail.setHttpOnly(true);
+                cPass.setHttpOnly(true);
+
+                response.addCookie(cEmail);
+                response.addCookie(cPass);
+            }
+        if (email == null || !email.matches("^[A-Za-z0-9._%+-]+@gmail\\.com$")) {
+            request.setAttribute("error", "Email must be a valid Gmail address");
+            request.getRequestDispatcher("/View/log.jsp").forward(request, response);
+        }
+        if(email.equals("") || password.equals("")){
+            request.setAttribute("error", "Không thể để trống thông tin");
+            request.getRequestDispatcher("/View/log.jsp").forward(request, response);
+        }
+        if (ud.getUserByEmail(email) == null) {
+            request.setAttribute("error", "account is not exist, you aren't sign up?");
+            request.getRequestDispatcher("/View/log.jsp").forward(request, response);
+        }
+        if (ud.login(email, password)) {
+            session.setAttribute("user", ud.getUserByEmail(email));
+            request.getRequestDispatcher("/View/home.jsp").forward(request, response);
+        } else {
+            request.setAttribute("error", "Email or password is invalid, please try again");
+            request.getRequestDispatcher("/View/log.jsp").forward(request, response);
+        }
     }
 
     /**

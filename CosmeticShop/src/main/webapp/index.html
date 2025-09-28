@@ -1,10 +1,132 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Start Page</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    </head>
-    <body>
-        <h1>CosmeticShop Project</h1>
-    </body>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý tài khoản</title>
+  <link rel="stylesheet" href="account.css">
+  <style>
+    body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #fff; /* nền hồng nhạt */
+}
+
+.container {
+  max-width: 420px;
+  margin: 40px auto;
+  background: #fff;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+h1 {
+  text-align: center;
+  color: black;
+}
+
+.profile-section {
+  text-align: center;
+  margin-bottom: 20px;
+  display: flex;
+  gap: 80px;
+  align-items: center;
+}
+
+.avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 100%;
+  padding: 10px;    
+  border: 3px solid black;
+  object-fit: cover;
+}
+
+.upload-label {
+  display: flex;                 /* bật flexbox cho label */
+  justify-content: center;       /* canh ngang */
+  align-items: center;           /* canh dọc */
+  padding: 8px 15px;
+  background: black;
+  width: 100px;
+  height: 80px;
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#avatarUpload {
+  display: none;
+}
+
+.info-form label {
+  display: block;
+  margin-top: 10px;
+  color: black;
+}
+
+.info-form input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 4px;
+  border: 1px solid black;
+  border-radius: 8px;
+}
+
+.info-form button {
+  width: 100%;
+  margin-top: 20px;
+  padding: 10px;
+  background: black;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.info-form button:hover {
+  background: black;
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Quản Lý Tài Khoản</h1>
+
+    <div class="profile-section">
+      <img src="IMG/default-avatar.png" alt="Avatar" class="avatar" id="avatarPreview">
+      <label for="avatarUpload" class="upload-label">Chọn Ảnh Đại Diện</label>
+      <input type="file" id="avatarUpload" name="avatar" accept="image/*">
+    </div>
+
+    <form class="info-form" action="/updateAccount" method="post" enctype="multipart/form-data">
+      <label>Họ Tên</label>
+      <input type="text" name="fullName" required>
+
+      <label>Email</label>
+      <input type="email" name="email" required>
+
+      <label>Mật khẩu</label>
+      <input type="password" name="password">
+
+      <button type="submit">Cập nhật</button>
+    </form>
+  </div>
+
+  <script>
+    // Xem trước ảnh trước khi upload
+    document.getElementById('avatarUpload').addEventListener('change', function(e){
+      const file = e.target.files[0];
+      if (file){
+        const reader = new FileReader();
+        reader.onload = function(){
+          document.getElementById('avatarPreview').src = reader.result;
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+  </script>
+</body>
 </html>
