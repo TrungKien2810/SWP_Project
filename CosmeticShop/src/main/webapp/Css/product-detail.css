@@ -1,0 +1,78 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #fff;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.product-image {
+    float: left;
+    width: 40%;
+    padding: 10px;
+}
+
+.product-image img {
+    width: 100%;
+    max-width: 300px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.product-details {
+    float: right;
+    width: 60%;
+    padding: 10px;
+}
+
+.product-details h2 {
+    color: #ff69b4; /* Màu hồng giống PINKYCLOUD */
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.product-details p {
+    font-size: 16px;
+    color: #333;
+    margin: 5px 0;
+}
+
+.product-details .price {
+    font-size: 20px;
+    color: #ff0000; /* Màu đỏ giá khuyến mãi giống Shopee */
+    font-weight: bold;
+}
+
+.product-details .original-price {
+    text-decoration: line-through;
+    color: #888;
+    margin-left: 10px;
+}
+
+.product-details .discount {
+    color: #ff69b4;
+    font-weight: bold;
+}
+
+.btn {
+    background-color: #ff69b4;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.btn:hover {
+    background-color: #ff1493;
+}
+
+.clear {
+    clear: both;
+}
