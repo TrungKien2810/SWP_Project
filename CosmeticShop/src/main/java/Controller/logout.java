@@ -4,7 +4,6 @@
  */
 package Controller;
 
-import DAO.UserDB;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -18,8 +17,8 @@ import jakarta.servlet.http.HttpSession;
  *
  * @author ADMIN
  */
-@WebServlet(name = "signup", urlPatterns = {"/signup"})
-public class signup extends HttpServlet {
+@WebServlet(name = "logout", urlPatterns = {"/logout"})
+public class logout extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -38,10 +37,10 @@ public class signup extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet signup</title>");
+            out.println("<title>Servlet logout</title>");
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet signup at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Servlet logout at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -59,7 +58,9 @@ public class signup extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.getRequestDispatcher("/View/register.jsp").forward(request, response);
+        HttpSession session = request.getSession();
+        session.invalidate();
+        request.getRequestDispatcher("/View/home.jsp").forward(request, response);
     }
 
     /**
@@ -73,31 +74,7 @@ public class signup extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        HttpSession session = request.getSession();
-        String username = request.getParameter("username");
-        String email = request.getParameter("email");
-        String password = request.getParameter("password");
-        String cp = request.getParameter("confirm-password");
-        UserDB ud = new UserDB();
-        if (email == null || !email.matches("^[A-Za-z0-9._%+-]+@gmail\\.com$")) {
-            request.setAttribute("error", "Email must be a valid Gmail address");
-            request.getRequestDispatcher("/View/register.jsp").forward(request, response);
-        }
-        if(email.equals("") || password.equals("") || username.equals("") || cp.equals("")){
-            request.setAttribute("error", "Không thể để trống thông tin");
-            request.getRequestDispatcher("/View/register.jsp").forward(request, response);
-        }
-        if (!cp.equals(password)) {
-            request.setAttribute("error", "Confirm password is invalid");
-            request.getRequestDispatcher("/View/register.jsp").forward(request, response);
-        }
-        if (ud.signup(username, email, password)) {
-            session.setAttribute("user", ud.getUserByEmail(email));
-            request.getRequestDispatcher("/View/home.jsp").forward(request, response);
-        } else {
-            request.setAttribute("error", "email is duplicate, please enter another email");
-            request.getRequestDispatcher("/View/register.jsp").forward(request, response);
-        }
+        processRequest(request, response);
     }
 
     /**

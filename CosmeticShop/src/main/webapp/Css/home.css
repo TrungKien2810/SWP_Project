@@ -2,7 +2,7 @@
 .header {
   width: 100%;
   height: 55px;
-   ackground-color: white;
+  background-color: white;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -514,4 +514,56 @@ footer li a:hover {
   .menu_search input {
     width: 100%;
   }
+}
+
+.account-menu {
+    position: relative;
+    display: inline-block;
+    margin-left: 20px;
+    cursor: pointer;
+}
+
+.account-icon {
+    font-size: 28px;
+    color: #fff !important; 
+    transition: color 0.3s;
+}
+.account-icon:hover {
+    color: #8d8989;
+}
+
+.account-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 40px;
+    background: #fff;
+    min-width: 180px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    border-radius: 10px;
+    padding: 10px 0;
+    z-index: 1100;
+}
+
+.account-dropdown a,
+.account-dropdown p {
+    display: block;
+    padding: 8px 15px;
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+}
+
+.account-dropdown a:hover {
+    background: #f7f7f7;
+}
+
+.account-menu:hover .account-dropdown {
+    display: block;
+    z-index: 1200;
+}
+         /* đổi màu icon */
+.menu { position: relative; z-index: 1000; }
+.menu .menu_search_cart .account-menu .account-icon {
+  color: #ffffff !important;
 }

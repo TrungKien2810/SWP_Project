@@ -1,3 +1,5 @@
+<%@page import="Model.user"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -74,33 +76,41 @@
                 </div>
                 <div class="col-md-6">
                     <h2>Đăng ký</h2>
-                    <form action="${pageContext.request.contextPath}/signup">
+                    <form action="${pageContext.request.contextPath}/signup" method="post">
                         <div class="mb-3">
                             <label for="username" class="form-label">Tên đăng nhập</label>
-                            <input type="text" class="form-control" name="username" id="username" placeholder="Tên đăng nhập" required>
+                            <input type="text" class="form-control" name="username" id="username" placeholder="Tên đăng nhập">
                         </div>
                         <div class="mb-3">
                             <label for="email" class="form-label">Địa chỉ email</label>
-                            <input type="email" class="form-control" name="email" id="email" placeholder="Địa chỉ email" required>
+                            <input type="text" class="form-control" name="email" id="email" placeholder="Địa chỉ email" >
                         </div>
                         <div class="mb-3">
                             <label for="password" class="form-label">Mật khẩu</label>
-                            <input type="password" class="form-control" name="password" id="password" placeholder="Mật khẩu" required>
+                            <input type="text" class="form-control" name="password" id="password" placeholder="Mật khẩu">
                         </div>
                         <div class="mb-3">
                             <label for="confirm-password" class="form-label">Nhập lại mật khẩu</label>
-                            <input type="password" class="form-control" name="confirm-password" id="confirm-password" placeholder="Nhập lại mật khẩu" required>
+                            <input type="text" class="form-control" name="confirm-password" id="confirm-password" placeholder="Nhập lại mật khẩu">
                         </div>
                         <div class="row">
                             <div class="col-6">
                                 <button type="submit" class="btn btn-signup">Đăng ký ngay!</button>
                             </div>
                             <div class="col-6">
-                                <a href="${pageContext.request.contextPath}/View/log.jsp" class="btn btn-login">Đăng nhập</a>
+                                <a href="${pageContext.request.contextPath}/login" class="btn btn-login">Đăng nhập</a>
                             </div>
                         </div>
                     </form>
                     <p class="terms mt-3">Bằng cách nhấn vào "Đăng ký", bạn đã đồng ý với <a href="#">Điều khoản dịch vụ</a> | <a href="#">Chính sách bảo mật</a></p>
+                    <%
+                        if (request.getAttribute("error") != null) {
+                            String error = (String) request.getAttribute("error");
+                    %>
+                        <h5 style="color: red"><%=error%></h5>
+                    <%
+                        }
+                    %>
                 </div>
             </div>
         </div>
