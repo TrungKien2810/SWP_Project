@@ -9,13 +9,28 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.UUID;
+import jakarta.servlet.annotation.MultipartConfig;
+import jakarta.servlet.http.Part;
 
 @WebServlet(name = "ProductController", urlPatterns = {"/products"})
+@MultipartConfig
 public class ProductController extends HttpServlet {
     private ProductDB productDB;
 
     public void init() {
-        productDB = new ProductDB();
+        // defer DB init to first use to speed up non-DB actions like showing new form
+        // productDB = new ProductDB();
+    }
+
+    private ProductDB db() {
+        if (productDB == null) {
+            productDB = new ProductDB();
+        }
+        return productDB;
     }
 
     @Override
@@ -66,7 +81,7 @@ public class ProductController extends HttpServlet {
 
       private void listProducts(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        List<Product> productList = productDB.getAllProducts();
+        List<Product> productList = db().getAllProducts();
         request.setAttribute("productList", productList);
         request.getRequestDispatcher("/View/bosuutap.jsp").forward(request, response);
     }
@@ -79,44 +94,94 @@ public class ProductController extends HttpServlet {
     private void showEditForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
-        Product existingProduct = productDB.getProductById(id);
+        Product existingProduct = db().getProductById(id);
         request.setAttribute("product", existingProduct);
         request.getRequestDispatcher("/View/product-form.jsp").forward(request, response);
     }
 
+    
     private void insertProduct(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+            throws IOException, ServletException {
         String name = request.getParameter("name");
         double price = Double.parseDouble(request.getParameter("price"));
         int stock = Integer.parseInt(request.getParameter("stock"));
         String description = request.getParameter("description");
-        String imageUrl = request.getParameter("imageUrl");
         int categoryId = Integer.parseInt(request.getParameter("categoryId"));
 
+        String imageUrl = handleImageUpload(request, null);
+
         Product newProduct = new Product(0, name, price, stock, description, imageUrl, categoryId);
-        productDB.addProduct(newProduct);
+        db().addProduct(newProduct);
         response.sendRedirect("products");
     }
 
     private void updateProduct(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+            throws IOException, ServletException {
         int id = Integer.parseInt(request.getParameter("id"));
         String name = request.getParameter("name");
         double price = Double.parseDouble(request.getParameter("price"));
         int stock = Integer.parseInt(request.getParameter("stock"));
         String description = request.getParameter("description");
-        String imageUrl = request.getParameter("imageUrl");
         int categoryId = Integer.parseInt(request.getParameter("categoryId"));
 
+        String currentImageUrl = request.getParameter("currentImageUrl");
+        String imageUrl = handleImageUpload(request, currentImageUrl);
+
         Product product = new Product(id, name, price, stock, description, imageUrl, categoryId);
-        productDB.updateProduct(product);
+        db().updateProduct(product);
         response.sendRedirect("products");
     }
 
     private void deleteProduct(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         int id = Integer.parseInt(request.getParameter("id"));
-        productDB.deleteProduct(id);
+        db().deleteProduct(id);
         response.sendRedirect("products");
+    }
+
+    private String handleImageUpload(HttpServletRequest request, String fallbackUrl) throws IOException, ServletException {
+        Part imagePart = null;
+        try {
+            imagePart = request.getPart("imageFile");
+        } catch (IllegalStateException | ServletException e) {
+            imagePart = null;
+        }
+
+        if (imagePart == null || imagePart.getSize() == 0) {
+            return fallbackUrl != null ? fallbackUrl : "";
+        }
+
+        String submittedFileName = Paths.get(imagePart.getSubmittedFileName()).getFileName().toString();
+        String ext = "";
+        int dot = submittedFileName.lastIndexOf('.');
+        if (dot >= 0) {
+            ext = submittedFileName.substring(dot);
+        }
+        String newFileName = UUID.randomUUID().toString() + ext;
+
+        String uploadDirRelative = "/IMG/uploads";
+        String uploadPath = getServletContext().getRealPath(uploadDirRelative);
+        if (uploadPath == null) {
+            uploadPath = getServletContext().getRealPath("/IMG");
+            if (uploadPath == null) {
+                uploadPath = request.getServletContext().getRealPath("/") + "IMG";
+            }
+            uploadPath = uploadPath + File.separator + "uploads";
+        }
+
+        File dir = new File(uploadPath);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        File dest = new File(dir, newFileName);
+        try {
+            imagePart.write(dest.getAbsolutePath());
+        } catch (IOException ex) {
+            throw ex;
+        }
+
+        String contextRelativeUrl = uploadDirRelative + "/" + newFileName;
+        return contextRelativeUrl.replace("\\", "/");
     }
 }

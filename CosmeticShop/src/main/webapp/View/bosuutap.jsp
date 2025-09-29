@@ -83,7 +83,7 @@
         <div class="product-grid">
             <c:forEach var="product" items="${productList}">
                 <div class="product-card">
-                    <img src="${pageContext.request.contextPath}${product.imageUrl}" alt="${product.name}">
+                    <img src="${pageContext.request.contextPath}${product.imageUrl}" alt="${product.name}" loading="lazy">
                     <div class="product-card-body">
                         <h5><c:out value="${product.name}" /></h5>
                         <p class="price">

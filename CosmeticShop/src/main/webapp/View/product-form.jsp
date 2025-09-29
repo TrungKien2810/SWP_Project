@@ -43,7 +43,7 @@
             </c:if>
         </h2>
 
-        <form action="${pageContext.request.contextPath}/products" method="post">
+        <form action="${pageContext.request.contextPath}/products" method="post" enctype="multipart/form-data">
             
             <%-- Phần logic ẩn: 
                  - Nếu là 'sửa' (product không rỗng), gửi action là "update" và id của sản phẩm.
@@ -52,6 +52,7 @@
             <c:if test="${product != null}">
                 <input type="hidden" name="action" value="update" />
                 <input type="hidden" name="id" value="${product.productId}" />
+                <input type="hidden" name="currentImageUrl" value="${product.imageUrl}" />
             </c:if>
             <c:if test="${product == null}">
                 <input type="hidden" name="action" value="insert" />
@@ -78,8 +79,11 @@
             </div>
 
             <div class="mb-3">
-                <label for="imageUrl" class="form-label">Đường dẫn Hình ảnh (VD: /IMG/anh1.png)</label>
-                <input type="text" class="form-control" name="imageUrl" id="imageUrl" value="${product.imageUrl}" required>
+                <label for="imageFile" class="form-label">Hình ảnh sản phẩm</label>
+                <input type="file" class="form-control" name="imageFile" id="imageFile" accept="image/*">
+                <c:if test="${product != null && product.imageUrl != null && product.imageUrl != ''}">
+                    <small class="text-muted">Hình hiện tại: ${product.imageUrl}</small>
+                </c:if>
             </div>
 
             <div class="mb-3">
