@@ -16,13 +16,16 @@ public class DBConnect {
     public Connection conn;
     public DBConnect(){
         try {
-            String connectionUrl =
+           String connectionUrl =
     "jdbc:sqlserver://localhost:1433;"
   + "databaseName=PinkyCloudDB;"
   + "user=sa;"
   + "password=kingqn132;"
   + "encrypt=true;"
   + "trustServerCertificate=true;";
+
+
+
 
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
             conn = DriverManager.getConnection(connectionUrl);
