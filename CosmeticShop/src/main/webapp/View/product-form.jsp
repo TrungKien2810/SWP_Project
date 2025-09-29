@@ -87,8 +87,11 @@
             </div>
 
             <div class="mb-3">
-                <label for="categoryId" class="form-label">ID Danh mục</label>
-                <input type="number" class="form-control" name="categoryId" id="categoryId" value="${product.categoryId}" required>
+                <label for="categoryName" class="form-label">Danh mục</label>
+                <input type="text" class="form-control" name="categoryName" id="categoryName" placeholder="Nhập tên danh mục (vd: Chăm sóc da)">
+                <c:if test="${product != null}">
+                    <input type="hidden" name="currentCategoryId" value="${product.categoryId}" />
+                </c:if>
             </div>
 
             <div class="d-grid gap-2 d-md-flex justify-content-md-end">

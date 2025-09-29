@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.sql.Types;
 
 public class ProductDB {
     private final DBConnect db = new DBConnect();
@@ -65,6 +66,23 @@ public class ProductDB {
         return null;
     }
 
+    // Tra cứu category_id theo tên danh mục
+    public Integer getCategoryIdByName(String name) {
+        if (name == null || name.trim().isEmpty()) return null;
+        String sql = "SELECT category_id FROM Categories WHERE name = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, name.trim());
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("category_id");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     // Thêm sản phẩm mới (Create)
     public boolean addProduct(Product product) {
         String sql = "INSERT INTO Products (name, price, stock, description, image_url, category_id) VALUES (?, ?, ?, ?, ?, ?)";
@@ -74,7 +92,11 @@ public class ProductDB {
             stmt.setInt(3, product.getStock());
             stmt.setString(4, product.getDescription());
             stmt.setString(5, product.getImageUrl());
-            stmt.setInt(6, product.getCategoryId());
+            if (product.getCategoryId() <= 0) {
+                stmt.setNull(6, Types.INTEGER);
+            } else {
+                stmt.setInt(6, product.getCategoryId());
+            }
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -91,7 +113,11 @@ public class ProductDB {
             stmt.setInt(3, product.getStock());
             stmt.setString(4, product.getDescription());
             stmt.setString(5, product.getImageUrl());
-            stmt.setInt(6, product.getCategoryId());
+            if (product.getCategoryId() <= 0) {
+                stmt.setNull(6, Types.INTEGER);
+            } else {
+                stmt.setInt(6, product.getCategoryId());
+            }
             stmt.setInt(7, product.getProductId());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {

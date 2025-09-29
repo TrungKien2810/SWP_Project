@@ -106,7 +106,18 @@ public class ProductController extends HttpServlet {
         double price = Double.parseDouble(request.getParameter("price"));
         int stock = Integer.parseInt(request.getParameter("stock"));
         String description = request.getParameter("description");
-        int categoryId = Integer.parseInt(request.getParameter("categoryId"));
+        // Resolve category by name, fallback to numeric legacy field or NULL
+        String categoryName = request.getParameter("categoryName");
+        Integer categoryIdObj = db().getCategoryIdByName(categoryName);
+        int categoryId = 0;
+        if (categoryIdObj != null) {
+            categoryId = categoryIdObj;
+        } else {
+            String legacyCat = request.getParameter("categoryId");
+            if (legacyCat != null && !legacyCat.isEmpty()) {
+                try { categoryId = Integer.parseInt(legacyCat); } catch (NumberFormatException ignored) {}
+            }
+        }
 
         String imageUrl = handleImageUpload(request, null);
 
@@ -122,7 +133,23 @@ public class ProductController extends HttpServlet {
         double price = Double.parseDouble(request.getParameter("price"));
         int stock = Integer.parseInt(request.getParameter("stock"));
         String description = request.getParameter("description");
-        int categoryId = Integer.parseInt(request.getParameter("categoryId"));
+        // Resolve category by name, fallback to current or legacy numeric
+        String categoryName = request.getParameter("categoryName");
+        Integer categoryIdObj = db().getCategoryIdByName(categoryName);
+        int categoryId = 0;
+        if (categoryIdObj != null) {
+            categoryId = categoryIdObj;
+        } else {
+            String currentCat = request.getParameter("currentCategoryId");
+            if (currentCat != null && !currentCat.isEmpty()) {
+                try { categoryId = Integer.parseInt(currentCat); } catch (NumberFormatException ignored) {}
+            } else {
+                String legacyCat = request.getParameter("categoryId");
+                if (legacyCat != null && !legacyCat.isEmpty()) {
+                    try { categoryId = Integer.parseInt(legacyCat); } catch (NumberFormatException ignored) {}
+                }
+            }
+        }
 
         String currentImageUrl = request.getParameter("currentImageUrl");
         String imageUrl = handleImageUpload(request, currentImageUrl);
