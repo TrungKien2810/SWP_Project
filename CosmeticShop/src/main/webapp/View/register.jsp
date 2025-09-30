@@ -1,6 +1,6 @@
 <%@page import="Model.user"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page contentType="text/jsp; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -33,11 +33,11 @@
         </div>
         <div class="menu_list">
             <ul class="menu_list_item">
-                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/HTML/home.html">TRANG CHỦ</a></li>
-                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/HTML/vechungtoi.html">VỀ CHÚNG TÔI</a></li>
-                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/HTML/bosuutap.html">BỘ SƯU TẬP</a></li>
-                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/HTML/register.html">ĐĂNG NHẬP & ĐĂNG KÝ</a></li>
-                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/HTML/lienhe.html">LIÊN HỆ</a></li>
+                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/home.jsp">TRANG CHỦ</a></li>
+                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/vechungtoi.jsp">VỀ CHÚNG TÔI</a></li>
+                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/bosuutap.jsp">BỘ SƯU TẬP</a></li>
+                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/register.jsp">ĐĂNG NHẬP & ĐĂNG KÝ</a></li>
+                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/lienhe.jsp">LIÊN HỆ</a></li>
             </ul>
             <div class="menu_search">
                 <div class="menu_search_input">
@@ -124,17 +124,17 @@
                     <h5 class="fw-bold">PINKYCLOUD OFFICE</h5>
                     <p>Địa chỉ: Số 31, đường Nguyễn Thị Minh Khai, Phường Quy Nhơn, Gia Lai</p>
                     <p>Mail: <a href="mailto:pinkycloudvietnam@gmail.com" class="text-white">pinkycloudvietnam@gmail.com</a></p>
-                    <p>Website: <a href="${pageContext.request.contextPath}/HTML/home.html" class="text-white">www.pinkycloud.vn</a></p>
+                    <p>Website: <a href="${pageContext.request.contextPath}/View/home.jsp" class="text-white">www.pinkycloud.vn</a></p>
                 </div>
                 <div class="col-md-3">
                     <h5 class="fw-bold">DANH MỤC</h5>
                     <ul class="list-unstyled">
-                        <li><a href="${pageContext.request.contextPath}/HTML/bosuutap.html" class="text-white text-decoration-none">Sức khỏe và làm đẹp</a></li>
-                        <li><a href="${pageContext.request.contextPath}/HTML/bosuutap.html" class="text-white text-decoration-none">Chăm sóc cơ thể</a></li>
-                        <li><a href="${pageContext.request.contextPath}/HTML/bosuutap.html" class="text-white text-decoration-none">Chăm sóc da mặt</a></li>
-                        <li><a href="${pageContext.request.contextPath}/HTML/bosuutap.html" class="text-white text-decoration-none">Chăm sóc tóc</a></li>
-                        <li><a href="${pageContext.request.contextPath}/HTML/bosuutap.html" class="text-white text-decoration-none">Clinic & Spa</a></li>
-                        <li><a href="${pageContext.request.contextPath}/HTML/bosuutap.html" class="text-white text-decoration-none">Trang điểm</a></li>
+                        <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Sức khỏe và làm đẹp</a></li>
+                        <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Chăm sóc cơ thể</a></li>
+                        <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Chăm sóc da mặt</a></li>
+                        <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Chăm sóc tóc</a></li>
+                        <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Clinic & Spa</a></li>
+                        <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Trang điểm</a></li>
                     </ul>
                 </div>
                 <div class="col-md-3">
