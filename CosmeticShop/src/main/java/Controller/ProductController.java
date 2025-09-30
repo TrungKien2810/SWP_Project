@@ -191,16 +191,8 @@ public class ProductController extends HttpServlet {
         }
         String newFileName = UUID.randomUUID().toString() + ext;
 
-        String uploadDirRelative = "/IMG/uploads";
-        String uploadPath = getServletContext().getRealPath(uploadDirRelative);
-        if (uploadPath == null) {
-            uploadPath = getServletContext().getRealPath("/IMG");
-            if (uploadPath == null) {
-                uploadPath = request.getServletContext().getRealPath("/") + "IMG";
-            }
-            uploadPath = uploadPath + File.separator + "uploads";
-        }
-
+        // Lưu ảnh vào folder cố định trong ổ C
+        String uploadPath = "C:\\CosmeticShop\\uploads";
         File dir = new File(uploadPath);
         if (!dir.exists()) {
             dir.mkdirs();
@@ -213,7 +205,8 @@ public class ProductController extends HttpServlet {
             throw ex;
         }
 
-        String contextRelativeUrl = uploadDirRelative + "/" + newFileName;
+        // Trả về đường dẫn tương đối để hiển thị ảnh
+        String contextRelativeUrl = "/uploads/" + newFileName;
         return contextRelativeUrl.replace("\\", "/");
     }
 }
