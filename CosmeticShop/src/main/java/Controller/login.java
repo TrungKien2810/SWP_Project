@@ -92,7 +92,7 @@ public class login extends HttpServlet {
                 response.addCookie(cEmail);
                 response.addCookie(cPass);
             }
-        if (email == null || !email.matches("^[A-Za-z0-9._%+-]+@gmail\\.com$")) {
+        if (!email.matches("^[A-Za-z0-9._%+-]+@gmail\\.com$")) {
             request.setAttribute("error", "Email must be a valid Gmail address");
             request.getRequestDispatcher("/View/log.jsp").forward(request, response);
         }

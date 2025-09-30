@@ -10,7 +10,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.io.File;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.UUID;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -88,6 +87,8 @@ public class ProductController extends HttpServlet {
 
     private void showNewForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        List<String> categories = db().getAllCategories();
+        request.setAttribute("categories", categories);
         request.getRequestDispatcher("/View/product-form.jsp").forward(request, response);
     }
 
@@ -95,7 +96,11 @@ public class ProductController extends HttpServlet {
             throws ServletException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
         Product existingProduct = db().getProductById(id);
+        List<String> categories = db().getAllCategories();
+        String currentCategoryName = db().getCategoryNameById(existingProduct.getCategoryId());
         request.setAttribute("product", existingProduct);
+        request.setAttribute("categories", categories);
+        request.setAttribute("currentCategoryName", currentCategoryName);
         request.getRequestDispatcher("/View/product-form.jsp").forward(request, response);
     }
 
