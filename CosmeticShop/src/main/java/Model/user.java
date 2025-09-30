@@ -18,11 +18,12 @@ public class user {
     private String phone;
     private String password;
     private LocalDateTime date_create;
+    private String role;
 
     public user() {
     }
 
-    public user(int user_id, String username, String email, String phone, String password, LocalDateTime date_create) {
+    public user(int user_id, String username, String email, String phone, String password, LocalDateTime date_create, String role) {
         this.user_id = user_id;
         this.username = username;
         this.email = email;
@@ -33,6 +34,7 @@ public class user {
         }
         this.password = password;
         this.date_create = date_create;
+        this.role = role;
     }
 
     public int getUser_id() {
