@@ -88,7 +88,15 @@
 
             <div class="mb-3">
                 <label for="categoryName" class="form-label">Danh mục</label>
-                <input type="text" class="form-control" name="categoryName" id="categoryName" placeholder="Nhập tên danh mục (vd: Chăm sóc da)">
+                <select class="form-control" name="categoryName" id="categoryName" required>
+                    <option value="">-- Chọn danh mục --</option>
+                    <c:forEach var="category" items="${categories}">
+                        <option value="${category}" 
+                                <c:if test="${category == currentCategoryName}">selected</c:if>>
+                            ${category}
+                        </option>
+                    </c:forEach>
+                </select>
                 <c:if test="${product != null}">
                     <input type="hidden" name="currentCategoryId" value="${product.categoryId}" />
                 </c:if>
