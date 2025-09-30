@@ -35,7 +35,7 @@
                                 <ul class="menu_list_item">
                                     <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/home.jsp">TRANG CHỦ</a></li>
                                     <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/vechungtoi.jsp">VỀ CHÚNG TÔI</a></li>
-                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/bosuutap.jsp">BỘ SƯU TẬP</a></li>
+                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/products">BỘ SƯU TẬP</a></li>
                                         <c:if test="${empty sessionScope.user}">
                                         <li><a class="menu_list_link" href="${pageContext.request.contextPath}/signup">
                                                 ĐĂNG NHẬP & ĐĂNG KÝ
