@@ -52,7 +52,7 @@
                                     </div>
                                 </div>
                                 <div class="menu_search_cart">
-                                    <i class="fa-solid fa-cart-shopping"></i>
+                                    <i class="fa-solid fa-cart-shopping cart-icon"></i>
                                     <!-- Tài khoản -->
                                     <div class="account-menu">
                                         <i class="fas fa-user-circle account-icon"></i>
@@ -312,5 +312,20 @@
                             </div>
                         </footer>
                         <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
+                        <script>
+                        document.addEventListener('click', function(e) {
+                            const menu = document.querySelector('.account-menu');
+                            if (!menu) return;
+                            const dropdown = menu.querySelector('.account-dropdown');
+                            if (!dropdown) return;
+
+                            if (menu.contains(e.target)) {
+                                const isShown = dropdown.style.display === 'block';
+                                dropdown.style.display = isShown ? 'none' : 'block';
+                            } else {
+                                dropdown.style.display = 'none';
+                            }
+                        });
+                        </script>
                         </body>
                         </html>
