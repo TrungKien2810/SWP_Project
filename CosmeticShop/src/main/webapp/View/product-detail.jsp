@@ -3,10 +3,12 @@
 <%
     Product p = (Product) request.getAttribute("product");
 %>
+
 <html>
 <head>
     <title>Chi tiết sản phẩm</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/product-detail.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
 </head>
 <body>
     <div class="container">
