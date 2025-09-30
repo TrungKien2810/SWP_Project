@@ -14,7 +14,7 @@
     <div class="container">
         <% if (p != null) { %>
             <div class="product-image">
-                <img src="<%= p.getImageUrl() %>" alt="Hình sản phẩm"/>
+                <img src="${pageContext.request.contextPath}<%= p.getImageUrl() %>" alt="Hình sản phẩm"/>
             </div>
             <div class="product-details">
                 <h2>Thông tin sản phẩm</h2>
