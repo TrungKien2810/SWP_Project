@@ -119,8 +119,7 @@
   gap: 16px;
 }
 .menu_search_cart:hover {
-  color: yellow;
-  transform: scale(1.1);
+  /* Remove shared hover styles to separate cart/account behaviors */
 }
 /* Modal - Ẩn ban đầu */
 .modal {
@@ -575,4 +574,7 @@ footer li a:hover {
 .cart-icon:hover {
   color: yellow;
   transform: scale(1.1);
+}
+.account-menu:hover .account-icon {
+  /* keep subtle icon color change if desired */
 }

@@ -12,4 +12,15 @@
             30
         </session-timeout>
     </session-config>
+    
+    <!-- Servlet mapping cho việc phục vụ ảnh từ folder cố định -->
+    <servlet>
+        <servlet-name>ImageServlet</servlet-name>
+        <servlet-class>Controller.ImageServlet</servlet-class>
+    </servlet>
+    
+    <servlet-mapping>
+        <servlet-name>ImageServlet</servlet-name>
+        <url-pattern>/uploads/*</url-pattern>
+    </servlet-mapping>
 </web-app>
