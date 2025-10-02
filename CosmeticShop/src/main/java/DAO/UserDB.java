@@ -26,7 +26,9 @@ public class UserDB {
             stmt.setString(1, email);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                return new user(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getObject("created_at", java.time.LocalDateTime.class), rs.getString("role"));
+
+                return new user(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5),
+                        rs.getString("role"), rs.getTimestamp("created_at").toLocalDateTime());
 
             }
         } catch (SQLException e) {
@@ -42,16 +44,21 @@ public class UserDB {
         String sql = "insert into Users(full_name, email, password, role) values (?, ?, ?, ?)";
         try {
             user check = getUserByEmail(email);
-            if(check!=null){
+            if (check != null) {
                 return false;
             }
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, username);
             stmt.setString(2, email);
             stmt.setString(3, password);
-            stmt.setString(4, "USER"); // Mặc định role là "USER"
-            if(stmt.executeUpdate()>0){
-                return true;
+
+            if (stmt.executeUpdate() > 0) {
+
+                stmt.setString(4, "USER"); // Mặc định role là "USER"
+                if (stmt.executeUpdate() > 0) {
+
+                    return true;
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -59,26 +66,25 @@ public class UserDB {
         }
         return false;
     }
-    public boolean login(String email, String password){
+
+    public boolean login(String email, String password) {
         user check = getUserByEmail(email);
-        if(check == null){
+        if (check == null) {
             return false;
-        }
-        else{
+        } else {
             String sql = "select * from Users where email = ?";
-            try{
+            try {
                 PreparedStatement stmt = conn.prepareStatement(sql);
                 stmt.setString(1, email);
                 ResultSet rs = stmt.executeQuery();
-                if(rs.next()){
-                    if(rs.getString("password").equals(password)){
+                if (rs.next()) {
+                    if (rs.getString("password").equals(password)) {
                         return true;
-                    }
-                    else{
+                    } else {
                         return false;
                     }
                 }
-            }catch(SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
             return false;
