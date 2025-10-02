@@ -25,7 +25,11 @@ public class productdetail extends HttpServlet {
             Product product = dao.getProductById(id);
 
             if (product != null) {
+                // Lấy tên danh mục theo category_id
+                String categoryName = dao.getCategoryNameById(product.getCategoryId());
+                
                 request.setAttribute("product", product);
+                request.setAttribute("categoryName", categoryName);
                 request.getRequestDispatcher("/View/product-detail.jsp").forward(request, response);
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy sản phẩm");// lỗi product=null
