@@ -19,11 +19,14 @@ public class user {
     private String password;
     private String role;
     private LocalDateTime date_create;
+    private String role;
 
     public user() {
     }
 
+
     public user(int user_id, String username, String email, String phone, String password, String role, LocalDateTime date_create) {
+
         this.user_id = user_id;
         this.username = username;
         this.email = email;
@@ -35,6 +38,7 @@ public class user {
         this.password = password;
         this.role = role != null ? role : "USER"; // Mặc định là "USER" nếu null
         this.date_create = date_create;
+        this.role = role;
     }
 
     public int getUser_id() {

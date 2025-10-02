@@ -114,10 +114,12 @@
   font-size: 30px;
   color: white;
   margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 .menu_search_cart:hover {
-  color: yellow;
-  transform: scale(1.1);
+  /* Remove shared hover styles to separate cart/account behaviors */
 }
 /* Modal - Ẩn ban đầu */
 .modal {
@@ -558,12 +560,21 @@ footer li a:hover {
     background: #f7f7f7;
 }
 
-.account-menu:hover .account-dropdown {
-    display: block;
-    z-index: 1200;
-}
+/* .account-menu:hover .account-dropdown { display: block; }  // disabled hover-open */
          /* đổi màu icon */
 .menu { position: relative; z-index: 1000; }
 .menu .menu_search_cart .account-menu .account-icon {
   color: #ffffff !important;
+}
+.cart-icon {
+  color: #ffffff;
+  cursor: pointer;
+  transition: color 0.3s, transform 0.3s;
+}
+.cart-icon:hover {
+  color: yellow;
+  transform: scale(1.1);
+}
+.account-menu:hover .account-icon {
+  /* keep subtle icon color change if desired */
 }

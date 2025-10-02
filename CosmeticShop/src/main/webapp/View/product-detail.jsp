@@ -147,6 +147,7 @@
                             </div>
                         </footer>
     <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
+    <script src="${pageContext.request.contextPath}/Js/home.js"></script>
 </body>
 
 </html>
