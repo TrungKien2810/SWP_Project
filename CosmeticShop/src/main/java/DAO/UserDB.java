@@ -54,10 +54,11 @@ public class UserDB {
 
             if (stmt.executeUpdate() > 0) {
 
-            stmt.setString(4, "USER"); // Mặc định role là "USER"
-            if(stmt.executeUpdate()>0){
+                stmt.setString(4, "USER"); // Mặc định role là "USER"
+                if (stmt.executeUpdate() > 0) {
 
-                return true;
+                    return true;
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();

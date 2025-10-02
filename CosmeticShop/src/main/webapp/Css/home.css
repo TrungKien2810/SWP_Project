@@ -626,7 +626,7 @@ footer li a:hover {
 }
 
 .account-icon:hover {
-  color: yellow;
+  color: yellow !important;
   transform: scale(1.1);
   /* hiệu ứng phóng to nhẹ */
 }
