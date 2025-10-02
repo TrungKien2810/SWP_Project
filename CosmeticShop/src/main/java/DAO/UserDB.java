@@ -5,12 +5,10 @@
 package DAO;
 
 import Model.user;
-import jakarta.enterprise.concurrent.Asynchronous;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
 
 /**
  *
@@ -28,7 +26,7 @@ public class UserDB {
             stmt.setString(1, email);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                return new user(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getObject("created_at", java.time.LocalDateTime.class));
+                return new user(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getString("role"), rs.getObject("created_at", java.time.LocalDateTime.class));
             }
         } catch (SQLException e) {
 
@@ -40,7 +38,7 @@ public class UserDB {
     }
 
     public boolean signup(String username, String email, String password) {
-        String sql = "insert into Users(full_name, email, password) values (?, ?, ?)";
+        String sql = "insert into Users(full_name, email, password, role) values (?, ?, ?, ?)";
         try {
             user check = getUserByEmail(email);
             if(check!=null){
@@ -50,6 +48,7 @@ public class UserDB {
             stmt.setString(1, username);
             stmt.setString(2, email);
             stmt.setString(3, password);
+            stmt.setString(4, "USER"); // Mặc định role là "USER"
             if(stmt.executeUpdate()>0){
                 return true;
             }
