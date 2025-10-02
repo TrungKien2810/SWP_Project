@@ -108,23 +108,50 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <!-- Dữ liệu sản phẩm sẽ được load từ database -->
-                                                <tr>
-                                                    <td>1</td>
-                                                    <td>Son môi cao cấp</td>
-                                                    <td>299,000 VNĐ</td>
-                                                    <td>Son môi không thấm nước</td>
-                                                    <td><img src="${pageContext.request.contextPath}/IMG/anh1.png" width="50" height="50" alt="Product"></td>
-                                                    <td>
-                                                        <button class="btn btn-sm btn-warning me-1" data-bs-toggle="modal" data-bs-target="#editProductModal">
-                                                            <i class="fas fa-edit"></i>
-                                                        </button>
-                                                        <button class="btn btn-sm btn-danger">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                                <!-- Thêm các dòng sản phẩm khác ở đây -->
+                                                <!-- Dữ liệu sản phẩm từ database -->
+                                                <c:forEach var="product" items="${productList}">
+                                                    <tr>
+                                                        <td>${product.productId}</td>
+                                                        <td>${product.name}</td>
+                                                        <td><span class="text-success fw-bold">${product.price} VNĐ</span></td>
+                                                        <td>
+                                                            <c:choose>
+                                                                <c:when test="${product.description.length() > 50}">
+                                                                    ${product.description.substring(0, 50)}...
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    ${product.description}
+                                                                </c:otherwise>
+                                                            </c:choose>
+                                                        </td>
+                                                        <td>
+                                                            <c:if test="${not empty product.imageUrl}">
+                                                                <img src="${pageContext.request.contextPath}${product.imageUrl}" 
+                                                                     width="50" height="50" alt="Product" 
+                                                                     style="object-fit: cover; border-radius: 5px;">
+                                                            </c:if>
+                                                            <c:if test="${empty product.imageUrl}">
+                                                                <span class="text-muted">Không có ảnh</span>
+                                                            </c:if>
+                                                        </td>
+                                                        <td>
+                                                            <a href="${pageContext.request.contextPath}/products?action=edit&id=${product.productId}" 
+                                                               class="btn btn-sm btn-warning me-1">
+                                                                <i class="fas fa-edit"></i>
+                                                            </a>
+                                                            <a href="${pageContext.request.contextPath}/products?action=delete&id=${product.productId}" 
+                                                               class="btn btn-sm btn-danger"
+                                                               onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')">
+                                                                <i class="fas fa-trash"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </c:forEach>
+                                                <c:if test="${empty productList}">
+                                                    <tr>
+                                                        <td colspan="6" class="text-center text-muted">Chưa có sản phẩm nào</td>
+                                                    </tr>
+                                                </c:if>
                                             </tbody>
                                         </table>
                                     </div>
@@ -141,34 +168,54 @@
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <form>
+                                        <form action="${pageContext.request.contextPath}/products" method="post" enctype="multipart/form-data">
+                                            <input type="hidden" name="action" value="insert" />
+                                            
+                                            <div class="mb-3">
+                                                <label for="name" class="form-label">Tên Sản phẩm</label>
+                                                <input type="text" class="form-control" name="name" id="name" required>
+                                            </div>
+
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="mb-3">
-                                                        <label for="productName" class="form-label">Tên sản phẩm</label>
-                                                        <input type="text" class="form-control" id="productName" required>
+                                                        <label for="price" class="form-label">Giá (VNĐ)</label>
+                                                        <input type="number" step="1000" class="form-control" name="price" id="price" required>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="mb-3">
-                                                        <label for="productPrice" class="form-label">Giá</label>
-                                                        <input type="number" class="form-control" id="productPrice" required>
+                                                        <label for="stock" class="form-label">Tồn kho</label>
+                                                        <input type="number" class="form-control" name="stock" id="stock" required>
                                                     </div>
                                                 </div>
                                             </div>
+
                                             <div class="mb-3">
-                                                <label for="productDescription" class="form-label">Mô tả</label>
-                                                <textarea class="form-control" id="productDescription" rows="3"></textarea>
+                                                <label for="description" class="form-label">Mô tả</label>
+                                                <textarea class="form-control" name="description" id="description" rows="4"></textarea>
                                             </div>
+
                                             <div class="mb-3">
-                                                <label for="productImage" class="form-label">Hình ảnh</label>
-                                                <input type="file" class="form-control" id="productImage" accept="image/*">
+                                                <label for="imageFile" class="form-label">Hình ảnh sản phẩm</label>
+                                                <input type="file" class="form-control" name="imageFile" id="imageFile" accept="image/*">
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label for="categoryName" class="form-label">Danh mục</label>
+                                                <select class="form-control" name="categoryName" id="categoryName" required>
+                                                    <option value="">-- Chọn danh mục --</option>
+                                                    <c:forEach var="category" items="${categories}">
+                                                        <option value="${category}">${category}</option>
+                                                    </c:forEach>
+                                                </select>
+                                            </div>
+                                            
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                                <button type="submit" class="btn" style="background-color: #f76c85; color: white;">Lưu sản phẩm</button>
                                             </div>
                                         </form>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                                        <button type="button" class="btn btn-primary">Lưu sản phẩm</button>
                                     </div>
                                 </div>
                             </div>
@@ -219,5 +266,16 @@
                         </c:if>
                         
                         <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
+                        <script>
+                            // Đóng modal sau khi submit thành công
+                            document.addEventListener('DOMContentLoaded', function() {
+                                // Kiểm tra nếu có thông báo thành công từ server
+                                const urlParams = new URLSearchParams(window.location.search);
+                                if (urlParams.get('success') === 'true') {
+                                    // Có thể thêm thông báo thành công ở đây
+                                    console.log('Thao tác thành công!');
+                                }
+                            });
+                        </script>
                         </body>
                         </html>

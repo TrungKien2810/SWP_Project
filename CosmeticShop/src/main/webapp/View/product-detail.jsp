@@ -45,7 +45,7 @@
                         </a></li>
                 </c:if>
                 <c:if test="${not empty sessionScope.user && sessionScope.user.role == 'ADMIN'}">
-                <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/product-manager.jsp">QUẢN LÝ SẢN PHẨM</a></li>
+                <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/products?action=manage">QUẢN LÝ SẢN PHẨM</a></li>
                 </c:if>
                 <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/lienhe.jsp">LIÊN HỆ</a></li>
             </ul>

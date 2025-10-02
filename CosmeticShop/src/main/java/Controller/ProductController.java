@@ -50,6 +50,9 @@ public class ProductController extends HttpServlet {
             case "delete":
                 deleteProduct(request, response);
                 break;
+            case "manage":
+                showManagePage(request, response);
+                break;
             default:
                 listProducts(request, response);
                 break;
@@ -104,6 +107,14 @@ public class ProductController extends HttpServlet {
         request.getRequestDispatcher("/View/product-form.jsp").forward(request, response);
     }
 
+    private void showManagePage(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        List<Product> productList = db().getAllProducts();
+        List<String> categories = db().getAllCategories();
+        request.setAttribute("productList", productList);
+        request.setAttribute("categories", categories);
+        request.getRequestDispatcher("/View/product-manager.jsp").forward(request, response);
+    }
     
     private void insertProduct(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
@@ -128,7 +139,7 @@ public class ProductController extends HttpServlet {
 
         Product newProduct = new Product(0, name, price, stock, description, imageUrl, categoryId);
         db().addProduct(newProduct);
-        response.sendRedirect("products");
+        response.sendRedirect("products?action=manage");
     }
 
     private void updateProduct(HttpServletRequest request, HttpServletResponse response)
@@ -161,14 +172,14 @@ public class ProductController extends HttpServlet {
 
         Product product = new Product(id, name, price, stock, description, imageUrl, categoryId);
         db().updateProduct(product);
-        response.sendRedirect("products");
+        response.sendRedirect("products?action=manage");
     }
 
     private void deleteProduct(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         int id = Integer.parseInt(request.getParameter("id"));
         db().deleteProduct(id);
-        response.sendRedirect("products");
+        response.sendRedirect("products?action=manage");
     }
 
     private String handleImageUpload(HttpServletRequest request, String fallbackUrl) throws IOException, ServletException {
