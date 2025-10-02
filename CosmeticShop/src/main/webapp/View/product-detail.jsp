@@ -3,6 +3,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%
     Product p = (Product) request.getAttribute("product");
+    String categoryName = (String) request.getAttribute("categoryName");
 %>
 
 <!DOCTYPE html>
@@ -42,6 +43,9 @@
                     <li><a class="menu_list_link" href="${pageContext.request.contextPath}/signup">
                             ĐĂNG NHẬP & ĐĂNG KÝ
                         </a></li>
+                </c:if>
+                <c:if test="${not empty sessionScope.user && sessionScope.user.role == 'ADMIN'}">
+                <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/products?action=manage">QUẢN LÝ SẢN PHẨM</a></li>
                 </c:if>
                 <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/lienhe.jsp">LIÊN HỆ</a></li>
             </ul>
@@ -84,7 +88,7 @@
                 </p>
                 <p><b>Số lượng:</b> <%= p.getStock() %></p>
                 <p><b>Mô tả:</b> <%= p.getDescription() %></p>
-                <p><b>Danh mục ID:</b> <%= p.getCategoryId() %></p>
+                <p><b>Danh mục:</b> <%= categoryName != null ? categoryName : "Không xác định" %></p>
                 <button class="btn">Mua ngay</button>
             </div>
             <div class="clear"></div>
