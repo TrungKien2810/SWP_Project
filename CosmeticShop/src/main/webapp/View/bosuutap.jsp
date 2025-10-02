@@ -54,6 +54,9 @@
                                     <li><a class="menu_list_link" href="${pageContext.request.contextPath}/signup">ĐĂNG
                                             NHẬP & ĐĂNG KÝ</a></li>
                                 </c:if>
+                                <c:if test="${not empty sessionScope.user && sessionScope.user.role == 'ADMIN'}">
+                                <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/products?action=manage">QUẢN LÝ SẢN PHẨM</a></li>
+                                </c:if>
                                 <li><a class="menu_list_link"
                                         href="${pageContext.request.contextPath}/View/lienhe.jsp">LIÊN HỆ</a></li>
                             </ul>
@@ -89,11 +92,11 @@
                                 SƯU TẬP SẢN PHẨM</h2>
                             <p>Khám phá những sản phẩm làm đẹp tốt nhất dành cho bạn.</p>
 
-                            <%-- Nút để thêm sản phẩm mới --%>
+                            <!-- <%-- Nút để thêm sản phẩm mới --%>
                                 <a href="${pageContext.request.contextPath}/products?action=new" class="btn btn-lg mt-3"
                                     style="background-color: #f76c85; color: white;">
                                     <i class="fas fa-plus-circle"></i> Thêm sản phẩm mới
-                                </a>
+                                </a> -->
                         </div>
 
                         <%-- Lưới hiển thị danh sách sản phẩm --%>
@@ -121,13 +124,13 @@
                                                 <a href="${pageContext.request.contextPath}/products?action=edit&id=${product.productId}"
                                                     class="btn btn-sm btn-outline-primary"
                                                     onclick="event.stopPropagation();">
-                                                    <i class="fas fa-edit"></i> Sửa
+                                                    <i class="fas fa-edit"></i> Mua ngay
                                                 </a>
-                                                <a href="${pageContext.request.contextPath}/products?action=delete&id=${product.productId}"
+                                                <!-- <a href="${pageContext.request.contextPath}/products?action=delete&id=${product.productId}"
                                                     class="btn btn-sm btn-outline-danger"
                                                     onclick="event.stopPropagation(); return confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?');">
                                                     <i class="fas fa-trash-alt"></i> Xóa
-                                                </a>
+                                                </a> -->
                                             </div>
                                         </div>
                                     </div>
