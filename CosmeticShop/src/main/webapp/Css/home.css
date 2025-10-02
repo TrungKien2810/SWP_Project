@@ -7,13 +7,15 @@
   align-items: center;
   justify-content: flex-end;
 }
+
 .header {
   display: flex;
-  justify-content: flex-end;  
-  align-items: center;        
+  justify-content: flex-end;
+  align-items: center;
   gap: 15px;
   padding: 10px 20px;
 }
+
 .header_text {
   font-size: smaller;
   font-weight: 700;
@@ -21,16 +23,19 @@
   margin: 0;
   margin-top: 15px;
 }
+
 .header_social {
   display: flex;
   gap: 15px;
 }
+
 .header_social_img {
   float: right;
   width: 42px;
   height: 42px;
   transition: transform 0.3s ease-in-out;
 }
+
 .header_social_img:hover {
   transform: scale(1.2);
 }
@@ -42,11 +47,13 @@
   display: flex;
   justify-content: space-between;
 }
+
 .menu_logo {
   position: relative;
   bottom: 30px;
   margin-left: 40px;
 }
+
 .menu_list {
   width: 80%;
   background-color: #f76c85;
@@ -56,11 +63,13 @@
   display: flex;
   align-items: center;
 }
+
 .menu_list_item {
   display: flex;
   list-style: none;
   margin-top: 13px;
 }
+
 .menu_list_link {
   margin-right: 50px;
   text-decoration: none;
@@ -71,24 +80,31 @@
   transition: color 0.3s ease, transform 0.3s ease;
   display: inline-block;
 }
+
 .menu_list_link:hover {
   color: yellow;
   transform: scale(1.3);
 }
+
 .menu_search {
   display: flex;
   align-items: center;
   background-color: white;
   border-radius: 25px;
   padding: 5px 10px;
-  width: 300px; /* Điều chỉnh chiều rộng */
-  height: 40px; /* Chiều cao cố định */
-  overflow: hidden; /* Ngăn phần con bị tràn */
+  width: 300px;
+  /* Điều chỉnh chiều rộng */
+  height: 40px;
+  /* Chiều cao cố định */
+  overflow: hidden;
+  /* Ngăn phần con bị tràn */
 }
+
 .menu_search_input {
   flex: 1;
   height: 100%;
 }
+
 .menu_search_input input {
   border: none;
   outline: none;
@@ -99,6 +115,7 @@
   color: #888;
   border-radius: 25px;
 }
+
 .menu_search_icon {
   display: flex;
   align-items: center;
@@ -109,6 +126,7 @@
   border-bottom-right-radius: 25px;
   cursor: pointer;
 }
+
 .menu_search_cart {
   margin-left: 40px;
   font-size: 30px;
@@ -118,9 +136,11 @@
   align-items: center;
   gap: 16px;
 }
+
 .menu_search_cart:hover {
   /* Remove shared hover styles to separate cart/account behaviors */
 }
+
 /* Modal - Ẩn ban đầu */
 .modal {
   display: none;
@@ -232,6 +252,7 @@ hr {
   border-top: 1px solid white;
   opacity: 0.8;
 }
+
 .info {
   padding-left: 78px;
   margin: 20px 0 20px 0;
@@ -244,6 +265,7 @@ footer p:hover {
   transition: transform 0.2s ease-in-out;
   color: yellow !important;
 }
+
 footer li a:hover {
   transform: scale(1.4);
   transition: transform 0.2s ease-in-out;
@@ -255,9 +277,12 @@ footer li a:hover {
   max-width: 100%;
   max-height: 100%;
 }
+
 .carousel-inner img {
-  height: 900px; /* Định kích thước ảnh */
-  object-fit: cover; /* Cắt ảnh vừa khung */
+  height: 900px;
+  /* Định kích thước ảnh */
+  object-fit: cover;
+  /* Cắt ảnh vừa khung */
 }
 
 .text {
@@ -282,7 +307,8 @@ footer li a:hover {
 .banner-item img {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Đảm bảo ảnh không bị méo và lấp đầy khối */
+  object-fit: cover;
+  /* Đảm bảo ảnh không bị méo và lấp đầy khối */
   transition: transform 0.4s ease-in-out;
   cursor: pointer;
 }
@@ -322,6 +348,7 @@ footer li a:hover {
   border-radius: 5px;
   cursor: pointer;
 }
+
 .video-list .video-item {
   margin-bottom: 10px;
 }
@@ -340,17 +367,21 @@ footer li a:hover {
   max-width: 100%;
   height: auto;
 }
+
 .branch-info {
   padding-left: 20px;
 }
+
 .branch-info h3 {
   color: #f76c85;
   font-weight: bold;
 }
+
 .branch-info h5 {
   color: #f76c85;
   font-weight: bold;
 }
+
 .branch-info p {
   margin-bottom: 5px;
 }
@@ -492,9 +523,11 @@ footer li a:hover {
     align-items: flex-start;
     gap: 10px;
   }
+
   .menu_search {
     width: 100%;
   }
+
   .menu_search input {
     width: 100%;
   }
@@ -502,79 +535,98 @@ footer li a:hover {
 
 /* Mobile (dưới 768px) */
 @media screen and (max-width: 768px) {
+
   .header,
   .menu {
     flex-direction: column;
     align-items: center;
   }
+
   .menu_list {
     display: none;
   }
+
   .menu_logo img {
     width: 120px;
   }
+
   .menu_search input {
     width: 100%;
   }
 }
 
 .account-menu {
-    position: relative;
-    display: inline-block;
-    margin-left: 20px;
-    cursor: pointer;
+  position: relative;
+  display: inline-block;
+  margin-left: 20px;
+  cursor: pointer;
 }
 
 .account-icon {
-    font-size: 28px;
-    color: #fff !important; 
-    transition: color 0.3s;
+  font-size: 28px;
+  color: #fff !important;
+  transition: color 0.3s;
 }
+
 .account-icon:hover {
-    color: #8d8989;
+  color: #8d8989;
 }
 
 .account-dropdown {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: 40px;
-    background: #fff;
-    min-width: 180px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    border-radius: 10px;
-    padding: 10px 0;
-    z-index: 1100;
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 40px;
+  background: #fff;
+  min-width: 180px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  padding: 10px 0;
+  z-index: 1100;
 }
 
 .account-dropdown a,
 .account-dropdown p {
-    display: block;
-    padding: 8px 15px;
-    text-decoration: none;
-    color: #333;
-    font-size: 14px;
+  display: block;
+  padding: 8px 15px;
+  text-decoration: none;
+  color: #333;
+  font-size: 14px;
 }
 
 .account-dropdown a:hover {
-    background: #f7f7f7;
+  background: #f7f7f7;
 }
 
 /* .account-menu:hover .account-dropdown { display: block; }  // disabled hover-open */
-         /* đổi màu icon */
-.menu { position: relative; z-index: 1000; }
+/* đổi màu icon */
+.menu {
+  position: relative;
+  z-index: 1000;
+}
+
 .menu .menu_search_cart .account-menu .account-icon {
   color: #ffffff !important;
 }
+
 .cart-icon {
   color: #ffffff;
   cursor: pointer;
   transition: color 0.3s, transform 0.3s;
 }
+
 .cart-icon:hover {
   color: yellow;
   transform: scale(1.1);
 }
-.account-menu:hover .account-icon {
-  /* keep subtle icon color change if desired */
+.account-icon {
+  color: #ffffff;
+  cursor: pointer;
+  transition: color 0.3s, transform 0.3s;
+}
+
+.account-icon:hover {
+  color: yellow;
+  transform: scale(1.1);
+  /* hiệu ứng phóng to nhẹ */
 }
