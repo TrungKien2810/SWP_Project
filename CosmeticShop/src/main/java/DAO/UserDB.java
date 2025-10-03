@@ -51,20 +51,12 @@ public class UserDB {
             stmt.setString(1, username);
             stmt.setString(2, email);
             stmt.setString(3, password);
-
-            if (stmt.executeUpdate() > 0) {
-
-                stmt.setString(4, "USER"); // Mặc định role là "USER"
-                if (stmt.executeUpdate() > 0) {
-
-                    return true;
-                }
-            }
+            stmt.setString(4, "USER"); // Mặc định role là "USER"
+            return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
-        return false;
     }
 
     public boolean login(String email, String password) {
@@ -87,6 +79,92 @@ public class UserDB {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+            return false;
+        }
+    }
+
+    // Google Sign-In upsert and password reset helpers
+    public boolean upsertGoogleUser(String email, String fullName, String googleSub) {
+        String select = "select * from Users where email = ?";
+        String insert = "insert into Users(full_name, email, password, role, google_id) values(?, ?, ?, ?, ?)";
+        String update = "update Users set full_name = ?, google_id = ? where email = ?";
+        try {
+            PreparedStatement s = conn.prepareStatement(select);
+            s.setString(1, email);
+            ResultSet rs = s.executeQuery();
+            if (rs.next()) {
+                PreparedStatement u = conn.prepareStatement(update);
+                u.setString(1, fullName);
+                u.setString(2, googleSub);
+                u.setString(3, email);
+                return u.executeUpdate() > 0;
+            } else {
+                PreparedStatement i = conn.prepareStatement(insert);
+                i.setString(1, fullName);
+                i.setString(2, email);
+                i.setString(3, "");
+                i.setString(4, "USER");
+                i.setString(5, googleSub);
+                return i.executeUpdate() > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean setResetToken(String email, String token, java.sql.Timestamp expiresAt) {
+        String sql = "update Users set reset_token = ?, reset_token_expiry = ? where email = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, token);
+            ps.setTimestamp(2, expiresAt);
+            ps.setString(3, email);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public user getUserByResetToken(String token) {
+        String sql = "select * from Users where reset_token = ? and reset_token_expiry > GETDATE()";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, token);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return new user(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5),
+                        rs.getString("role"), rs.getTimestamp("created_at").toLocalDateTime());
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public boolean updatePasswordByToken(String token, String newPassword) {
+        String sql = "update Users set password = ?, reset_token = NULL, reset_token_expiry = NULL where reset_token = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, newPassword);
+            ps.setString(2, token);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updatePassword(String email, String newPassword) {
+        String sql = "update Users set password = ? where email = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, newPassword);
+            ps.setString(2, email);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
             return false;
         }
     }

@@ -1,3 +1,7 @@
+-- Add columns to support Google Sign-In and password reset (idempotent checks recommended in production)
+ALTER TABLE Users ADD google_id VARCHAR(64) NULL;
+ALTER TABLE Users ADD reset_token VARCHAR(128) NULL;
+ALTER TABLE Users ADD reset_token_expiry DATETIME NULL;
 -- Script để thêm cột role vào bảng Users
 -- Chạy script này trong database để cập nhật cấu trúc bảng
 
