@@ -100,17 +100,25 @@ public class login extends HttpServlet {
         if(email.equals("") || password.equals("")){
             request.setAttribute("error", "Không thể để trống thông tin");
             request.getRequestDispatcher("/View/log.jsp").forward(request, response);
+            return;
+
         }
         if (ud.getUserByEmail(email) == null) {
             request.setAttribute("error", "account is not exist, you aren't sign up?");
             request.getRequestDispatcher("/View/log.jsp").forward(request, response);
+            return;
+
         }
         if (ud.login(email, password)) {
             session.setAttribute("user", ud.getUserByEmail(email));
             request.getRequestDispatcher("/View/home.jsp").forward(request, response);
+            return;
+
         } else {
             request.setAttribute("error", "Email or password is invalid, please try again");
             request.getRequestDispatcher("/View/log.jsp").forward(request, response);
+            return;
+
         }
     }
 

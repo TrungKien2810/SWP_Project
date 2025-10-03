@@ -88,17 +88,25 @@ public class signup extends HttpServlet {
         if(email.equals("") || password.equals("") || username.equals("") || cp.equals("")){
             request.setAttribute("error", "Không thể để trống thông tin");
             request.getRequestDispatcher("/View/register.jsp").forward(request, response);
+            return;
+
         }
         if (!cp.equals(password)) {
             request.setAttribute("error", "Confirm password is invalid");
             request.getRequestDispatcher("/View/register.jsp").forward(request, response);
+            return;
+
         }
         if (ud.signup(username, email, password)) {
             session.setAttribute("user", ud.getUserByEmail(email));
             request.getRequestDispatcher("/View/home.jsp").forward(request, response);
+            return;
+
         } else {
             request.setAttribute("error", "email is duplicate, please enter another email");
             request.getRequestDispatcher("/View/register.jsp").forward(request, response);
+            return;
+
         }
     }
 
