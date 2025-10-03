@@ -1,631 +1,322 @@
-/* ======= Header ======= */
-.header {
-  width: 100%;
-  height: 55px;
-  background-color: white;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-
-.header {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 15px;
-  padding: 10px 20px;
-}
-
-.header_text {
-  font-size: smaller;
-  font-weight: 700;
-  color: #f76c85;
-  margin: 0;
-  margin-top: 15px;
-}
-
-.header_social {
-  display: flex;
-  gap: 15px;
-}
-
-.header_social_img {
-  float: right;
-  width: 42px;
-  height: 42px;
-  transition: transform 0.3s ease-in-out;
-}
-
-.header_social_img:hover {
-  transform: scale(1.2);
-}
-
-/* ========== Menu ========== */
-.menu {
-  width: 100%;
-  height: 100px;
-  display: flex;
-  justify-content: space-between;
-}
-
-.menu_logo {
-  position: relative;
-  bottom: 30px;
-  margin-left: 40px;
-}
-
-.menu_list {
-  width: 80%;
-  background-color: #f76c85;
-  margin-bottom: 15px;
-  border-top-left-radius: 50px;
-  border-bottom-left-radius: 50px;
-  display: flex;
-  align-items: center;
-}
-
-.menu_list_item {
-  display: flex;
-  list-style: none;
-  margin-top: 13px;
-}
-
-.menu_list_link {
-  margin-right: 50px;
-  text-decoration: none;
-  color: white;
-  font-size: 14px;
-  font-weight: 700;
-  white-space: nowrap;
-  transition: color 0.3s ease, transform 0.3s ease;
-  display: inline-block;
-}
-
-.menu_list_link:hover {
-  color: yellow;
-  transform: scale(1.3);
-}
-
-.menu_search {
-  display: flex;
-  align-items: center;
-  background-color: white;
-  border-radius: 25px;
-  padding: 5px 10px;
-  width: 300px;
-  /* Điều chỉnh chiều rộng */
-  height: 40px;
-  /* Chiều cao cố định */
-  overflow: hidden;
-  /* Ngăn phần con bị tràn */
-}
-
-.menu_search_input {
-  flex: 1;
-  height: 100%;
-}
-
-.menu_search_input input {
-  border: none;
-  outline: none;
-  padding: 10px;
-  width: 100%;
-  height: 100%;
-  font-size: 14px;
-  color: #888;
-  border-radius: 25px;
-}
-
-.menu_search_icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 100%;
-  border-top-right-radius: 25px;
-  border-bottom-right-radius: 25px;
-  cursor: pointer;
-}
-
-.menu_search_cart {
-  margin-left: 40px;
-  font-size: 30px;
-  color: white;
-  margin-bottom: 5px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.menu_search_cart:hover {
-  /* Remove shared hover styles to separate cart/account behaviors */
-}
-
-/* Modal - Ẩn ban đầu */
-.modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(5px);
-  justify-content: center;
-  align-items: center;
-  transition: opacity 0.3s ease;
-}
-
-/* Nội dung modal */
-.modal-content {
-  background: #fff;
-  padding: 20px;
-  width: 350px;
-  border-radius: 10px;
-  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
-  text-align: center;
-  transform: translateY(-20px);
-  transition: transform 0.3s ease;
-}
-
-/* Hiện modal với hiệu ứng */
-.modal.show {
-  display: flex;
-  opacity: 1;
-}
-
-.modal.show .modal-content {
-  transform: translateY(0);
-}
-
-/* Nút đóng */
-.close {
-  position: absolute;
-  top: 10px;
-  right: 15px;
-  font-size: 25px;
-  cursor: pointer;
-  color: #555;
-  transition: 0.3s;
-}
-
-.close:hover {
-  color: red;
-}
-
-/* Form đăng nhập và đăng ký */
-.input-group {
-  text-align: left;
-  margin-bottom: 15px;
-}
-
-.input-group label {
-  display: block;
-  font-size: 14px;
-  margin-bottom: 5px;
-}
-
-.input-group input {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  outline: none;
-  transition: 0.3s;
-}
-
-.input-group input:focus {
-  border-color: #f76c85;
-}
-
-/* Nút đăng nhập và đăng ký */
-button {
-  width: 100%;
-  padding: 10px;
-  background: #f76c85;
-  color: white;
-  font-size: 16px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-/* Link chuyển đổi modal */
-p {
-  margin-top: 15px;
-  font-size: 14px;
-}
-
-p a {
-  color: #f76c85;
-  text-decoration: none;
-  font-weight: bold;
-}
-
-p a:hover {
-  text-decoration: underline;
-}
-
-/* FOOOTER */
-hr {
-  border-top: 1px solid white;
-  opacity: 0.8;
-}
-
-.info {
-  padding-left: 78px;
-  margin: 20px 0 20px 0;
-}
-
-footer a:hover,
-footer h5:hover,
-footer p:hover {
-  transform: scale(1.05);
-  transition: transform 0.2s ease-in-out;
-  color: yellow !important;
-}
-
-footer li a:hover {
-  transform: scale(1.4);
-  transition: transform 0.2s ease-in-out;
-  color: yellow !important;
-}
-
-/* BANNER */
-.carousel {
-  max-width: 100%;
-  max-height: 100%;
-}
-
-.carousel-inner img {
-  height: 900px;
-  /* Định kích thước ảnh */
-  object-fit: cover;
-  /* Cắt ảnh vừa khung */
-}
-
-.text {
-  margin-top: 40px;
-  color: #f76c85;
-  text-align: center;
-}
-
-.text h2 {
-  font-weight: 800;
-  font-family: 'Times New Roman', Times, serif;
-}
-
-.banner-item {
-  overflow: hidden;
-  border-radius: 20px;
-  transition: transform 0.4s cubic-bezier(0.25, 1.25, 0.5, 1),
-    box-shadow 0.4s ease-in-out;
-}
-
-/* Đảm bảo ảnh luôn che phủ toàn bộ div */
-.banner-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  /* Đảm bảo ảnh không bị méo và lấp đầy khối */
-  transition: transform 0.4s ease-in-out;
-  cursor: pointer;
-}
-
-/* Hiệu ứng phóng to khi hover */
-.banner-item:hover {
-  transform: scale(1.02);
-  box-shadow: 0px 15px 25px rgba(0, 0, 0, 0.3);
-}
-
-/* Khi hover vào, ảnh cũng phóng to nhẹ để tránh nền trắng */
-.banner-item:hover img {
-  transform: scale(1.02);
-}
-
-.text_1 {
-  margin-top: 30px;
-}
-
-.text_1 h2 {
-  color: #f76c85;
-  font-family: 'Times New Roman', Times, serif;
-  font-weight: 900;
-}
-
-.zoom-img {
-  transition: transform 0.3s ease-in-out;
-}
-
-.zoom-img:hover {
-  transform: scale(1.05);
-}
-
-.video-list img {
-  width: 100%;
-  height: auto;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.video-list .video-item {
-  margin-bottom: 10px;
-}
-
-.text_2 {
-  margin-bottom: 20px;
-}
-
-.text_2 h2 {
-  color: #f76c85;
-  font-family: 'Times New Roman', Times, serif;
-  font-weight: 900;
-}
-
-.map-container img {
-  max-width: 100%;
-  height: auto;
-}
-
-.branch-info {
-  padding-left: 20px;
-}
-
-.branch-info h3 {
-  color: #f76c85;
-  font-weight: bold;
-}
-
-.branch-info h5 {
-  color: #f76c85;
-  font-weight: bold;
-}
-
-.branch-info p {
-  margin-bottom: 5px;
-}
-
-
-/* ======= Header Responsive ======= */
-@media (max-width: 768px) {
-  .header {
-    height: auto;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 0;
-  }
-
-  .header_text {
-    font-size: 13px;
-    margin: 0;
-  }
-
-  .header_social {
-    margin-top: 5px;
-    justify-content: center;
-  }
-
-  .header_social_img {
-    width: 25px;
-    height: 25px;
-  }
-}
-
-@media (max-width: 480px) {
-  .header {
-    padding: 8px 0;
-  }
-
-  .header_text {
-    font-size: 12px;
-  }
-
-  .header_social {
-    gap: 8px;
-  }
-
-  .header_social_img {
-    width: 22px;
-    height: 22px;
-  }
-}
-
-/* ==========Menu Responsive ========== */
-@media (max-width: 1024px) {
-  .menu {
-    flex-direction: column;
-    height: auto;
-    align-items: center;
-  }
-
-  .menu_logo {
-    width: 25%;
-    margin: 10px 0;
-    text-align: center;
-  }
-
-  .menu_list {
-    width: 90%;
-    flex-direction: column;
-    border-radius: 30px;
-    padding: 10px 0;
-  }
-
-  .menu_list_item {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
-  }
-
-  .menu_list_link {
-    margin: 5px;
-    font-size: 14px;
-  }
-
-  .menu_search {
-    width: 90%;
-  }
-
-  .menu_search_cart {
-    margin-left: 0;
-    margin-top: 10px;
-  }
-}
-
-/* Mobile (Dưới 768px) */
-@media (max-width: 768px) {
-  .menu_logo {
-    width: 30%;
-    margin-left: 0;
-  }
-
-  .menu_list {
-    width: 100%;
-    border-radius: 0;
-    padding: 10px;
-  }
-
-  .menu_list_item {
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .menu_list_link {
-    font-size: 13px;
-  }
-
-  .menu_search {
-    width: 100%;
-    padding: 5px;
-  }
-
-  .menu_search_input input {
-    font-size: 12px;
-    padding: 8px;
-  }
-
-  .menu_search_icon {
-    width: 35px;
-  }
-
-  .menu_search_cart {
-    font-size: 25px;
-  }
-}
-
-/* Tablet (768px - 1024px) */
-@media screen and (max-width: 1024px) {
-  .menu_list {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .menu_search {
-    width: 100%;
-  }
-
-  .menu_search input {
-    width: 100%;
-  }
-}
-
-/* Mobile (dưới 768px) */
-@media screen and (max-width: 768px) {
-
-  .header,
-  .menu {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .menu_list {
-    display: none;
-  }
-
-  .menu_logo img {
-    width: 120px;
-  }
-
-  .menu_search input {
-    width: 100%;
-  }
-}
-
-.account-menu {
-  position: relative;
-  display: inline-block;
-  margin-left: 20px;
-  cursor: pointer;
-}
-
-.account-icon {
-  font-size: 28px;
-  color: #fff !important;
-  transition: color 0.3s;
-}
-
-.account-icon:hover {
-  color: #8d8989;
-}
-
-.account-dropdown {
-  display: none;
-  position: absolute;
-  right: 0;
-  top: 40px;
-  background: #fff;
-  min-width: 180px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-  border-radius: 10px;
-  padding: 10px 0;
-  z-index: 1100;
-}
-
-.account-dropdown a,
-.account-dropdown p {
-  display: block;
-  padding: 8px 15px;
-  text-decoration: none;
-  color: #333;
-  font-size: 14px;
-}
-
-.account-dropdown a:hover {
-  background: #f7f7f7;
-}
-
-/* .account-menu:hover .account-dropdown { display: block; }  // disabled hover-open */
-/* đổi màu icon */
-.menu {
-  position: relative;
-  z-index: 1000;
-}
-
-.menu .menu_search_cart .account-menu .account-icon {
-  color: #ffffff !important;
-}
-
-.cart-icon {
-  color: #ffffff;
-  cursor: pointer;
-  transition: color 0.3s, transform 0.3s;
-}
-
-.cart-icon:hover {
-  color: yellow;
-  transform: scale(1.1);
-}
-.account-icon {
-  color: #ffffff;
-  cursor: pointer;
-  transition: color 0.3s, transform 0.3s;
-}
-
-.menu .menu_search_cart .account-menu .account-icon:hover {
-  color: yellow !important;
-  transform: scale(1.1);
-}
+<%@page import="Model.user"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
+        <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-…"
+      crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <script src="${pageContext.request.contextPath}/Js/home.js"></script>
+        <title>Pinky Cloud</title>
+    </head>
+    <body>
+        <!-- header -->
+        <div class="header">
+            <div class="header_text"><p>THEO DÕI CHÚNG TÔI</p></div>
+            <div class="header_social">
+                <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/fb.png" alt="" ></a>
+                <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/ins.png" alt=""></a>
+                <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/tt.png"alt=""><a>
+                        <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/ytb.png" alt="" ></a>
+                        </div>
+                        </div>
+                        <!-- menu -->
+                        <div class="menu">
+                            <div class="menu_logo">
+                                <img src="${pageContext.request.contextPath}/IMG/logo.jpg" alt="" style="width: 230px;">
+                            </div>
+                            <div class="menu_list">
+                                <ul class="menu_list_item">
+                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/home.jsp">TRANG CHỦ</a></li>
+                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/vechungtoi.jsp">VỀ CHÚNG TÔI</a></li>
+                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/products">BỘ SƯU TẬP</a></li>
+                                        <c:if test="${empty sessionScope.user}">
+                                        <li><a class="menu_list_link" href="${pageContext.request.contextPath}/signup">
+                                                ĐĂNG NHẬP & ĐĂNG KÝ
+                                            </a></li>
+                                        </c:if>
+                                        <c:if test="${not empty sessionScope.user && sessionScope.user.role == 'ADMIN'}">
+                                        <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/products?action=manage">QUẢN LÝ SẢN PHẨM</a></li>
+                                        </c:if>
+                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/lienhe.jsp">LIÊN HỆ</a></li>
+                                </ul>
+                                <div class="menu_search">
+                                    <div class="menu_search_input">
+                                        <input type="text" placeholder="Nhập từ khóa bạn cần tìm kiếm . . . ">
+                                    </div>
+                                    <div class="menu_search_icon">
+                                        <a href=""><i class="fa-solid fa-magnifying-glass fa-xl" style="color: #f76c85;"></i></a>
+                                    </div>
+                                </div>
+                                <div class="menu_search_cart">
+                                    <i class="fa-solid fa-cart-shopping cart-icon"></i>
+                                    <!-- Tài khoản -->
+                                    <c:if test="${!empty sessionScope.user}">
+                                        <div class="account-menu">
+                                        <i class="fas fa-user-circle account-icon"></i>
+                                        <c:if test="${not empty sessionScope.user}">
+                                            <div class="account-dropdown">
+                                                <p class="welcome-text">Welcome, ${sessionScope.user.username}</p>
+                                                <a href="${pageContext.request.contextPath}/account-management">Quản lý tài khoản</a>
+                                                <a href="${pageContext.request.contextPath}/cart">My Cart</a>
+                                                <a href="${pageContext.request.contextPath}/logout">Log Out</a>
+                                            </div>
+                                        </c:if>
+                                    </div>
+                                    </c:if> 
+                                </div>
+                            </div>    
+                        </div>
+
+                        <!-- MODAL LOGIN -->
+                        <!-- Modal Đăng Nhập -->
+                        <!--<div class="modal" id="loginModal">
+                            <div class="modal-content">
+                                <span class="close">&times;</span>
+                                <h2>Đăng nhập</h2>
+                                <form>
+                                    <div class="input-group">
+                                        <label for="email">Email</label>
+                                        <input type="email" id="email" placeholder="Nhập email của bạn" required>
+                                    </div>
+                                    <div class="input-group">
+                                        <label for="password">Mật khẩu</label>
+                                        <input type="password" id="password" placeholder="Nhập mật khẩu" required>
+                                    </div>
+                                    <button type="submit">Đăng nhập</button>
+                                </form>
+                                <p>Chưa có tài khoản? <a href="#" id="showRegister">Đăng ký ngay</a></p>
+                            </div>
+                        </div> -->
+
+<!-- Modal Đăng Ký -->
+<div class="modal" id="registerModal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Đăng ký</h2>
+        <form>
+            <div class="input-group">
+                <label for="fullname">Họ và tên</label>
+                <input type="text" id="fullname" placeholder="Nhập họ và tên" required>
+            </div>
+            <div class="input-group">
+                <label for="emailReg">Email</label>
+                <input type="email" id="emailReg" placeholder="Nhập email của bạn" required>
+            </div>
+            <div class="input-group">
+                <label for="passwordReg">Mật khẩu</label>
+                <input type="password" id="passwordReg" placeholder="Tạo mật khẩu" required>
+            </div>
+            <button type="submit">Đăng ký</button>
+        </form>
+        <p>Đã có tài khoản? <a href="#" id="showLogin">Đăng nhập</a></p>
+    </div>
+</div>
+                    
+                        <div id="carouselExample" class="carousel slide mt-3" data-bs-ride="carousel" data-bs-interval="2000">
+                            <div class="carousel-inner">
+                                <div class="carousel-item active">
+                                    <img src="${pageContext.request.contextPath}/IMG/hinhnen1.png"
+                                         class="d-block w-100"
+                                         alt="Slide 1"
+                                         style="max-height: 550px; object-fit: cover;">
+                                </div>
+                                <div class="carousel-item">
+                                    <img src="${pageContext.request.contextPath}/IMG/hinhnen2.png"
+                                         class="d-block w-100"
+                                         alt="Slide 2"
+                                         style="max-height: 550px; object-fit: cover;">
+                                </div>
+                                <div class="carousel-item">
+                                    <img src="${pageContext.request.contextPath}/IMG/hinhnen3.png"
+                                         class="d-block w-100"
+                                         alt="Slide 3"
+                                         style="max-height: 550px; object-fit: cover;">
+                                </div> 
+                                <div class="carousel-item">
+                                    <img src="${pageContext.request.contextPath}/IMG/hinhnen4.png"
+                                         class="d-block w-100"
+                                         alt="Slide 4"
+                                         style="max-height: 550px; object-fit: cover;">
+                                </div>
+                            </div>
+
+                            <!-- Nút điều hướng -->
+                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+                                <span class="carousel-control-next-icon"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </div> 
+
+
+
+                        <div class="text">
+                            <h2>KHÁM PHÁ BỘ SƯU TẬP</h2>
+                        </div>
+
+                        <div class="container mt-4">
+                            <div class="row g-5">
+                                <!-- Hàng 1 -->
+                                <div class="col-md-6">
+                                    <div class="banner-item bg-lightblue">
+                                        <img src="${pageContext.request.contextPath}/IMG/bst1.jpg" alt="">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="banner-item bg-lightpink">
+                                        <img src="${pageContext.request.contextPath}/IMG/bst2.jpg" alt="">
+                                    </div>
+                                </div>
+
+                                <!-- Hàng 2 -->
+                                <%-- <div class="col-md-4">
+                                    <div class="banner-item bg-lightgray">
+                                      <a href="https://www.son3ce.com/"><img src="${pageContext.request.contextPath}/IMG/bst3.png" alt=""></a>  
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="banner-item bg-lightorange">
+                                        <a href="https://www.carslan.com/?srsltid=AfmBOopZ7zVD_OR9MDgYT29w8ByUaNikvqYyjkU0g5t3OKv6xvlgfrfX">
+                                            <img src="${pageContext.request.contextPath}/IMG/bst4.png" alt="">
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="banner-item bg-lightgray">
+                                        <a href="https://www.judydoll.com/"> <img src="${pageContext.request.contextPath}/IMG/bst5.png" alt=""></a>
+                                       
+                                    </div>
+                                </div>
+
+        <!-- Hàng 3 -->
+        <div class="col-md-4">
+            <div class="banner-item bg-lightred">
+                <a href="https://acnes.com.vn/">       
+                     <img src="${pageContext.request.contextPath}/IMG/bst6.png" alt="">
+                </a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="banner-item bg-lightblue">
+                <a href="https://anessa.vn/">                
+                    <img src="${pageContext.request.contextPath}/IMG/bst7.png" alt="">
+                </a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="banner-item bg-lightyellow">
+                <a href="https://www.bioderma.com.vn/">  
+                    <img src="${pageContext.request.contextPath}/IMG/bst8.png" alt="">
+                </a>
+              
+            </div>
+        </div>   --%>
+                            </div> 
+
+                            <div class="container mt-4 text-center">
+                                <h2 class="text-center text-uppercase fw-bold " style="color: #f76c85;">
+                                    Chi Nhánh Phân Phối
+                                </h2>
+                                <div class="row mt-4">
+                                    <!-- Cột chứa bản đồ -->
+                                    <div class="col-md-6 map-container text-center">
+                                        <img src="${pageContext.request.contextPath}/IMG/map.jpg" alt="Bản đồ phân phối">
+                                    </div>
+                                    <!-- Cột chứa thông tin chi nhánh -->
+                                    <div class="col-md-6 branch-info">
+                                        <h3>Trụ Sở Chính</h3>
+                                        <p><strong>Cửa hàng mỹ phẩm PinkyCloud</strong></p>
+                                        <p>📍 Số 31, đường Nguyễn Thị Minh Khai, Phường Quy Nhơn, Gia Lai</p>
+                                        <p>📧 pinkycloudvietnam@gmail.com</p>
+                                        <p>🌍 <a href="${pageContext.request.contextPath}/View/home.jsp" target="_blank" style="color: #24e454; text-decoration: none;" >pinkycloud.vn</a></p>
+
+                                        <h3>Hệ Thống Phòng Kinh Doanh</h3>
+                                        <h5>TOCEPO THỊ NẠI</h5>
+                                        <p>📍 224 Đống Đa, Thị Nải, Quy Nhơn, Bình Định, Việt Nam</p>
+                                        <p>📞 0888.004.444 - 0888.885.884 (Zalo)</p>
+
+                                        <h5>Quán Nhậu Aking 2</h5>
+                                        <p>📍153-155 Bùi Xuân Phái, Trần Hưng Đạo, Quy Nhơn, Bình Định, Việt Nam</p>
+                                        <p>📞 0833.55.4444 (Zalo)</p>
+
+                                        <h3>Nhà Phân Phối KEEPFLY</h3>
+                                        <h5>🏠 Bình Dương</h5>
+                                        <p>📍 1/5 KP. Bình Quới A, P. Bình Chuẩn, TP. Thuận An</p>
+
+                                        <h5>🏠 TP. Nha Trang</h5>
+                                        <p>📍 17/11/1 đường 52, Vĩnh Phước, Tp Nha Trang</p>
+
+                                        <h5>🏠 Kiên Giang</h5>
+                                        <p>📍 151 Quang Trung, Vĩnh Thạnh, Rạch Giá, Kiên Giang</p>
+
+                                        <h3>PINKYCLOUD SHOWROOM</h3>
+                                        <p>📍 15-17 Tô Hiệu, Tân Phú, TP. Hồ Chí Minh</p>
+                                        <p>📍 56 Ngô Gia Tự, Tây Sơn, Bình Định</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <footer class="text-white py-4 w-100" style="background-color:#f76c85;">
+                            <div class="container-fluid text-center">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <h5 class="fw-bold">PINKYCLOUD OFFICE</h5>
+                                        <p>Địa chỉ: Số 31, đường Nguyễn Thị Minh Khai, Phường Quy Nhơn, Gia Lai</p>
+                                        <p>Mail: <a href="mailto:pinkycloudvietnam@gmail.com" class="text-white">pinkycloudvietnam@gmail.com</a></p>
+                                        <p>Website: <a href="${pageContext.request.contextPath}/View/home.jsp" class="text-white">www.pinkycloud.vn</a></p>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <h5 class="fw-bold">DANH MỤC</h5>
+                                        <ul class="list-unstyled">
+                                            <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Sức khỏe và làm đẹp</a></li>
+                                            <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Chăm sóc cơ thể</a></li>
+                                            <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Chăm sóc da mặt</a></li>
+                                            <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Chăm sóc tóc</a></li>
+                                            <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Clinic & Spa</a></li>
+                                            <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Trang điểm</a></li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <h5 class="fw-bold">CHÍNH SÁCH HỖ TRỢ</h5>
+                                        <ul class="list-unstyled">
+                                            <li><a href="#" class="text-white text-decoration-none">Hỗ trợ đặt hàng</a></li>
+                                            <li><a href="#" class="text-white text-decoration-none">Chính sách trả hàng</a></li>
+                                            <li><a href="#" class="text-white text-decoration-none">Chính sách bảo hành</a></li>
+                                            <li><a href="#" class="text-white text-decoration-none">Chính sách người dùng</a></li>
+                                            <li><a href="#" class="text-white text-decoration-none">Chính sách mua hàng</a></li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <h5 class="fw-bold">THEO DÕI CHÚNG TÔI</h5>
+                                        <div class="d-flex info">
+                                            <a href="" class="me-3"><img src="${pageContext.request.contextPath}/IMG/fbf.png" alt="Facebook" width="32"></a>
+                                            <a href="#" class="me-3"><img src="${pageContext.request.contextPath}/IMG/linkedin-54890.png" alt="instagram" width="32"></a>
+                                            <a href="" class="me-3"><img src="${pageContext.request.contextPath}/IMG/tiktok-56510.png" alt="LinkedIn" width="32"></a>
+                                            <a href="#" class="me-3"><img src="${pageContext.request.contextPath}/IMG/youtube-11341.png" alt="YouTube" width="32"></a>
+                                            <a href="#" class="me-3"><img src="${pageContext.request.contextPath}/IMG/twitter.png" alt="Twitter" width="32"></a>
+                                        </div>
+                                        <div class="mt-2">
+                                            <img src="${pageContext.request.contextPath}/IMG/bocongthuong.png" alt="Bộ Công Thương" width="120">
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr class="border-white my-3">
+                                <div class="text-center">
+                                    <p class="mb-0">2023 Copyright PinkyCloud.vn - Sản phẩm chăm sóc da, Mỹ phẩm trang điểm, Mỹ phẩm chính hãng</p>
+                                </div>
+                            </div>
+                        </footer>
+                        <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
+                        
+                        </body>
+                        </html>
