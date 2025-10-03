@@ -63,7 +63,7 @@
                                         <c:if test="${not empty sessionScope.user}">
                                             <div class="account-dropdown">
                                                 <p class="welcome-text">Welcome, ${sessionScope.user.username}</p>
-                                                <a href="${pageContext.request.contextPath}/accountSetting">Account Setting</a>
+                                                <a href="${pageContext.request.contextPath}/account-management">Quản lý tài khoản</a>
                                                 <a href="${pageContext.request.contextPath}/cart">My Cart</a>
                                                 <a href="${pageContext.request.contextPath}/logout">Log Out</a>
                                             </div>

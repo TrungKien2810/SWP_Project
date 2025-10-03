@@ -1,5 +1,3 @@
-<%@page import="Model.user"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -7,18 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/dndk.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/font/fontawesome-free-6.7.2-web/css/all.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/log.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/register.css">
-    <script src="${pageContext.request.contextPath}/JS/home.js"></script>
-    <title>PinkyCloud - Đăng Ký</title>
+    <title>PinkyCloud - Đặt lại mật khẩu</title>
 </head>
 <body>
     <!-- header -->
     <div class="header">
-        <div class="header_text"><p style="color:#f76c85;">THEO DÕI CHÚNG TÔI</p></div>
+        <div class="header_text"><p>THEO DÕI CHÚNG TÔI</p></div>
         <div class="header_social">
             <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/fb.png" alt="" ></a>
             <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/ins.png" alt=""></a>
@@ -26,6 +20,7 @@
             <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/ytb.png" alt="" ></a>
         </div>
     </div>
+    
     <!-- menu -->
     <div class="menu">
         <div class="menu_logo">
@@ -36,85 +31,56 @@
                 <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/home.jsp">TRANG CHỦ</a></li>
                 <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/vechungtoi.jsp">VỀ CHÚNG TÔI</a></li>
                 <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/bosuutap.jsp">BỘ SƯU TẬP</a></li>
-                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/register.jsp">ĐĂNG NHẬP & ĐĂNG KÝ</a></li>
+                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/login">ĐĂNG NHẬP & ĐĂNG KÝ</a></li>
                 <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/lienhe.jsp">LIÊN HỆ</a></li>
             </ul>
-            <div class="menu_search">
-                <div class="menu_search_input">
-                    <input type="text" placeholder="Nhập từ khóa bạn cần tìm kiếm . . . ">
-                </div>
-                <div class="menu_search_icon">
-                    <a href=""><i class="fa-solid fa-magnifying-glass fa-xl" style="color:#f76c85;"></i></a>
-                </div>
-            </div>
-            <div class="menu_search_cart">
-                <i class="fa-solid fa-cart-shopping"></i>
-            </div>
         </div>
     </div>
 
-    <!-- Phần Đăng Ký -->
-    <div class="register-section">
-        <div class="toast" id="notificationToast" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="toast-header">
-                <strong class="me-auto">Thông báo</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body"></div>
-        </div>
-
+    <!-- Phần Đặt lại mật khẩu -->
+    <div class="login-section">
         <div class="container">
-            <div class="row">
+            <div class="row justify-content-center">
                 <div class="col-md-6">
-                    <h1>Tạo tài khoản</h1>
-                    <div class="social-icons">
-                        <a href="#"><i class="bi bi-facebook"></i></a>
-                        <a href="#"><i class="bi bi-twitter"></i></a>
-                        <a href="#"><i class="bi bi-instagram"></i></a>
-                        <a href="#"><i class="bi bi-youtube"></i></a>
+                    <div class="card">
+                        <div class="card-body">
+                            <h2 class="text-center mb-4">Đặt lại mật khẩu</h2>
+                            <p class="text-center text-muted mb-4">Nhập mật khẩu mới cho tài khoản của bạn</p>
+                            
+                            <form method="post" action="${pageContext.request.contextPath}/password/reset">
+                                <input type="hidden" name="token" value="${token}">
+                                
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Mật khẩu mới</label>
+                                    <input type="password" class="form-control" name="password" id="password" placeholder="Nhập mật khẩu mới" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="confirm" class="form-label">Nhập lại mật khẩu</label>
+                                    <input type="password" class="form-control" name="confirm" id="confirm" placeholder="Nhập lại mật khẩu" required>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">Cập nhật mật khẩu</button>
+                                </div>
+                            </form>
+                            
+                            <div class="text-center mt-3">
+                                <a href="${pageContext.request.contextPath}/login" class="text-decoration-none">Quay lại đăng nhập</a>
+                            </div>
+                            
+                            <%
+                                String error = (String) request.getAttribute("error");
+                                if (error != null) {
+                            %>
+                                <div class="alert alert-danger mt-3" role="alert">
+                                    <%= error %>
+                                </div>
+                            <%
+                                }
+                            %>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-6">
-                    <h2>Đăng ký</h2>
-                    <form action="${pageContext.request.contextPath}/signup" method="post">
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Tên đăng nhập</label>
-                            <input type="text" class="form-control" name="username" id="username" placeholder="Tên đăng nhập">
-                        </div>
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Địa chỉ email</label>
-                            <input type="email" class="form-control" name="email" id="email" placeholder="Chỉ chấp nhận Gmail (@gmail.com)" pattern="^[A-Za-z0-9._%+-]+@gmail\.com$" required>
-                            <div class="form-text">Vui lòng nhập địa chỉ Gmail hợp lệ (ví dụ: ten@gmail.com)</div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Mật khẩu</label>
-                            <input type="password" class="form-control" name="password" id="password" placeholder="Mật khẩu" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="confirm-password" class="form-label">Nhập lại mật khẩu</label>
-                            <input type="password" class="form-control" name="confirm-password" id="confirm-password" placeholder="Nhập lại mật khẩu" required>
-                        </div>
-                        <div class="row">
-                            <div class="col-6">
-                                <button type="submit" class="btn btn-signup">Đăng ký ngay!</button>
-                            </div>
-                            <div class="col-6">
-                                <a href="${pageContext.request.contextPath}/login" class="btn btn-login">Đăng nhập</a>
-                            </div>
-                        </div>
-                    </form>
-                    <p class="terms mt-3">Bằng cách nhấn vào "Đăng ký", bạn đã đồng ý với <a href="#">Điều khoản dịch vụ</a> | <a href="#">Chính sách bảo mật</a></p>
-                    <a class="d-block mt-2" href="${pageContext.request.contextPath}/View/forgot-password.jsp">Quên mật khẩu?</a>
-                    <%
-                        if (request.getAttribute("error") != null) {
-                            String error = (String) request.getAttribute("error");
-                    %>
-                        <div class="alert alert-danger mt-3" role="alert">
-                            <%=error%>
-                        </div>
-                    <%
-                        }
-                    %>
                 </div>
             </div>
         </div>
@@ -174,6 +140,7 @@
 
     <script src="${pageContext.request.contextPath}/JS/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <script src="${pageContext.request.contextPath}/JS/auth.js"></script>
 </body>
 </html>
+
+

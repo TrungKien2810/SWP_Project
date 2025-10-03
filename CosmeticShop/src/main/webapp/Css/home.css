@@ -625,8 +625,7 @@ footer li a:hover {
   transition: color 0.3s, transform 0.3s;
 }
 
-.account-icon:hover {
+.menu .menu_search_cart .account-menu .account-icon:hover {
   color: yellow !important;
   transform: scale(1.1);
-  /* hiệu ứng phóng to nhẹ */
 }

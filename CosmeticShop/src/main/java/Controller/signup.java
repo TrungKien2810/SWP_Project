@@ -83,7 +83,6 @@ public class signup extends HttpServlet {
             request.setAttribute("error", "Email must be a valid Gmail address");
             request.getRequestDispatcher("/View/register.jsp").forward(request, response);
             return;
-
         }
         if(email.equals("") || password.equals("") || username.equals("") || cp.equals("")){
             request.setAttribute("error", "Không thể để trống thông tin");

@@ -14,6 +14,7 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/log.css">
         <script src="${pageContext.request.contextPath}/JS/home.js"></script>
         <title>PinkyCloud - Đăng Nhập</title>
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
     </head>
     <body>
         <!-- header -->
@@ -98,7 +99,7 @@
                                             </div>
                                             <div class="mb-3">
                                                 <label for="password" class="form-label">Mật khẩu</label>
-                                                <input type="text" class="form-control" name="password" id="password" placeholder="Mật khẩu" value="<%=savedPass%>">
+                                                <input type="password" class="form-control" name="password" id="password" placeholder="Mật khẩu" value="<%=savedPass%>">
                                             </div>
 
                                             <div class="mb-3 form-check">
@@ -113,8 +114,29 @@
                                                     <a href="${pageContext.request.contextPath}/signup" class="btn btn-signup">Đăng ký</a>
                                                 </div>
                                             </div>
+                                        <div class="mt-3">
+                                            <div class="mb-2 fw-bold">Hoặc đăng nhập/đăng ký bằng Google</div>
+                                            <div id="g_id_onload"
+                                                 data-client_id="1088116862431-kjlf432l7eicqq56h69kdsu92kkfutk1.apps.googleusercontent.com"
+                                                 data-context="signin"
+                                                 data-ux_mode="popup"
+                                                 data-callback="handleCredentialResponse">
+                                            </div>
+                                            <div class="g_id_signin" data-type="standard" data-size="large"></div>
+                                        </div>
+                                        <script>
+                                          function handleCredentialResponse(response) {
+                                            var f = document.createElement('form');
+                                            f.method = 'POST';
+                                            f.action = '${pageContext.request.contextPath}/auth/google';
+                                            var i = document.createElement('input');
+                                            i.type = 'hidden'; i.name = 'credential'; i.value = response.credential;
+                                            f.appendChild(i); document.body.appendChild(f); f.submit();
+                                          }
+                                        </script>
                                         </form>
                                         <p class="terms mt-3">Bằng cách nhấn vào "Đăng nhập ngay!", bạn đã đồng ý với <a href="#">Điều khoản dịch vụ</a> | <a href="#">Chính sách bảo mật</a></p>
+                                        <a class="d-block mt-2" href="${pageContext.request.contextPath}/View/forgot-password.jsp">Quên mật khẩu?</a>
                                         <%
                                             if (request.getAttribute("error") != null) {
                                                 String error = (String) request.getAttribute("error");

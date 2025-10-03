@@ -19,7 +19,6 @@ public class user {
     private String password;
     private String role;
     private LocalDateTime date_create;
-
     public user() {
     }
 
