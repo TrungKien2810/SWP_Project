@@ -61,6 +61,7 @@ public class login extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.getRequestDispatcher("/View/log.jsp").forward(request, response);
+        return;
     }
 
     /**
@@ -95,21 +96,26 @@ public class login extends HttpServlet {
         if (!email.matches("^[A-Za-z0-9._%+-]+@gmail\\.com$")) {
             request.setAttribute("error", "Email must be a valid Gmail address");
             request.getRequestDispatcher("/View/log.jsp").forward(request, response);
+            return;
         }
         if(email.equals("") || password.equals("")){
             request.setAttribute("error", "Không thể để trống thông tin");
             request.getRequestDispatcher("/View/log.jsp").forward(request, response);
+            return;
         }
         if (ud.getUserByEmail(email) == null) {
             request.setAttribute("error", "account is not exist, you aren't sign up?");
             request.getRequestDispatcher("/View/log.jsp").forward(request, response);
+            return;
         }
         if (ud.login(email, password)) {
             session.setAttribute("user", ud.getUserByEmail(email));
             request.getRequestDispatcher("/View/home.jsp").forward(request, response);
+            return;
         } else {
             request.setAttribute("error", "Email or password is invalid, please try again");
             request.getRequestDispatcher("/View/log.jsp").forward(request, response);
+            return;
         }
     }
 
