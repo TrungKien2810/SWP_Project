@@ -83,8 +83,37 @@ public class ProductController extends HttpServlet {
 
       private void listProducts(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        List<Product> productList = db().getAllProducts();
+        // Lấy tham số tìm kiếm và lọc
+        String searchTerm = request.getParameter("search");
+        String categoryName = request.getParameter("category");
+        String minPriceStr = request.getParameter("minPrice");
+        String maxPriceStr = request.getParameter("maxPrice");
+        String fixedPriceRange = request.getParameter("fixedPriceRange");
+        String sortBy = request.getParameter("sortBy");
+        
+        List<Product> productList;
+        
+        // Xử lý tìm kiếm và lọc
+        if (searchTerm != null || categoryName != null || minPriceStr != null || maxPriceStr != null || fixedPriceRange != null || sortBy != null) {
+            double minPrice = (minPriceStr != null && !minPriceStr.isEmpty()) ? Double.parseDouble(minPriceStr) : -1;
+            double maxPrice = (maxPriceStr != null && !maxPriceStr.isEmpty()) ? Double.parseDouble(maxPriceStr) : -1;
+            
+            productList = db().searchAndFilterProducts(searchTerm, categoryName, minPrice, maxPrice, fixedPriceRange, sortBy);
+        } else {
+            productList = db().getAllProducts();
+        }
+        
+        // Lấy danh sách categories để hiển thị trong dropdown
+        List<String> categories = db().getAllCategories();
+        
         request.setAttribute("productList", productList);
+        request.setAttribute("categories", categories);
+        request.setAttribute("searchTerm", searchTerm);
+        request.setAttribute("selectedCategory", categoryName);
+        request.setAttribute("minPrice", minPriceStr);
+        request.setAttribute("maxPrice", maxPriceStr);
+        request.setAttribute("selectedFixedPriceRange", fixedPriceRange);
+        request.setAttribute("selectedSortBy", sortBy);
         request.getRequestDispatcher("/View/bosuutap.jsp").forward(request, response);
     }
 

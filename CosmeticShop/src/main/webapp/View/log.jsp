@@ -34,11 +34,11 @@
                             </div>
                             <div class="menu_list">
                                 <ul class="menu_list_item">
-                                    <li><a class="menu_list_link" href="${pageContext.request.contextPath}/HTML/home.html">TRANG CHỦ</a></li>
-                                    <li><a class="menu_list_link" href="${pageContext.request.contextPath}/HTML/vechungtoi.html">VỀ CHÚNG TÔI</a></li>
-                                    <li><a class="menu_list_link" href="${pageContext.request.contextPath}/HTML/bosuutap.html">BỘ SƯU TẬP</a></li>
-                                    <li><a class="menu_list_link" href="${pageContext.request.contextPath}/HTML/register.html">ĐĂNG NHẬP & ĐĂNG KÝ</a></li>
-                                    <li><a class="menu_list_link" href="${pageContext.request.contextPath}/HTML/lienhe.html">LIÊN HỆ</a></li>
+                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/home.jsp">TRANG CHỦ</a></li>
+                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/vechungtoi.jsp">VỀ CHÚNG TÔI</a></li>
+                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/products">BỘ SƯU TẬP</a></li>
+                                    <li><a class="menu_list_link" href="${pageContext.request.contextPath}/signup">ĐĂNG NHẬP & ĐĂNG KÝ</a></li>
+                                    <li><a class="menu_list_link" href="${pageContext.request.contextPath}/HTML/lienhe.jsp">LIÊN HỆ</a></li>
                                 </ul>
                                 <div class="menu_search">
                                     <div class="menu_search_input">

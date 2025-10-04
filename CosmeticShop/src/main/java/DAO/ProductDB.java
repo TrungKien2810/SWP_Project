@@ -168,4 +168,243 @@ public class ProductDB {
             return false;
         }
     }
+
+    // Tìm kiếm sản phẩm theo tên
+    public List<Product> searchProducts(String searchTerm) {
+        List<Product> productList = new ArrayList<>();
+        String sql = "SELECT * FROM Products WHERE name LIKE ? OR description LIKE ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            String searchPattern = "%" + searchTerm + "%";
+            stmt.setString(1, searchPattern);
+            stmt.setString(2, searchPattern);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Product product = new Product(
+                            rs.getInt("product_id"),
+                            rs.getString("name"),
+                            rs.getDouble("price"),
+                            rs.getInt("stock"),
+                            rs.getString("description"),
+                            rs.getString("image_url"),
+                            rs.getInt("category_id")
+                    );
+                    productList.add(product);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return productList;
+    }
+
+    // Lọc sản phẩm theo danh mục
+    public List<Product> getProductsByCategory(String categoryName) {
+        List<Product> productList = new ArrayList<>();
+        String sql = "SELECT p.* FROM Products p JOIN Categories c ON p.category_id = c.category_id WHERE c.name = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, categoryName);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Product product = new Product(
+                            rs.getInt("product_id"),
+                            rs.getString("name"),
+                            rs.getDouble("price"),
+                            rs.getInt("stock"),
+                            rs.getString("description"),
+                            rs.getString("image_url"),
+                            rs.getInt("category_id")
+                    );
+                    productList.add(product);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return productList;
+    }
+
+    // Lọc sản phẩm theo khoảng giá
+    public List<Product> getProductsByPriceRange(double minPrice, double maxPrice) {
+        List<Product> productList = new ArrayList<>();
+        String sql = "SELECT * FROM Products WHERE price >= ? AND price <= ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setDouble(1, minPrice);
+            stmt.setDouble(2, maxPrice);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Product product = new Product(
+                            rs.getInt("product_id"),
+                            rs.getString("name"),
+                            rs.getDouble("price"),
+                            rs.getInt("stock"),
+                            rs.getString("description"),
+                            rs.getString("image_url"),
+                            rs.getInt("category_id")
+                    );
+                    productList.add(product);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return productList;
+    }
+
+    // Lọc sản phẩm theo giá cố định
+    public List<Product> getProductsByFixedPriceRange(String priceRange) {
+        List<Product> productList = new ArrayList<>();
+        String sql = "";
+        
+        switch (priceRange) {
+            case "under-100k":
+                sql = "SELECT * FROM Products WHERE price < 100000 ORDER BY price";
+                break;
+            case "100k-300k":
+                sql = "SELECT * FROM Products WHERE price >= 100000 AND price <= 300000 ORDER BY price";
+                break;
+            case "300k-500k":
+                sql = "SELECT * FROM Products WHERE price > 300000 AND price <= 500000 ORDER BY price";
+                break;
+            case "500k-1m":
+                sql = "SELECT * FROM Products WHERE price > 500000 AND price <= 1000000 ORDER BY price";
+                break;
+            case "over-1m":
+                sql = "SELECT * FROM Products WHERE price > 1000000 ORDER BY price";
+                break;
+            default:
+                return getAllProducts();
+        }
+        
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Product product = new Product(
+                            rs.getInt("product_id"),
+                            rs.getString("name"),
+                            rs.getDouble("price"),
+                            rs.getInt("stock"),
+                            rs.getString("description"),
+                            rs.getString("image_url"),
+                            rs.getInt("category_id")
+                    );
+                    productList.add(product);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return productList;
+    }
+
+    // Tìm kiếm và lọc kết hợp (cập nhật để hỗ trợ lọc giá cố định và sắp xếp)
+    public List<Product> searchAndFilterProducts(String searchTerm, String categoryName, double minPrice, double maxPrice, String fixedPriceRange, String sortBy) {
+        List<Product> productList = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT p.* FROM Products p JOIN Categories c ON p.category_id = c.category_id WHERE 1=1");
+        List<Object> parameters = new ArrayList<>();
+        
+        if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+            sql.append(" AND (p.name LIKE ? OR p.description LIKE ?)");
+            String searchPattern = "%" + searchTerm + "%";
+            parameters.add(searchPattern);
+            parameters.add(searchPattern);
+        }
+        
+        if (categoryName != null && !categoryName.trim().isEmpty() && !categoryName.equals("all")) {
+            sql.append(" AND c.name = ?");
+            parameters.add(categoryName);
+        }
+        
+        // Xử lý lọc giá cố định
+        if (fixedPriceRange != null && !fixedPriceRange.trim().isEmpty() && !fixedPriceRange.equals("all")) {
+            switch (fixedPriceRange) {
+                case "under-100k":
+                    sql.append(" AND p.price < ?");
+                    parameters.add(100000.0);
+                    break;
+                case "100k-300k":
+                    sql.append(" AND p.price >= ? AND p.price <= ?");
+                    parameters.add(100000.0);
+                    parameters.add(300000.0);
+                    break;
+                case "300k-500k":
+                    sql.append(" AND p.price > ? AND p.price <= ?");
+                    parameters.add(300000.0);
+                    parameters.add(500000.0);
+                    break;
+                case "500k-1m":
+                    sql.append(" AND p.price > ? AND p.price <= ?");
+                    parameters.add(500000.0);
+                    parameters.add(1000000.0);
+                    break;
+                case "over-1m":
+                    sql.append(" AND p.price > ?");
+                    parameters.add(1000000.0);
+                    break;
+            }
+        } else {
+            // Chỉ áp dụng lọc giá tùy chỉnh nếu không có lọc giá cố định
+            if (minPrice >= 0) {
+                sql.append(" AND p.price >= ?");
+                parameters.add(minPrice);
+            }
+            
+            if (maxPrice > 0) {
+                sql.append(" AND p.price <= ?");
+                parameters.add(maxPrice);
+            }
+        }
+        
+        // Xử lý sắp xếp
+        if (sortBy != null && !sortBy.trim().isEmpty()) {
+            switch (sortBy) {
+                case "price-asc":
+                    sql.append(" ORDER BY p.price ASC");
+                    break;
+                case "price-desc":
+                    sql.append(" ORDER BY p.price DESC");
+                    break;
+                case "name-asc":
+                    sql.append(" ORDER BY p.name ASC");
+                    break;
+                case "name-desc":
+                    sql.append(" ORDER BY p.name DESC");
+                    break;
+                case "newest":
+                    sql.append(" ORDER BY p.product_id DESC");
+                    break;
+                case "oldest":
+                    sql.append(" ORDER BY p.product_id ASC");
+                    break;
+                default:
+                    sql.append(" ORDER BY p.name ASC");
+                    break;
+            }
+        } else {
+            sql.append(" ORDER BY p.name ASC");
+        }
+        
+        try (PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < parameters.size(); i++) {
+                stmt.setObject(i + 1, parameters.get(i));
+            }
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Product product = new Product(
+                            rs.getInt("product_id"),
+                            rs.getString("name"),
+                            rs.getDouble("price"),
+                            rs.getInt("stock"),
+                            rs.getString("description"),
+                            rs.getString("image_url"),
+                            rs.getInt("category_id")
+                    );
+                    productList.add(product);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return productList;
+    }
+
 }
