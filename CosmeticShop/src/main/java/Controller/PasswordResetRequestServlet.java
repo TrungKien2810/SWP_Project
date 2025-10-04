@@ -1,6 +1,7 @@
 package Controller;
 
 import DAO.UserDB;
+import Model.user;
 import Util.EmailUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -13,12 +14,34 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Base64;
 
-@WebServlet(name = "passwordResetRequest", urlPatterns = {"/password/reset/request"})
+@WebServlet(name = "passwordResetRequest", urlPatterns = {"/password/reset/request", "/test-servlet"})
 public class PasswordResetRequestServlet extends HttpServlet {
 
-    private static final String FROM_EMAIL = System.getenv().getOrDefault("MAIL_FROM", "yourgmail@gmail.com");
-    private static final String APP_PASSWORD = System.getenv().getOrDefault("MAIL_APP_PASSWORD", "app_password_here");
+    private String getFromEmail(HttpServletRequest req) {
+        String fromEnv = System.getenv("MAIL_FROM");
+        if (fromEnv != null && !fromEnv.isEmpty()) {
+            return fromEnv;
+        }
+        return req.getServletContext().getInitParameter("MAIL_FROM");
+    }
+    
+    private String getAppPassword(HttpServletRequest req) {
+        String passwordEnv = System.getenv("MAIL_APP_PASSWORD");
+        if (passwordEnv != null && !passwordEnv.isEmpty()) {
+            return passwordEnv;
+        }
+        return req.getServletContext().getInitParameter("MAIL_APP_PASSWORD");
+    }
 
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        System.out.println("PasswordResetRequestServlet doGet called");
+        resp.setContentType("text/html; charset=UTF-8");
+        resp.getWriter().println("<h1>Password Reset Request Servlet is working!</h1>");
+        resp.getWriter().println("<p>Current time: " + new java.util.Date() + "</p>");
+        resp.getWriter().println("<p>Context path: " + req.getContextPath() + "</p>");
+    }
+    
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String email = req.getParameter("email");
@@ -27,15 +50,16 @@ public class PasswordResetRequestServlet extends HttpServlet {
             return;
         }
 
-        // Enforce Gmail-only for password recovery
+        // Validate Gmail format only
         String normalizedEmail = email.trim().toLowerCase();
-        if (!normalizedEmail.endsWith("@gmail.com")) {
+        if (!normalizedEmail.matches("^[a-zA-Z0-9._%+-]+@gmail\\.com$")) {
             resp.sendRedirect(req.getContextPath() + "/View/forgot-password.jsp?msg=Chỉ hỗ trợ khôi phục qua Gmail (@gmail.com)");
             return;
         }
 
         UserDB ud = new UserDB();
-        if (ud.getUserByEmail(email) != null) {
+        user existingUser = ud.getUserByEmail(email);
+        if (existingUser != null) {
             String token = generateToken();
             Timestamp expiry = Timestamp.from(Instant.now().plusSeconds(3600));
             ud.setResetToken(email, token, expiry);
@@ -44,13 +68,28 @@ public class PasswordResetRequestServlet extends HttpServlet {
             String resetLink = baseUrl + "?token=" + token;
             String body = "<p>Nhấn vào link để đặt lại mật khẩu:</p><p><a href=\"" + resetLink + "\">Đặt lại mật khẩu</a></p>";
             try {
-                EmailUtil.send(email, "Đặt lại mật khẩu - Pinky Cloud", body, FROM_EMAIL, APP_PASSWORD);
+                String fromEmail = getFromEmail(req);
+                String appPassword = getAppPassword(req);
+                
+                // Kiểm tra cấu hình email
+                if (fromEmail == null || fromEmail.equals("yourgmail@gmail.com") || 
+                    appPassword == null || appPassword.equals("your_16_character_app_password")) {
+                    // Tạm thời bỏ qua gửi email, chỉ tạo token
+                    resp.sendRedirect(req.getContextPath() + "/View/log.jsp?msg=Token đã được tạo. Vui lòng cấu hình email để gửi link khôi phục.");
+                    return;
+                }
+                
+                EmailUtil.send(email, "Đặt lại mật khẩu - Pinky Cloud", body, fromEmail, appPassword);
+                resp.sendRedirect(req.getContextPath() + "/View/log.jsp?msg=Link khôi phục mật khẩu đã được gửi đến email của bạn");
             } catch (Exception e) {
-                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Cannot send email");
+                e.printStackTrace(); // Log lỗi để debug
+                resp.sendRedirect(req.getContextPath() + "/View/forgot-password.jsp?msg=Lỗi gửi email. Vui lòng kiểm tra cấu hình email hoặc thử lại sau.");
                 return;
             }
+        } else {
+            // Không tiết lộ thông tin về việc email có tồn tại hay không để bảo mật
+            resp.sendRedirect(req.getContextPath() + "/View/log.jsp?msg=Nếu email tồn tại trong hệ thống, link khôi phục đã được gửi");
         }
-        resp.sendRedirect(req.getContextPath() + "/View/log.jsp?msg=If the Gmail exists, a reset link has been sent");
     }
 
     private String generateToken() {

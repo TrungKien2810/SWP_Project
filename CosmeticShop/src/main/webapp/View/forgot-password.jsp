@@ -45,13 +45,13 @@
                     <div class="card">
                         <div class="card-body">
                             <h2 class="text-center mb-4">Quên mật khẩu</h2>
-                            <p class="text-center text-muted mb-4">Chỉ hỗ trợ Gmail (@gmail.com) để nhận link khôi phục mật khẩu</p>
+                            <p class="text-center text-muted mb-4">Nhập địa chỉ Gmail đã đăng ký để nhận link khôi phục mật khẩu</p>
                             
                             <form method="post" action="${pageContext.request.contextPath}/password/reset/request">
                                 <div class="mb-3">
                                     <label for="email" class="form-label">Địa chỉ email</label>
-                                    <input type="email" class="form-control" name="email" id="email" placeholder="chỉ nhận @gmail.com" pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$" required>
-                                    <div class="form-text">Vui lòng nhập địa chỉ Gmail hợp lệ (ví dụ: ten@gmail.com)</div>
+                                    <input type="email" class="form-control" name="email" id="email" placeholder="Nhập Gmail đã đăng ký" pattern="^[A-Za-z0-9._%+-]+@gmail\.com$" required>
+                                    <div class="form-text">Vui lòng nhập địa chỉ Gmail đã đăng ký (ví dụ: ten@gmail.com)</div>
                                 </div>
                                 
                                 <div class="d-grid">
