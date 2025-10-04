@@ -9,6 +9,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -75,20 +77,24 @@ public class PasswordResetRequestServlet extends HttpServlet {
                 if (fromEmail == null || fromEmail.equals("yourgmail@gmail.com") || 
                     appPassword == null || appPassword.equals("your_16_character_app_password")) {
                     // Tạm thời bỏ qua gửi email, chỉ tạo token
-                    resp.sendRedirect(req.getContextPath() + "/View/log.jsp?msg=Token đã được tạo. Vui lòng cấu hình email để gửi link khôi phục.");
+                    String message = "Token đã được tạo. Vui lòng cấu hình email để gửi link khôi phục.";
+                    resp.sendRedirect(req.getContextPath() + "/View/log.jsp?msg=" + URLEncoder.encode(message, StandardCharsets.UTF_8));
                     return;
                 }
                 
                 EmailUtil.send(email, "Đặt lại mật khẩu - Pinky Cloud", body, fromEmail, appPassword);
-                resp.sendRedirect(req.getContextPath() + "/View/log.jsp?msg=Link khôi phục mật khẩu đã được gửi đến email của bạn");
+                String message = "Link khôi phục mật khẩu đã được gửi đến email của bạn";
+                resp.sendRedirect(req.getContextPath() + "/View/log.jsp?msg=" + URLEncoder.encode(message, StandardCharsets.UTF_8));
             } catch (Exception e) {
                 e.printStackTrace(); // Log lỗi để debug
-                resp.sendRedirect(req.getContextPath() + "/View/forgot-password.jsp?msg=Lỗi gửi email. Vui lòng kiểm tra cấu hình email hoặc thử lại sau.");
+                String errorMessage = "Lỗi gửi email. Vui lòng kiểm tra cấu hình email hoặc thử lại sau.";
+                resp.sendRedirect(req.getContextPath() + "/View/forgot-password.jsp?msg=" + URLEncoder.encode(errorMessage, StandardCharsets.UTF_8));
                 return;
             }
         } else {
             // Không tiết lộ thông tin về việc email có tồn tại hay không để bảo mật
-            resp.sendRedirect(req.getContextPath() + "/View/log.jsp?msg=Nếu email tồn tại trong hệ thống, link khôi phục đã được gửi");
+            String securityMessage = "Nếu email tồn tại trong hệ thống, link khôi phục đã được gửi";
+            resp.sendRedirect(req.getContextPath() + "/View/log.jsp?msg=" + URLEncoder.encode(securityMessage, StandardCharsets.UTF_8));
         }
     }
 

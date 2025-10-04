@@ -8,6 +8,8 @@ import jakarta.mail.Session;
 import jakarta.mail.Transport;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeUtility;
+import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
 public class EmailUtil {
@@ -35,8 +37,17 @@ public class EmailUtil {
         Message msg = new MimeMessage(session);
         msg.setFrom(new InternetAddress(fromEmail));
         msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
-        msg.setSubject(subject);
+        
+        // Encode subject để tránh lỗi font chữ
+        try {
+            msg.setSubject(MimeUtility.encodeText(subject, "UTF-8", "B"));
+        } catch (Exception e) {
+            // Fallback nếu có lỗi
+            msg.setSubject(subject);
+        }
+        
         msg.setContent(body, "text/html; charset=UTF-8");
+        msg.setHeader("Content-Type", "text/html; charset=UTF-8");
         Transport.send(msg);
     }
 }
