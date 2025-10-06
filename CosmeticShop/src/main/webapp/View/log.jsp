@@ -124,6 +124,18 @@
                                         <%
                                             }
                                         %>
+                                        <%
+    String msg = request.getParameter("msg");
+    if (msg == null) {
+        msg = (String) request.getAttribute("msg");
+    }
+    if (msg != null) {
+%>
+<h5 style="color: green"><%=msg%></h5>
+<%
+    }
+%>
+
                                     </div>
                                 </div>
                             </div>
