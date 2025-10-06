@@ -91,17 +91,37 @@ public class ProductController extends HttpServlet {
         String fixedPriceRange = request.getParameter("fixedPriceRange");
         String sortBy = request.getParameter("sortBy");
         
+        // Paging params
+        String pageStr = request.getParameter("page");
+        String pageSizeStr = request.getParameter("pageSize");
+        int page = 1;
+        int pageSize = 12;
+        if (pageStr != null && !pageStr.isEmpty()) {
+            try { page = Integer.parseInt(pageStr); if (page < 1) page = 1; } catch (NumberFormatException ignored) {}
+        }
+        if (pageSizeStr != null && !pageSizeStr.isEmpty()) {
+            try {
+                pageSize = Integer.parseInt(pageSizeStr);
+                if (pageSize < 1) pageSize = 12;
+                if (pageSize > 50) pageSize = 50;
+            } catch (NumberFormatException ignored) {}
+        }
+        
         List<Product> productList;
+        int totalProducts;
         
         // Xử lý tìm kiếm và lọc
         if (searchTerm != null || categoryName != null || minPriceStr != null || maxPriceStr != null || fixedPriceRange != null || sortBy != null) {
             double minPrice = (minPriceStr != null && !minPriceStr.isEmpty()) ? Double.parseDouble(minPriceStr) : -1;
             double maxPrice = (maxPriceStr != null && !maxPriceStr.isEmpty()) ? Double.parseDouble(maxPriceStr) : -1;
             
-            productList = db().searchAndFilterProducts(searchTerm, categoryName, minPrice, maxPrice, fixedPriceRange, sortBy);
+            productList = db().searchAndFilterProductsWithPaging(searchTerm, categoryName, minPrice, maxPrice, fixedPriceRange, sortBy, page, pageSize);
+            totalProducts = db().getFilteredProductsCount(searchTerm, categoryName, minPrice, maxPrice, fixedPriceRange);
         } else {
-            productList = db().getAllProducts();
+            productList = db().getAllProductsWithPaging(page, pageSize);
+            totalProducts = db().getTotalProductsCount();
         }
+        int totalPages = (int) Math.ceil((double) totalProducts / pageSize);
         
         // Lấy danh sách categories để hiển thị trong dropdown
         List<String> categories = db().getAllCategories();
@@ -114,6 +134,11 @@ public class ProductController extends HttpServlet {
         request.setAttribute("maxPrice", maxPriceStr);
         request.setAttribute("selectedFixedPriceRange", fixedPriceRange);
         request.setAttribute("selectedSortBy", sortBy);
+        // Paging attributes
+        request.setAttribute("currentPage", page);
+        request.setAttribute("pageSize", pageSize);
+        request.setAttribute("totalProducts", totalProducts);
+        request.setAttribute("totalPages", totalPages);
         request.getRequestDispatcher("/View/bosuutap.jsp").forward(request, response);
     }
 

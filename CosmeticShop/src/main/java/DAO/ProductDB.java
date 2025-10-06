@@ -407,4 +407,226 @@ public class ProductDB {
         return productList;
     }
 
+    // Phân trang: lấy tất cả sản phẩm với OFFSET/FETCH (SQL Server 2012+)
+    public List<Product> getAllProductsWithPaging(int page, int pageSize) {
+        List<Product> productList = new ArrayList<>();
+        String sql = "SELECT * FROM Products ORDER BY product_id DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, (page - 1) * pageSize);
+            stmt.setInt(2, pageSize);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Product product = new Product(
+                            rs.getInt("product_id"),
+                            rs.getString("name"),
+                            rs.getDouble("price"),
+                            rs.getInt("stock"),
+                            rs.getString("description"),
+                            rs.getString("image_url"),
+                            rs.getInt("category_id")
+                    );
+                    productList.add(product);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return productList;
+    }
+
+    // Phân trang: tìm kiếm + lọc với OFFSET/FETCH
+    public List<Product> searchAndFilterProductsWithPaging(String searchTerm, String categoryName,
+            double minPrice, double maxPrice, String fixedPriceRange, String sortBy,
+            int page, int pageSize) {
+        List<Product> productList = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT p.* FROM Products p JOIN Categories c ON p.category_id = c.category_id WHERE 1=1");
+        List<Object> parameters = new ArrayList<>();
+
+        if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+            sql.append(" AND (p.name LIKE ? OR p.description LIKE ?)");
+            String searchPattern = "%" + searchTerm + "%";
+            parameters.add(searchPattern);
+            parameters.add(searchPattern);
+        }
+
+        if (categoryName != null && !categoryName.trim().isEmpty() && !categoryName.equals("all")) {
+            sql.append(" AND c.name = ?");
+            parameters.add(categoryName);
+        }
+
+        if (fixedPriceRange != null && !fixedPriceRange.trim().isEmpty() && !fixedPriceRange.equals("all")) {
+            switch (fixedPriceRange) {
+                case "under-100k":
+                    sql.append(" AND p.price < ?");
+                    parameters.add(100000.0);
+                    break;
+                case "100k-300k":
+                    sql.append(" AND p.price >= ? AND p.price <= ?");
+                    parameters.add(100000.0);
+                    parameters.add(300000.0);
+                    break;
+                case "300k-500k":
+                    sql.append(" AND p.price > ? AND p.price <= ?");
+                    parameters.add(300000.0);
+                    parameters.add(500000.0);
+                    break;
+                case "500k-1m":
+                    sql.append(" AND p.price > ? AND p.price <= ?");
+                    parameters.add(500000.0);
+                    parameters.add(1000000.0);
+                    break;
+                case "over-1m":
+                    sql.append(" AND p.price > ?");
+                    parameters.add(1000000.0);
+                    break;
+            }
+        } else {
+            if (minPrice >= 0) {
+                sql.append(" AND p.price >= ?");
+                parameters.add(minPrice);
+            }
+            if (maxPrice > 0) {
+                sql.append(" AND p.price <= ?");
+                parameters.add(maxPrice);
+            }
+        }
+
+        if (sortBy != null && !sortBy.trim().isEmpty()) {
+            switch (sortBy) {
+                case "price-asc":
+                    sql.append(" ORDER BY p.price ASC");
+                    break;
+                case "price-desc":
+                    sql.append(" ORDER BY p.price DESC");
+                    break;
+                case "name-asc":
+                    sql.append(" ORDER BY p.name ASC");
+                    break;
+                case "name-desc":
+                    sql.append(" ORDER BY p.name DESC");
+                    break;
+                case "newest":
+                    sql.append(" ORDER BY p.product_id DESC");
+                    break;
+                case "oldest":
+                    sql.append(" ORDER BY p.product_id ASC");
+                    break;
+                default:
+                    sql.append(" ORDER BY p.name ASC");
+                    break;
+            }
+        } else {
+            sql.append(" ORDER BY p.name ASC");
+        }
+
+        sql.append(" OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+        parameters.add((page - 1) * pageSize);
+        parameters.add(pageSize);
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < parameters.size(); i++) {
+                stmt.setObject(i + 1, parameters.get(i));
+            }
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Product product = new Product(
+                            rs.getInt("product_id"),
+                            rs.getString("name"),
+                            rs.getDouble("price"),
+                            rs.getInt("stock"),
+                            rs.getString("description"),
+                            rs.getString("image_url"),
+                            rs.getInt("category_id")
+                    );
+                    productList.add(product);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return productList;
+    }
+
+    public int getTotalProductsCount() {
+        String sql = "SELECT COUNT(*) FROM Products";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int getFilteredProductsCount(String searchTerm, String categoryName,
+            double minPrice, double maxPrice, String fixedPriceRange) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Products p JOIN Categories c ON p.category_id = c.category_id WHERE 1=1");
+        List<Object> parameters = new ArrayList<>();
+
+        if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+            sql.append(" AND (p.name LIKE ? OR p.description LIKE ?)");
+            String searchPattern = "%" + searchTerm + "%";
+            parameters.add(searchPattern);
+            parameters.add(searchPattern);
+        }
+
+        if (categoryName != null && !categoryName.trim().isEmpty() && !categoryName.equals("all")) {
+            sql.append(" AND c.name = ?");
+            parameters.add(categoryName);
+        }
+
+        if (fixedPriceRange != null && !fixedPriceRange.trim().isEmpty() && !fixedPriceRange.equals("all")) {
+            switch (fixedPriceRange) {
+                case "under-100k":
+                    sql.append(" AND p.price < ?");
+                    parameters.add(100000.0);
+                    break;
+                case "100k-300k":
+                    sql.append(" AND p.price >= ? AND p.price <= ?");
+                    parameters.add(100000.0);
+                    parameters.add(300000.0);
+                    break;
+                case "300k-500k":
+                    sql.append(" AND p.price > ? AND p.price <= ?");
+                    parameters.add(300000.0);
+                    parameters.add(500000.0);
+                    break;
+                case "500k-1m":
+                    sql.append(" AND p.price > ? AND p.price <= ?");
+                    parameters.add(500000.0);
+                    parameters.add(1000000.0);
+                    break;
+                case "over-1m":
+                    sql.append(" AND p.price > ?");
+                    parameters.add(1000000.0);
+                    break;
+            }
+        } else {
+            if (minPrice >= 0) {
+                sql.append(" AND p.price >= ?");
+                parameters.add(minPrice);
+            }
+            if (maxPrice > 0) {
+                sql.append(" AND p.price <= ?");
+                parameters.add(maxPrice);
+            }
+        }
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < parameters.size(); i++) {
+                stmt.setObject(i + 1, parameters.get(i));
+            }
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 }
