@@ -50,6 +50,9 @@ public class ProductController extends HttpServlet {
             case "delete":
                 deleteProduct(request, response);
                 break;
+            case "manage":
+                showManagePage(request, response);
+                break;
             default:
                 listProducts(request, response);
                 break;
@@ -80,8 +83,62 @@ public class ProductController extends HttpServlet {
 
       private void listProducts(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        List<Product> productList = db().getAllProducts();
+        // Lấy tham số tìm kiếm và lọc
+        String searchTerm = request.getParameter("search");
+        String categoryName = request.getParameter("category");
+        String minPriceStr = request.getParameter("minPrice");
+        String maxPriceStr = request.getParameter("maxPrice");
+        String fixedPriceRange = request.getParameter("fixedPriceRange");
+        String sortBy = request.getParameter("sortBy");
+        
+        // Paging params
+        String pageStr = request.getParameter("page");
+        String pageSizeStr = request.getParameter("pageSize");
+        int page = 1;
+        int pageSize = 12;
+        if (pageStr != null && !pageStr.isEmpty()) {
+            try { page = Integer.parseInt(pageStr); if (page < 1) page = 1; } catch (NumberFormatException ignored) {}
+        }
+        if (pageSizeStr != null && !pageSizeStr.isEmpty()) {
+            try {
+                pageSize = Integer.parseInt(pageSizeStr);
+                if (pageSize < 1) pageSize = 12;
+                if (pageSize > 50) pageSize = 50;
+            } catch (NumberFormatException ignored) {}
+        }
+        
+        List<Product> productList;
+        int totalProducts;
+        
+        // Xử lý tìm kiếm và lọc
+        if (searchTerm != null || categoryName != null || minPriceStr != null || maxPriceStr != null || fixedPriceRange != null || sortBy != null) {
+            double minPrice = (minPriceStr != null && !minPriceStr.isEmpty()) ? Double.parseDouble(minPriceStr) : -1;
+            double maxPrice = (maxPriceStr != null && !maxPriceStr.isEmpty()) ? Double.parseDouble(maxPriceStr) : -1;
+            
+            productList = db().searchAndFilterProductsWithPaging(searchTerm, categoryName, minPrice, maxPrice, fixedPriceRange, sortBy, page, pageSize);
+            totalProducts = db().getFilteredProductsCount(searchTerm, categoryName, minPrice, maxPrice, fixedPriceRange);
+        } else {
+            productList = db().getAllProductsWithPaging(page, pageSize);
+            totalProducts = db().getTotalProductsCount();
+        }
+        int totalPages = (int) Math.ceil((double) totalProducts / pageSize);
+        
+        // Lấy danh sách categories để hiển thị trong dropdown
+        List<String> categories = db().getAllCategories();
+        
         request.setAttribute("productList", productList);
+        request.setAttribute("categories", categories);
+        request.setAttribute("searchTerm", searchTerm);
+        request.setAttribute("selectedCategory", categoryName);
+        request.setAttribute("minPrice", minPriceStr);
+        request.setAttribute("maxPrice", maxPriceStr);
+        request.setAttribute("selectedFixedPriceRange", fixedPriceRange);
+        request.setAttribute("selectedSortBy", sortBy);
+        // Paging attributes
+        request.setAttribute("currentPage", page);
+        request.setAttribute("pageSize", pageSize);
+        request.setAttribute("totalProducts", totalProducts);
+        request.setAttribute("totalPages", totalPages);
         request.getRequestDispatcher("/View/bosuutap.jsp").forward(request, response);
     }
 
@@ -104,6 +161,14 @@ public class ProductController extends HttpServlet {
         request.getRequestDispatcher("/View/product-form.jsp").forward(request, response);
     }
 
+    private void showManagePage(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        List<Product> productList = db().getAllProducts();
+        List<String> categories = db().getAllCategories();
+        request.setAttribute("productList", productList);
+        request.setAttribute("categories", categories);
+        request.getRequestDispatcher("/View/product-manager.jsp").forward(request, response);
+    }
     
     private void insertProduct(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
@@ -128,7 +193,7 @@ public class ProductController extends HttpServlet {
 
         Product newProduct = new Product(0, name, price, stock, description, imageUrl, categoryId);
         db().addProduct(newProduct);
-        response.sendRedirect("products");
+        response.sendRedirect("products?action=manage");
     }
 
     private void updateProduct(HttpServletRequest request, HttpServletResponse response)
@@ -161,14 +226,14 @@ public class ProductController extends HttpServlet {
 
         Product product = new Product(id, name, price, stock, description, imageUrl, categoryId);
         db().updateProduct(product);
-        response.sendRedirect("products");
+        response.sendRedirect("products?action=manage");
     }
 
     private void deleteProduct(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         int id = Integer.parseInt(request.getParameter("id"));
         db().deleteProduct(id);
-        response.sendRedirect("products");
+        response.sendRedirect("products?action=manage");
     }
 
     private String handleImageUpload(HttpServletRequest request, String fallbackUrl) throws IOException, ServletException {
@@ -191,16 +256,8 @@ public class ProductController extends HttpServlet {
         }
         String newFileName = UUID.randomUUID().toString() + ext;
 
-        String uploadDirRelative = "/IMG/uploads";
-        String uploadPath = getServletContext().getRealPath(uploadDirRelative);
-        if (uploadPath == null) {
-            uploadPath = getServletContext().getRealPath("/IMG");
-            if (uploadPath == null) {
-                uploadPath = request.getServletContext().getRealPath("/") + "IMG";
-            }
-            uploadPath = uploadPath + File.separator + "uploads";
-        }
-
+        // Lưu ảnh vào folder cố định trong ổ C
+        String uploadPath = "C:\\CosmeticShop\\uploads";
         File dir = new File(uploadPath);
         if (!dir.exists()) {
             dir.mkdirs();
@@ -213,7 +270,8 @@ public class ProductController extends HttpServlet {
             throw ex;
         }
 
-        String contextRelativeUrl = uploadDirRelative + "/" + newFileName;
+        // Trả về đường dẫn tương đối để hiển thị ảnh
+        String contextRelativeUrl = "/uploads/" + newFileName;
         return contextRelativeUrl.replace("\\", "/");
     }
 }

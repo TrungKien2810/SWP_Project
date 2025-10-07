@@ -5,12 +5,10 @@
 package DAO;
 
 import Model.user;
-import jakarta.enterprise.concurrent.Asynchronous;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
 
 /**
  *
@@ -28,7 +26,10 @@ public class UserDB {
             stmt.setString(1, email);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                return new user(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getObject("created_at", java.time.LocalDateTime.class), rs.getString(7));
+
+                return new user(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5),
+                        rs.getString("role"), rs.getTimestamp("created_at").toLocalDateTime());
+
             }
         } catch (SQLException e) {
 
@@ -40,47 +41,101 @@ public class UserDB {
     }
 
     public boolean signup(String username, String email, String password) {
-        String sql = "insert into Users(full_name, email, password) values (?, ?, ?)";
+        String sql = "insert into Users(full_name, email, password, role) values (?, ?, ?, ?)";
         try {
             user check = getUserByEmail(email);
-            if(check!=null){
+            if (check != null) {
                 return false;
             }
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, username);
             stmt.setString(2, email);
             stmt.setString(3, password);
-            if(stmt.executeUpdate()>0){
-                return true;
-            }
+            stmt.setString(4, "USER"); // Mặc định role là "USER"
+            return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
-        return false;
     }
-    public boolean login(String email, String password){
+
+    public boolean login(String email, String password) {
         user check = getUserByEmail(email);
-        if(check == null){
+        if (check == null) {
             return false;
-        }
-        else{
+        } else {
             String sql = "select * from Users where email = ?";
-            try{
+            try {
                 PreparedStatement stmt = conn.prepareStatement(sql);
                 stmt.setString(1, email);
                 ResultSet rs = stmt.executeQuery();
-                if(rs.next()){
-                    if(rs.getString("password").equals(password)){
+                if (rs.next()) {
+                    if (rs.getString("password").equals(password)) {
                         return true;
-                    }
-                    else{
+                    } else {
                         return false;
                     }
                 }
-            }catch(SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
+            return false;
+        }
+    }
+
+
+    public boolean setResetToken(String email, String token, java.sql.Timestamp expiresAt) {
+        String sql = "update Users set reset_token = ?, reset_token_expiry = ? where email = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, token);
+            ps.setTimestamp(2, expiresAt);
+            ps.setString(3, email);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public user getUserByResetToken(String token) {
+        String sql = "select * from Users where reset_token = ? and reset_token_expiry > GETDATE()";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, token);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return new user(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5),
+                        rs.getString("role"), rs.getTimestamp("created_at").toLocalDateTime());
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public boolean updatePasswordByToken(String token, String newPassword) {
+        String sql = "update Users set password = ?, reset_token = NULL, reset_token_expiry = NULL where reset_token = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, newPassword);
+            ps.setString(2, token);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updatePassword(String email, String newPassword) {
+        String sql = "update Users set password = ? where email = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, newPassword);
+            ps.setString(2, email);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
             return false;
         }
     }
