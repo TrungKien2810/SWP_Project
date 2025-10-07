@@ -1,0 +1,261 @@
+<%@page import="Model.user"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-…" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>PinkyCloud - Quản lý tài khoản</title>
+    <style>
+        .account-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .account-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        .account-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .account-header h2 {
+            color: #f76c85;
+            margin-bottom: 10px;
+        }
+        .account-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .account-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #f76c85;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            margin-right: 20px;
+        }
+        .account-details h4 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .account-details p {
+            color: #666;
+            margin: 0;
+        }
+        .account-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .action-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .action-card:hover {
+            border-color: #f76c85;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(247, 108, 133, 0.2);
+        }
+        .action-icon {
+            font-size: 2.5rem;
+            color: #f76c85;
+            margin-bottom: 15px;
+        }
+        .action-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .action-description {
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- header -->
+    <div class="header">
+        <div class="header_text"><p>THEO DÕI CHÚNG TÔI</p></div>
+        <div class="header_social">
+            <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/fb.png" alt="" ></a>
+            <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/ins.png" alt=""></a>
+            <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/tt.png"alt=""><a>
+            <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/ytb.png" alt="" ></a>
+        </div>
+    </div>
+    
+    <!-- menu -->
+    <div class="menu">
+        <div class="menu_logo">
+            <img src="${pageContext.request.contextPath}/IMG/logo.jpg" alt="" style="width: 230px;">
+        </div>
+        <div class="menu_list">
+            <ul class="menu_list_item">
+                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/home.jsp">TRANG CHỦ</a></li>
+                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/vechungtoi.jsp">VỀ CHÚNG TÔI</a></li>
+                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/products">BỘ SƯU TẬP</a></li>
+                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/lienhe.jsp">LIÊN HỆ</a></li>
+            </ul>
+            <div class="menu_search">
+                <div class="menu_search_input">
+                    <input type="text" placeholder="Nhập từ khóa bạn cần tìm kiếm . . . ">
+                </div>
+                <div class="menu_search_icon">
+                    <a href=""><i class="fa-solid fa-magnifying-glass fa-xl" style="color: #f76c85;"></i></a>
+                </div>
+            </div>
+            <div class="menu_search_cart">
+                <i class="fa-solid fa-cart-shopping cart-icon"></i>
+                <!-- Tài khoản -->
+                <c:if test="${!empty sessionScope.user}">
+                    <div class="account-menu">
+                        <i class="fas fa-user-circle account-icon"></i>
+                        <c:if test="${not empty sessionScope.user}">
+                            <div class="account-dropdown">
+                                <p class="welcome-text">Welcome, ${sessionScope.user.username}</p>
+                                <a href="${pageContext.request.contextPath}/account-management">Quản lý tài khoản</a>
+                                <a href="${pageContext.request.contextPath}/cart">My Cart</a>
+                                <a href="${pageContext.request.contextPath}/logout">Log Out</a>
+                            </div>
+                        </c:if>
+                    </div>
+                </c:if> 
+            </div>
+        </div>    
+    </div>
+
+    <!-- Phần Quản lý tài khoản -->
+    <div class="account-container">
+        <div class="account-card">
+            <div class="account-header">
+                <h2>Quản lý tài khoản</h2>
+                <p>Quản lý thông tin và cài đặt tài khoản của bạn</p>
+            </div>
+
+            <div class="account-info">
+                <div class="account-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="account-details">
+                    <h4>${sessionScope.user.username}</h4>
+                    <p>${sessionScope.user.email}</p>
+                    <p>Vai trò: ${sessionScope.user.role}</p>
+                </div>
+            </div>
+
+            <div class="account-actions">
+                <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/change-password'">
+                    <div class="action-icon">
+                        <i class="fas fa-key"></i>
+                    </div>
+                    <div class="action-title">Đổi mật khẩu</div>
+                    <div class="action-description">Thay đổi mật khẩu tài khoản của bạn</div>
+                </div>
+
+                <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/cart'">
+                    <div class="action-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="action-title">Giỏ hàng</div>
+                    <div class="action-description">Xem và quản lý giỏ hàng của bạn</div>
+                </div>
+
+                <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/View/forgot-password.jsp'">
+                    <div class="action-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="action-title">Quên mật khẩu</div>
+                    <div class="action-description">Khôi phục mật khẩu qua email</div>
+                </div>
+
+                <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/logout'">
+                    <div class="action-icon">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </div>
+                    <div class="action-title">Đăng xuất</div>
+                    <div class="action-description">Thoát khỏi tài khoản hiện tại</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-white py-4 w-100" style="background-color:#f76c85;">
+        <div class="container-fluid text-center">
+            <div class="row">
+                <div class="col-md-3">
+                    <h5 class="fw-bold">PINKYCLOUD OFFICE</h5>
+                    <p>Địa chỉ: Số 31, đường Nguyễn Thị Minh Khai, Phường Quy Nhơn, Gia Lai</p>
+                    <p>Mail: <a href="mailto:pinkycloudvietnam@gmail.com" class="text-white">pinkycloudvietnam@gmail.com</a></p>
+                    <p>Website: <a href="${pageContext.request.contextPath}/View/home.jsp" class="text-white">www.pinkycloud.vn</a></p>
+                </div>
+                <div class="col-md-3">
+                    <h5 class="fw-bold">DANH MỤC</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Sức khỏe và làm đẹp</a></li>
+                        <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Chăm sóc cơ thể</a></li>
+                        <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Chăm sóc da mặt</a></li>
+                        <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Chăm sóc tóc</a></li>
+                        <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Clinic & Spa</a></li>
+                        <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Trang điểm</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5 class="fw-bold">CHÍNH SÁCH HỖ TRỢ</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-white text-decoration-none">Hỗ trợ đặt hàng</a></li>
+                        <li><a href="#" class="text-white text-decoration-none">Chính sách trả hàng</a></li>
+                        <li><a href="#" class="text-white text-decoration-none">Chính sách bảo hành</a></li>
+                        <li><a href="#" class="text-white text-decoration-none">Chính sách người dùng</a></li>
+                        <li><a href="#" class="text-white text-decoration-none">Chính sách mua hàng</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5 class="fw-bold">THEO DÕI CHÚNG TÔI</h5>
+                    <div class="d-flex info">
+                        <a href="" class="me-3"><img src="${pageContext.request.contextPath}/IMG/fbf.png" alt="Facebook" width="32"></a>
+                        <a href="#" class="me-3"><img src="${pageContext.request.contextPath}/IMG/linkedin-54890.png" alt="instagram" width="32"></a>
+                        <a href="" class="me-3"><img src="${pageContext.request.contextPath}/IMG/tiktok-56510.png" alt="LinkedIn" width="32"></a>
+                        <a href="#" class="me-3"><img src="${pageContext.request.contextPath}/IMG/youtube-11341.png" alt="YouTube" width="32"></a>
+                        <a href="#" class="me-3"><img src="${pageContext.request.contextPath}/IMG/twitter.png" alt="Twitter" width="32"></a>
+                    </div>
+                    <div class="mt-2">
+                        <img src="${pageContext.request.contextPath}/IMG/bocongthuong.png" alt="Bộ Công Thương" width="120">
+                    </div>
+                </div>
+            </div>
+            <hr class="border-white my-3">
+            <div class="text-center">
+                <p class="mb-0">2023 Copyright PinkyCloud.vn - Sản phẩm chăm sóc da, Mỹ phẩm trang điểm, Mỹ phẩm chính hãng</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

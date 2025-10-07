@@ -33,11 +33,11 @@
                             </div>
                             <div class="menu_list">
                                 <ul class="menu_list_item">
-                                    <li><a class="menu_list_link" href="${pageContext.request.contextPath}/HTML/home.html">TRANG CHỦ</a></li>
-                                    <li><a class="menu_list_link" href="${pageContext.request.contextPath}/HTML/vechungtoi.html">VỀ CHÚNG TÔI</a></li>
-                                    <li><a class="menu_list_link" href="${pageContext.request.contextPath}/HTML/bosuutap.html">BỘ SƯU TẬP</a></li>
-                                    <li><a class="menu_list_link" href="${pageContext.request.contextPath}/HTML/register.html">ĐĂNG NHẬP & ĐĂNG KÝ</a></li>
-                                    <li><a class="menu_list_link" href="${pageContext.request.contextPath}/HTML/lienhe.html">LIÊN HỆ</a></li>
+                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/home.jsp">TRANG CHỦ</a></li>
+                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/vechungtoi.jsp">VỀ CHÚNG TÔI</a></li>
+                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/products">BỘ SƯU TẬP</a></li>
+                                    <li><a class="menu_list_link" href="${pageContext.request.contextPath}/signup">ĐĂNG NHẬP & ĐĂNG KÝ</a></li>
+                                    <li><a class="menu_list_link" href="${pageContext.request.contextPath}/HTML/lienhe.jsp">LIÊN HỆ</a></li>
                                 </ul>
                                 <div class="menu_search">
                                     <div class="menu_search_input">
@@ -98,7 +98,7 @@
                                             </div>
                                             <div class="mb-3">
                                                 <label for="password" class="form-label">Mật khẩu</label>
-                                                <input type="text" class="form-control" name="password" id="password" placeholder="Mật khẩu" value="<%=savedPass%>">
+                                                <input type="password" class="form-control" name="password" id="password" placeholder="Mật khẩu" value="<%=savedPass%>">
                                             </div>
 
                                             <div class="mb-3 form-check">
@@ -115,6 +115,7 @@
                                             </div>
                                         </form>
                                         <p class="terms mt-3">Bằng cách nhấn vào "Đăng nhập ngay!", bạn đã đồng ý với <a href="#">Điều khoản dịch vụ</a> | <a href="#">Chính sách bảo mật</a></p>
+                                        <a class="d-block mt-2" href="${pageContext.request.contextPath}/View/forgot-password.jsp">Quên mật khẩu?</a>
                                         <%
                                             if (request.getAttribute("error") != null) {
                                                 String error = (String) request.getAttribute("error");
@@ -123,6 +124,18 @@
                                         <%
                                             }
                                         %>
+                                        <%
+    String msg = request.getParameter("msg");
+    if (msg == null) {
+        msg = (String) request.getAttribute("msg");
+    }
+    if (msg != null) {
+%>
+<h5 style="color: green"><%=msg%></h5>
+<%
+    }
+%>
+
                                     </div>
                                 </div>
                             </div>

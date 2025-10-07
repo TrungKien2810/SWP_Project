@@ -12,7 +12,7 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
       integrity="sha512-…"
       crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <script src="${pageContext.request.contextPath}/JS/home.js"></script>
+        <script src="${pageContext.request.contextPath}/Js/home.js"></script>
         <title>Pinky Cloud</title>
     </head>
     <body>
@@ -41,6 +41,9 @@
                                                 ĐĂNG NHẬP & ĐĂNG KÝ
                                             </a></li>
                                         </c:if>
+                                        <c:if test="${not empty sessionScope.user && sessionScope.user.role == 'ADMIN'}">
+                                        <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/products?action=manage">QUẢN LÝ SẢN PHẨM</a></li>
+                                        </c:if>
                                     <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/lienhe.jsp">LIÊN HỆ</a></li>
                                 </ul>
                                 <div class="menu_search">
@@ -54,24 +57,26 @@
                                 <div class="menu_search_cart">
                                     <i class="fa-solid fa-cart-shopping cart-icon"></i>
                                     <!-- Tài khoản -->
-                                    <div class="account-menu">
+                                    <c:if test="${!empty sessionScope.user}">
+                                        <div class="account-menu">
                                         <i class="fas fa-user-circle account-icon"></i>
                                         <c:if test="${not empty sessionScope.user}">
                                             <div class="account-dropdown">
                                                 <p class="welcome-text">Welcome, ${sessionScope.user.username}</p>
-                                                <a href="${pageContext.request.contextPath}/View/account.jsp">Account Setting</a>
+                                                <a href="${pageContext.request.contextPath}/account-management">Quản lý tài khoản</a>
                                                 <a href="${pageContext.request.contextPath}/cart">My Cart</a>
                                                 <a href="${pageContext.request.contextPath}/logout">Log Out</a>
                                             </div>
                                         </c:if>
                                     </div>
+                                    </c:if> 
                                 </div>
                             </div>    
                         </div>
 
                         <!-- MODAL LOGIN -->
                         <!-- Modal Đăng Nhập -->
-                        <%-- <div class="modal" id="loginModal">
+                        <!--<div class="modal" id="loginModal">
                             <div class="modal-content">
                                 <span class="close">&times;</span>
                                 <h2>Đăng nhập</h2>
@@ -88,7 +93,7 @@
                                 </form>
                                 <p>Chưa có tài khoản? <a href="#" id="showRegister">Đăng ký ngay</a></p>
                             </div>
-                        </div>
+                        </div> -->
 
 <!-- Modal Đăng Ký -->
 <div class="modal" id="registerModal">
@@ -113,7 +118,7 @@
         <p>Đã có tài khoản? <a href="#" id="showLogin">Đăng nhập</a></p>
     </div>
 </div>
-                        --%>
+                    
                         <div id="carouselExample" class="carousel slide mt-3" data-bs-ride="carousel" data-bs-interval="2000">
                             <div class="carousel-inner">
                                 <div class="carousel-item active">
@@ -273,12 +278,12 @@
                                     <div class="col-md-3">
                                         <h5 class="fw-bold">DANH MỤC</h5>
                                         <ul class="list-unstyled">
-                                            <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Sức khỏe và làm đẹp</a></li>
-                                            <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Chăm sóc cơ thể</a></li>
-                                            <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Chăm sóc da mặt</a></li>
-                                            <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Chăm sóc tóc</a></li>
-                                            <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Clinic & Spa</a></li>
-                                            <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Trang điểm</a></li>
+                                            <li><a href="${pageContext.request.contextPath}/products" class="text-white text-decoration-none">Sức khỏe và làm đẹp</a></li>
+                                            <li><a href="${pageContext.request.contextPath}/products" class="text-white text-decoration-none">Chăm sóc cơ thể</a></li>
+                                            <li><a href="${pageContext.request.contextPath}/products" class="text-white text-decoration-none">Chăm sóc da mặt</a></li>
+                                            <li><a href="${pageContext.request.contextPath}/products" class="text-white text-decoration-none">Chăm sóc tóc</a></li>
+                                            <li><a href="${pageContext.request.contextPath}/products" class="text-white text-decoration-none">Clinic & Spa</a></li>
+                                            <li><a href="${pageContext.request.contextPath}/products" class="text-white text-decoration-none">Trang điểm</a></li>
                                         </ul>
                                     </div>
                                     <div class="col-md-3">
@@ -312,20 +317,6 @@
                             </div>
                         </footer>
                         <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
-                        <script>
-                        document.addEventListener('click', function(e) {
-                            const menu = document.querySelector('.account-menu');
-                            if (!menu) return;
-                            const dropdown = menu.querySelector('.account-dropdown');
-                            if (!dropdown) return;
-
-                            if (menu.contains(e.target)) {
-                                const isShown = dropdown.style.display === 'block';
-                                dropdown.style.display = isShown ? 'none' : 'block';
-                            } else {
-                                dropdown.style.display = 'none';
-                            }
-                        });
-                        </script>
+                    
                         </body>
                         </html>

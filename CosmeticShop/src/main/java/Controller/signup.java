@@ -60,6 +60,7 @@ public class signup extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.getRequestDispatcher("/View/register.jsp").forward(request, response);
+        return;
     }
 
     /**
@@ -82,21 +83,30 @@ public class signup extends HttpServlet {
         if (email == null || !email.matches("^[A-Za-z0-9._%+-]+@gmail\\.com$")) {
             request.setAttribute("error", "Email must be a valid Gmail address");
             request.getRequestDispatcher("/View/register.jsp").forward(request, response);
+            return;
         }
         if(email.equals("") || password.equals("") || username.equals("") || cp.equals("")){
             request.setAttribute("error", "Không thể để trống thông tin");
             request.getRequestDispatcher("/View/register.jsp").forward(request, response);
+            return;
+
         }
         if (!cp.equals(password)) {
             request.setAttribute("error", "Confirm password is invalid");
             request.getRequestDispatcher("/View/register.jsp").forward(request, response);
+            return;
+
         }
         if (ud.signup(username, email, password)) {
             session.setAttribute("user", ud.getUserByEmail(email));
             request.getRequestDispatcher("/View/home.jsp").forward(request, response);
+            return;
+
         } else {
             request.setAttribute("error", "email is duplicate, please enter another email");
             request.getRequestDispatcher("/View/register.jsp").forward(request, response);
+            return;
+
         }
     }
 
