@@ -34,80 +34,83 @@ public class addToCart extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-      
-
+       response.setContentType("text/html;charset=UTF-8");
         HttpSession session = request.getSession();
 
-        // ✅ Lấy tham số từ request
-        String idStr = request.getParameter("id");
-        String name = request.getParameter("name");
-        String priceStr = request.getParameter("price");
-        String stockStr = request.getParameter("stock");
-        String description = request.getParameter("description");
-        String imageUrl = request.getParameter("imageUrl");
-        String categoryIdStr = request.getParameter("categoryId");
-
-        // ✅ Nếu thiếu tham số → báo lỗi nhẹ nhàng
-        if (idStr == null || name == null || priceStr == null || imageUrl == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Thiếu tham số sản phẩm khi thêm vào giỏ hàng!");
-            return;
-        }
-
-        // ✅ Parse dữ liệu
-        int id = Integer.parseInt(idStr);
-        double price = Double.parseDouble(priceStr);
-        int stock = (stockStr != null && !stockStr.isEmpty()) ? Integer.parseInt(stockStr) : 1;
-        int categoryId = (categoryIdStr != null && !categoryIdStr.isEmpty()) ? Integer.parseInt(categoryIdStr) : 0;
-
-        // ✅ Tạo đối tượng Product
-        Product p = new Product(id, name, price, stock, description, imageUrl, categoryId);
-
-        // ✅ Lấy giỏ hàng từ session
+        // Lấy giỏ hàng từ session
         Map<Product, Integer> cart = (Map<Product, Integer>) session.getAttribute("cart");
         if (cart == null) {
             cart = new HashMap<>();
+            session.setAttribute("cart", cart);
         }
 
-        // ✅ Kiểm tra nếu sản phẩm đã có → tăng số lượng
-        boolean found = false;
-        for (Product existing : cart.keySet()) {
-            if (existing.getProductId() == p.getProductId()) {
-                cart.put(existing, cart.get(existing) + 1);
-                found = true;
-                break;
+        // Thao tác trên giỏ hàng: add/update/remove
+        String action = request.getParameter("action");
+        if (action != null) {
+            switch (action) {
+                case "update":
+                    int updateId = Integer.parseInt(request.getParameter("id"));
+                    int quantity = Integer.parseInt(request.getParameter("quantity"));
+                    for (Product p : cart.keySet()) {
+                        if (p.getProductId() == updateId) {
+                            cart.put(p, quantity);
+                            break;
+                        }
+                    }
+                    break;
+
+                case "remove":
+                    int removeId = Integer.parseInt(request.getParameter("id"));
+                    Product removeProduct = null;
+                    for (Product p : cart.keySet()) {
+                        if (p.getProductId() == removeId) {
+                            removeProduct = p;
+                            break;
+                        }
+                    }
+                    if (removeProduct != null) cart.remove(removeProduct);
+                    break;
             }
         }
 
-        // ✅ Nếu chưa có sản phẩm trong giỏ
-        if (!found) {
-            cart.put(p, 1);
+        // Lấy các sản phẩm được chọn để tính tổng
+        String[] selectedIds = request.getParameterValues("selectedItems");
+        double cartTotalSelected = 0;
+        if (selectedIds != null) {
+            for (String idStr : selectedIds) {
+                int id = Integer.parseInt(idStr);
+                for (Map.Entry<Product, Integer> entry : cart.entrySet()) {
+                    if (entry.getKey().getProductId() == id) {
+                        cartTotalSelected += entry.getKey().getPrice() * entry.getValue();
+                    }
+                }
+            }
         }
 
-        // ✅ Tính toán tổng tiền
-        double subtotal = 0;
-        for (Map.Entry<Product, Integer> entry : cart.entrySet()) {
-            subtotal += entry.getKey().getPrice() * entry.getValue();
-        }
-        double shipping = (subtotal > 0) ? 30000 : 0;
+        // Áp dụng mã giảm giá nếu có
+        String promoCode = request.getParameter("promoCode");
         double discount = 0;
-        double total = subtotal + shipping - discount;
+        if (promoCode != null && !promoCode.isEmpty()) {
+            if (promoCode.equalsIgnoreCase("PINKY10")) {
+                discount = cartTotalSelected * 0.1; // giảm 10%
+            }
+            // Thêm các mã khác ở đây
+        }
 
-        // ✅ Lưu lại giỏ hàng vào session
-        session.setAttribute("cart", cart);
+        double shipping = (cartTotalSelected > 0) ? 30000 : 0;
+        double total = cartTotalSelected + shipping - discount;
 
-        // ✅ Truyền dữ liệu sang JSP
-        request.setAttribute("subtotal", subtotal);
+        // Gửi dữ liệu sang JSP
+        request.setAttribute("cart", cart);
+        request.setAttribute("cartTotalSelected", cartTotalSelected);
         request.setAttribute("shipping", shipping);
         request.setAttribute("discount", discount);
         request.setAttribute("total", total);
-        request.setAttribute("cart", cart);
+        request.setAttribute("selectedIds", selectedIds);
+        request.setAttribute("promoCode", promoCode);
 
-        // ✅ Chuyển sang trang giỏ hàng
         request.getRequestDispatcher("View/cart.jsp").forward(request, response);
     }
-
-
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
