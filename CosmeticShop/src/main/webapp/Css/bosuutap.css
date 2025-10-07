@@ -649,4 +649,6 @@
             font-size: 1.1rem;
         }
 
-  
+        body > main > div.row > div.col-lg-9.col-md-8 > div.no-results > a > i{
+            display: none;
+        }
