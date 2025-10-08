@@ -85,7 +85,7 @@ public class login extends HttpServlet {
                 Cookie cPass = new Cookie("password", password);
                 cEmail.setMaxAge(7 * 24 * 60 * 60);
                 cPass.setMaxAge(7 * 24 * 60 * 60);
-                // Tùy chọn bảo mật
+
                 cEmail.setHttpOnly(true);
                 cPass.setHttpOnly(true);
 
@@ -93,7 +93,7 @@ public class login extends HttpServlet {
                 response.addCookie(cPass);
             }
         if (!email.matches("^[A-Za-z0-9._%+-]+@gmail\\.com$")) {
-            request.setAttribute("error", "Email must be a valid Gmail address");
+            request.setAttribute("error", "Sai cú pháp email");
             request.getRequestDispatcher("/View/log.jsp").forward(request, response);
             return;
         }
@@ -104,7 +104,7 @@ public class login extends HttpServlet {
 
         }
         if (ud.getUserByEmail(email) == null) {
-            request.setAttribute("error", "account is not exist, you aren't sign up?");
+            request.setAttribute("error", "Tài khoản không tồn tại, bạn đã đăng ký chưa?");
             request.getRequestDispatcher("/View/log.jsp").forward(request, response);
             return;
 
@@ -115,7 +115,7 @@ public class login extends HttpServlet {
             return;
 
         } else {
-            request.setAttribute("error", "Email or password is invalid, please try again");
+            request.setAttribute("error", "Email hoặc mật khẩu không đúng");
             request.getRequestDispatcher("/View/log.jsp").forward(request, response);
             return;
 

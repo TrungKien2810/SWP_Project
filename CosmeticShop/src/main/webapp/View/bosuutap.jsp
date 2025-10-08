@@ -315,7 +315,7 @@
                                                 <p>Hãy thử tìm kiếm với từ khóa khác hoặc điều chỉnh bộ lọc của bạn.</p>
                                                 <a href="${pageContext.request.contextPath}/products"
                                                     class="btn btn-primary mt-3">
-                                                    <i class="fas fa-refresh"></i> Xem tất cả sản phẩm
+                                                     Xem tất cả sản phẩm
                                                 </a>
                                             </div>
                                         </c:when>
@@ -323,7 +323,7 @@
                                             <div class="product-grid" id="productGrid">
                                                 <c:forEach var="product" items="${productList}">
                                                     <div class="product-card"
-                                                        onclick="window.location.href='${pageContext.request.contextPath}/product-detail?id=${product.productId}'"
+                                                        onclick="window.location.href='${pageContext.request.contextPath}/addToCart?id=${product.productId}'"
                                                         style="cursor: pointer;">
                                                         <img src="${pageContext.request.contextPath}${product.imageUrl}"
                                                             alt="${product.name}" loading="lazy">
