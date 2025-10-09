@@ -45,7 +45,6 @@
 </div>
 
 <%
-    // Tạo dữ liệu tĩnh test giỏ hàng
     class TestProduct {
         String name, image;
         int price, quantity;
@@ -64,117 +63,140 @@
 <div class="cart-page container mt-5">
     <h2 class="text-center mb-4">GIỎ HÀNG CỦA BẠN</h2>
 
-    <div class="cart-content row">
-        <!-- DANH SÁCH SẢN PHẨM -->
-        <div class="cart-items col-md-8">
-            <% for(TestProduct p : cartItems) { %>
-            <div class="cart-item d-flex align-items-center mb-4 p-3 border rounded shadow-sm">
-                <input type="checkbox" class="cart-item-checkbox me-2" checked
-                       data-price="<%=p.price%>" data-quantity="<%=p.quantity%>">
-                <img src="${pageContext.request.contextPath}/IMG/<%=p.image%>"
-                     alt="<%=p.name%>" class="me-3" style="width:100px; height:100px; object-fit:cover;">
-                <div class="item-info flex-grow-1">
-                    <h5><%=p.name%></h5>
-                    <p class="item-price"><%=p.price%>₫ x <span class="item-qty"><%=p.quantity%></span></p>
-                    <input type="number" value="<%=p.quantity%>" min="1" class="form-control w-25 text-center quantity-input">
+    <div id="cartContent">
+        <% if(cartItems.isEmpty()) { %>
+            <div class="text-center my-5">
+                <h4>Giỏ hàng của bạn trống</h4>
+                <a href="${pageContext.request.contextPath}/products" class="btn btn-primary mt-3">Thêm sản phẩm</a>
+            </div>
+        <% } else { %>
+            <div class="cart-content row">
+                <!-- DANH SÁCH SẢN PHẨM -->
+                <div class="cart-items col-md-8">
+                    <% for(TestProduct p : cartItems) { %>
+                    <div class="cart-item d-flex align-items-center mb-4 p-3 border rounded shadow-sm">
+                        <input type="checkbox" class="cart-item-checkbox me-2" checked
+                               data-price="<%=p.price%>" data-quantity="<%=p.quantity%>">
+                        <img src="${pageContext.request.contextPath}/IMG/<%=p.image%>"
+                             alt="<%=p.name%>" class="me-3" style="width:100px; height:100px; object-fit:cover;">
+                        <div class="item-info flex-grow-1">
+                            <h5><%=p.name%></h5>
+                            <p class="item-price"><%=p.price%>₫ x <span class="item-qty"><%=p.quantity%></span></p>
+                            <input type="number" value="<%=p.quantity%>" min="1" class="form-control w-25 text-center quantity-input">
+                        </div>
+                        <div class="item-total ms-3">
+                            <p class="fw-bold item-total-text"><%=p.price * p.quantity%>₫</p>
+                            <button class="btn btn-sm btn-outline-danger mt-2 delete-btn">Xóa</button>
+                        </div>
+                    </div>
+                    <% } %>
                 </div>
-                <div class="item-total ms-3">
-                    <p class="fw-bold item-total-text"><%=p.price * p.quantity%>₫</p>
+
+                <!-- CART SUMMARY -->
+                <div class="col-md-4 cart-summary bg-light p-4 rounded shadow-sm">
+                    <h4 class="fw-bold mb-3">Tổng cộng</h4>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Tạm tính:</span>
+                        <span id="subtotalDisplay">0₫</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Phí vận chuyển:</span>
+                        <span>Miễn phí</span>
+                    </div>
+                    <hr>
+
+                    <div class="mb-3">
+                        <form id="promoForm" class="d-flex">
+                            <input type="text" id="promoCodeInput" class="form-control me-2" placeholder="Nhập mã khuyến mãi">
+                            <button type="submit" class="btn btn-outline-danger">Áp dụng</button>
+                        </form>
+                        <small id="promoDisplay" class="text-success" style="display:none;"></small>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="fw-bold">Tổng thanh toán:</span>
+                        <strong style="color:#f76c85;" id="totalDisplay">0₫</strong>
+                    </div>
+
+                    <a href="${pageContext.request.contextPath}/checkout" class="btn btn-danger w-100 fw-bold">THANH TOÁN NGAY</a>
                 </div>
             </div>
-            <% } %>
-        </div>
-
-        <!-- CART SUMMARY -->
-        <div class="col-md-4 cart-summary bg-light p-4 rounded shadow-sm">
-            <h4 class="fw-bold mb-3">Tổng cộng</h4>
-            <div class="d-flex justify-content-between mb-2">
-                <span>Tạm tính:</span>
-                <span id="subtotalDisplay">0₫</span>
-            </div>
-            <div class="d-flex justify-content-between mb-2">
-                <span>Phí vận chuyển:</span>
-                <span>Miễn phí</span>
-            </div>
-            <hr>
-
-            <!-- Mã giảm giá -->
-            <div class="mb-3">
-                <form id="promoForm" class="d-flex">
-                    <input type="text" id="promoCodeInput" class="form-control me-2" placeholder="Nhập mã khuyến mãi">
-                    <button type="submit" class="btn btn-outline-danger">Áp dụng</button>
-                </form>
-                <small id="promoDisplay" class="text-success" style="display:none;"></small>
-            </div>
-
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="fw-bold">Tổng thanh toán:</span>
-                <strong style="color:#f76c85;" id="totalDisplay">0₫</strong>
-            </div>
-
-            <a href="${pageContext.request.contextPath}/checkout" class="btn btn-danger w-100 fw-bold">THANH TOÁN NGAY</a>
-        </div>
+        <% } %>
     </div>
 </div>
 
 <script>
-    const checkboxes = document.querySelectorAll('.cart-item-checkbox');
-    const quantityInputs = document.querySelectorAll('.quantity-input');
-    const subtotalDisplay = document.getElementById('subtotalDisplay');
-    const totalDisplay = document.getElementById('totalDisplay');
+    function updateCartUI() {
+        const cartItems = document.querySelectorAll('.cart-item');
+        const cartContentDiv = document.getElementById('cartContent');
+
+        if (cartItems.length === 0) {
+            cartContentDiv.innerHTML = `
+                <div class="text-center my-5">
+                    <h4>Giỏ hàng của bạn đang trống</h4>
+                    <a href="${pageContext.request.contextPath}/products" class="btn btn-primary mt-3">Thêm sản phẩm mới</a>
+                </div>`;
+        }
+    }
 
     function updateTotal() {
         let subtotal = 0;
-        quantityInputs.forEach(input => {
-            const cartItem = input.closest('.cart-item');
-            const price = parseInt(cartItem.querySelector('.cart-item-checkbox').dataset.price);
-            const qty = parseInt(input.value);
-
-            // Cập nhật dataset
-            cartItem.querySelector('.cart-item-checkbox').dataset.quantity = qty;
-
-            // Cập nhật hiển thị số lượng và giá từng sản phẩm
-            cartItem.querySelector('.item-qty').textContent = qty;
-            cartItem.querySelector('.item-total-text').textContent = (price * qty).toLocaleString() + '₫';
-
-            if (cartItem.querySelector('.cart-item-checkbox').checked) {
+        document.querySelectorAll('.cart-item').forEach(item => {
+            const price = parseInt(item.querySelector('.cart-item-checkbox').dataset.price);
+            const qty = parseInt(item.querySelector('.quantity-input').value);
+            item.querySelector('.cart-item-checkbox').dataset.quantity = qty;
+            item.querySelector('.item-qty').textContent = qty;
+            item.querySelector('.item-total-text').textContent = (price * qty).toLocaleString() + '₫';
+            if (item.querySelector('.cart-item-checkbox').checked) {
                 subtotal += price * qty;
             }
         });
-        subtotalDisplay.textContent = subtotal.toLocaleString() + '₫';
-        totalDisplay.textContent = subtotal.toLocaleString() + '₫';
+        const subtotalDisplay = document.getElementById('subtotalDisplay');
+        const totalDisplay = document.getElementById('totalDisplay');
+        if(subtotalDisplay) subtotalDisplay.textContent = subtotal.toLocaleString() + '₫';
+        if(totalDisplay) totalDisplay.textContent = subtotal.toLocaleString() + '₫';
     }
 
-    // Event change checkbox hoặc số lượng
-    checkboxes.forEach(cb => cb.addEventListener('change', updateTotal));
-    quantityInputs.forEach(input => input.addEventListener('input', updateTotal));
+    // Event checkbox & quantity input
+    document.querySelectorAll('.quantity-input').forEach(input => input.addEventListener('input', updateTotal));
+    document.querySelectorAll('.cart-item-checkbox').forEach(cb => cb.addEventListener('change', updateTotal));
 
-    updateTotal(); // chạy khi load
+    // Event nút xóa
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            this.closest('.cart-item').remove();
+            updateTotal();
+            updateCartUI();
+        });
+    });
+
+    updateTotal();
 
     // Mã giảm giá
     const promoForm = document.getElementById('promoForm');
-    promoForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const code = document.getElementById('promoCodeInput').value.trim();
-        let discount = 0;
-        if (code === "GIAM10") discount = 10000; // ví dụ
-        document.getElementById('promoDisplay').textContent = "Mã giảm giá áp dụng: -" + discount.toLocaleString() + "₫";
-        document.getElementById('promoDisplay').style.display = 'inline';
+    if(promoForm) {
+        promoForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const code = document.getElementById('promoCodeInput').value.trim();
+            let discount = 0;
+            if (code === "GIAM10") discount = 10000;
+            document.getElementById('promoDisplay').textContent = "Mã giảm giá áp dụng: -" + discount.toLocaleString() + "₫";
+            document.getElementById('promoDisplay').style.display = 'inline';
 
-        let subtotal = 0;
-        quantityInputs.forEach(input => {
-            const cartItem = input.closest('.cart-item');
-            const price = parseInt(cartItem.querySelector('.cart-item-checkbox').dataset.price);
-            const qty = parseInt(input.value);
-            if (cartItem.querySelector('.cart-item-checkbox').checked) subtotal += price * qty;
+            let subtotal = 0;
+            document.querySelectorAll('.cart-item').forEach(item => {
+                const price = parseInt(item.querySelector('.cart-item-checkbox').dataset.price);
+                const qty = parseInt(item.querySelector('.quantity-input').value);
+                if (item.querySelector('.cart-item-checkbox').checked) subtotal += price * qty;
+            });
+            document.getElementById('totalDisplay').textContent = (subtotal - discount).toLocaleString() + '₫';
         });
-        totalDisplay.textContent = (subtotal - discount).toLocaleString() + '₫';
-    });
+    }
 </script>
 
 <!-- ===== FOOTER ===== -->
 <footer class="text-white py-4 w-100 mt-5" style="background-color:#f76c85;">
-    <!-- footer nguyên bản giữ nguyên -->
+    <!-- footer giữ nguyên -->
     <div class="container-fluid text-center">
         <div class="row">
             <div class="col-md-3">
