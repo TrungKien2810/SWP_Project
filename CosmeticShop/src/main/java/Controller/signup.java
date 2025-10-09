@@ -60,6 +60,7 @@ public class signup extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.getRequestDispatcher("/View/register.jsp").forward(request, response);
+        return;
     }
 
     /**

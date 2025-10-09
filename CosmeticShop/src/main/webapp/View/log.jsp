@@ -14,7 +14,6 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/log.css">
         <script src="${pageContext.request.contextPath}/JS/home.js"></script>
         <title>PinkyCloud - Đăng Nhập</title>
-        <script src="https://accounts.google.com/gsi/client" async defer></script>
     </head>
     <body>
         <!-- header -->
@@ -34,11 +33,11 @@
                             </div>
                             <div class="menu_list">
                                 <ul class="menu_list_item">
-                                    <li><a class="menu_list_link" href="${pageContext.request.contextPath}/HTML/home.html">TRANG CHỦ</a></li>
-                                    <li><a class="menu_list_link" href="${pageContext.request.contextPath}/HTML/vechungtoi.html">VỀ CHÚNG TÔI</a></li>
-                                    <li><a class="menu_list_link" href="${pageContext.request.contextPath}/HTML/bosuutap.html">BỘ SƯU TẬP</a></li>
-                                    <li><a class="menu_list_link" href="${pageContext.request.contextPath}/HTML/register.html">ĐĂNG NHẬP & ĐĂNG KÝ</a></li>
-                                    <li><a class="menu_list_link" href="${pageContext.request.contextPath}/HTML/lienhe.html">LIÊN HỆ</a></li>
+                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/home.jsp">TRANG CHỦ</a></li>
+                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/vechungtoi.jsp">VỀ CHÚNG TÔI</a></li>
+                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/products">BỘ SƯU TẬP</a></li>
+                                    <li><a class="menu_list_link" href="${pageContext.request.contextPath}/signup">ĐĂNG NHẬP & ĐĂNG KÝ</a></li>
+                                    <li><a class="menu_list_link" href="${pageContext.request.contextPath}/HTML/lienhe.jsp">LIÊN HỆ</a></li>
                                 </ul>
                                 <div class="menu_search">
                                     <div class="menu_search_input">
@@ -114,26 +113,6 @@
                                                     <a href="${pageContext.request.contextPath}/signup" class="btn btn-signup">Đăng ký</a>
                                                 </div>
                                             </div>
-                                        <div class="mt-3">
-                                            <div class="mb-2 fw-bold">Hoặc đăng nhập/đăng ký bằng Google</div>
-                                            <div id="g_id_onload"
-                                                 data-client_id="1088116862431-kjlf432l7eicqq56h69kdsu92kkfutk1.apps.googleusercontent.com"
-                                                 data-context="signin"
-                                                 data-ux_mode="popup"
-                                                 data-callback="handleCredentialResponse">
-                                            </div>
-                                            <div class="g_id_signin" data-type="standard" data-size="large"></div>
-                                        </div>
-                                        <script>
-                                          function handleCredentialResponse(response) {
-                                            var f = document.createElement('form');
-                                            f.method = 'POST';
-                                            f.action = '${pageContext.request.contextPath}/auth/google';
-                                            var i = document.createElement('input');
-                                            i.type = 'hidden'; i.name = 'credential'; i.value = response.credential;
-                                            f.appendChild(i); document.body.appendChild(f); f.submit();
-                                          }
-                                        </script>
                                         </form>
                                         <p class="terms mt-3">Bằng cách nhấn vào "Đăng nhập ngay!", bạn đã đồng ý với <a href="#">Điều khoản dịch vụ</a> | <a href="#">Chính sách bảo mật</a></p>
                                         <a class="d-block mt-2" href="${pageContext.request.contextPath}/View/forgot-password.jsp">Quên mật khẩu?</a>
@@ -145,6 +124,18 @@
                                         <%
                                             }
                                         %>
+                                        <%
+    String msg = request.getParameter("msg");
+    if (msg == null) {
+        msg = (String) request.getAttribute("msg");
+    }
+    if (msg != null) {
+%>
+<h5 style="color: green"><%=msg%></h5>
+<%
+    }
+%>
+
                                     </div>
                                 </div>
                             </div>

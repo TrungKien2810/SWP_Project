@@ -13,6 +13,17 @@
         </session-timeout>
     </session-config>
     
+    <!-- Email Configuration -->
+    <context-param>
+        <param-name>MAIL_FROM</param-name>
+        <param-value>tinygamevn132@gmail.com</param-value>
+    </context-param>
+    
+    <context-param>
+        <param-name>MAIL_APP_PASSWORD</param-name>
+        <param-value>ijolltlwnhycvvkc</param-value>
+    </context-param>
+    
     <!-- Servlet mapping cho việc phục vụ ảnh từ folder cố định -->
     <servlet>
         <servlet-name>ImageServlet</servlet-name>
@@ -23,4 +34,5 @@
         <servlet-name>ImageServlet</servlet-name>
         <url-pattern>/uploads/*</url-pattern>
     </servlet-mapping>
+    
 </web-app>

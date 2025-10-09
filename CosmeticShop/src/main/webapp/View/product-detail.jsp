@@ -81,7 +81,6 @@
             </div>
             <div class="product-details">
                 <h2>Thông tin sản phẩm</h2>
-                <p><b>ID:</b> <%= p.getProductId() %></p>
                 <p><b>Tên:</b> <%= p.getName() %></p>
                 <p><b>Giá:</b> 
                     <span class="price"><%= p.getPrice() %> VND</span>

@@ -565,11 +565,12 @@ footer li a:hover {
 .account-icon {
   font-size: 28px;
   color: #fff !important;
-  transition: color 0.3s;
+  transition: color 0.3s, transform 0.3s;
 }
 
 .account-icon:hover {
   color: #8d8989;
+  transform: scale(1.1);
 }
 
 .account-dropdown {
@@ -629,3 +630,4 @@ footer li a:hover {
   color: yellow !important;
   transform: scale(1.1);
 }
+

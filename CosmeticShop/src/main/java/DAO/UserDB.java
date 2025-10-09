@@ -83,35 +83,6 @@ public class UserDB {
         }
     }
 
-    // Google Sign-In upsert and password reset helpers
-    public boolean upsertGoogleUser(String email, String fullName, String googleSub) {
-        String select = "select * from Users where email = ?";
-        String insert = "insert into Users(full_name, email, password, role, google_id) values(?, ?, ?, ?, ?)";
-        String update = "update Users set full_name = ?, google_id = ? where email = ?";
-        try {
-            PreparedStatement s = conn.prepareStatement(select);
-            s.setString(1, email);
-            ResultSet rs = s.executeQuery();
-            if (rs.next()) {
-                PreparedStatement u = conn.prepareStatement(update);
-                u.setString(1, fullName);
-                u.setString(2, googleSub);
-                u.setString(3, email);
-                return u.executeUpdate() > 0;
-            } else {
-                PreparedStatement i = conn.prepareStatement(insert);
-                i.setString(1, fullName);
-                i.setString(2, email);
-                i.setString(3, "");
-                i.setString(4, "USER");
-                i.setString(5, googleSub);
-                return i.executeUpdate() > 0;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
 
     public boolean setResetToken(String email, String token, java.sql.Timestamp expiresAt) {
         String sql = "update Users set reset_token = ?, reset_token_expiry = ? where email = ?";
