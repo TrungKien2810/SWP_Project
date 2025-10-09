@@ -108,7 +108,6 @@ public class addToCart extends HttpServlet {
         request.setAttribute("total", total);
         request.setAttribute("selectedIds", selectedIds);
         request.setAttribute("promoCode", promoCode);
-
         request.getRequestDispatcher("View/cart.jsp").forward(request, response);
     }
 
