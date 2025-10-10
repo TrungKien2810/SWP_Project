@@ -27,7 +27,7 @@
     </div>
     
     <!-- menu -->
-                        <div class="menu">
+                         <div class="menu">
                             <div class="menu_logo">
                                 <img src="${pageContext.request.contextPath}/IMG/logo.jpg" alt="" style="width: 230px;">
                             </div>
@@ -42,7 +42,25 @@
                                             </a></li>
                                         </c:if>
                                         <c:if test="${not empty sessionScope.user && sessionScope.user.role == 'ADMIN'}">
-                                        <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/products?action=manage">QUẢN LÝ SẢN PHẨM</a></li>
+                                        <li class="dropdown">
+                                            <a class="menu_list_link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="fas fa-crown me-1"></i>ADMIN DASHBOARD
+                                            </a>
+                                            <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                                                <li><a class="dropdown-item" href="${pageContext.request.contextPath}/admin-dashboard">
+                                                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                                                </a></li>
+                                                <li><a class="dropdown-item" href="${pageContext.request.contextPath}/products?action=manage">
+                                                    <i class="fas fa-box me-2"></i>Quản lý sản phẩm
+                                                </a></li>
+                                                <li><a class="dropdown-item" href="${pageContext.request.contextPath}/admin-users">
+                                                    <i class="fas fa-users me-2"></i>Quản lý người dùng
+                                                </a></li>
+                                                <li><a class="dropdown-item" href="${pageContext.request.contextPath}/View/admin-reports.jsp">
+                                                    <i class="fas fa-chart-line me-2"></i>Báo cáo
+                                                </a></li>
+                                            </ul>
+                                        </li>
                                         </c:if>
                                     <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/lienhe.jsp">LIÊN HỆ</a></li>
                                 </ul>
@@ -56,6 +74,23 @@
                                 </div>
                                 <div class="menu_search_cart">
                                     <i class="fa-solid fa-cart-shopping cart-icon"></i>
+                                    <!-- Tài khoản -->
+                                    <c:if test="${!empty sessionScope.user}">
+                                        <div class="account-menu">
+                                        <i class="fas fa-user-circle account-icon"></i>
+                                        <c:if test="${not empty sessionScope.user}">
+                                            <div class="account-dropdown">
+                                                <p class="welcome-text">Welcome, ${sessionScope.user.username}</p>
+                                                <a href="${pageContext.request.contextPath}/account-management">Quản lý tài khoản</a>
+                                                <a href="${pageContext.request.contextPath}/cart">My Cart</a>
+                                                <a href="${pageContext.request.contextPath}/logout">Log Out</a>
+                                            </div>
+                                        </c:if>
+                                    </div>
+                                    </c:if> 
+                                </div>
+                            </div>    
+                        </div>
                                     <!-- Tài khoản -->
                                     <c:if test="${!empty sessionScope.user}">
                                         <div class="account-menu">
