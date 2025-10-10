@@ -1,44 +1,52 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // Account menu dropdown
     var accountMenu = document.querySelector('.account-menu');
-    if (!accountMenu) return;
+    if (accountMenu) {
+        var dropdown = accountMenu.querySelector('.account-dropdown');
+        if (dropdown) {
+            function isDropdownVisible() {
+                return window.getComputedStyle(dropdown).display === 'block';
+            }
 
-    var dropdown = accountMenu.querySelector('.account-dropdown');
-    if (!dropdown) return;
+            function showDropdown() {
+                dropdown.style.display = 'block';
+            }
 
-    function isDropdownVisible() {
-        // dùng getComputedStyle để check chính xác hơn
-        return window.getComputedStyle(dropdown).display === 'block';
-    }
+            function hideDropdown() {
+                dropdown.style.display = 'none';
+            }
 
-    function showDropdown() {
-        dropdown.style.display = 'block';
-    }
+            function toggleDropdown() {
+                if (isDropdownVisible()) {
+                    hideDropdown();
+                } else {
+                    showDropdown();
+                }
+            }
 
-    function hideDropdown() {
-        dropdown.style.display = 'none';
-    }
+            // Toggle khi click vào accountMenu (trừ khi click bên trong dropdown)
+            accountMenu.addEventListener('click', function (e) {
+                var clickedInsideDropdown = dropdown.contains(e.target);
+                if (clickedInsideDropdown) return;
 
-    function toggleDropdown() {
-        if (isDropdownVisible()) {
-            hideDropdown();
-        } else {
-            showDropdown();
+                e.stopPropagation();
+                toggleDropdown();
+            });
+
+            // Đóng khi click ra ngoài accountMenu
+            document.addEventListener('click', function (e) {
+                if (!accountMenu.contains(e.target)) {
+                    hideDropdown();
+                }
+            });
         }
     }
 
-    // Toggle khi click vào accountMenu (trừ khi click bên trong dropdown)
-    accountMenu.addEventListener('click', function (e) {
-        var clickedInsideDropdown = dropdown.contains(e.target);
-        if (clickedInsideDropdown) return; // cho link bên trong dropdown hoạt động bình thường
-
-        e.stopPropagation(); // chặn click lan ra ngoài document
-        toggleDropdown();
-    });
-
-    // Đóng khi click ra ngoài accountMenu
-    document.addEventListener('click', function (e) {
-        if (!accountMenu.contains(e.target)) {
-            hideDropdown();
-        }
-    });
+    // Admin dropdown menu - sử dụng Bootstrap dropdown
+    var adminDropdown = document.querySelector('#adminDropdown');
+    if (adminDropdown) {
+        // Bootstrap sẽ tự động xử lý dropdown
+        // Chỉ cần đảm bảo dropdown hoạt động đúng
+        console.log('Admin dropdown initialized');
+    }
 });
