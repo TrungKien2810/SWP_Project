@@ -1,5 +1,6 @@
 <%@page import="Model.user"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -313,10 +314,15 @@
             <div class="row align-items-center">
                 <div class="col-md-6">
                     <h2><i class="fas fa-users"></i> Quản lý người dùng</h2>
-                    <p class="text-muted mb-0">Quản lý tài khoản người dùng và phân quyền</p>
+                    <p class="text-muted mb-0">
+                        Quản lý tài khoản người dùng và phân quyền
+                        <c:if test="${totalPages > 1}">
+                            | Trang ${currentPage}/${totalPages}
+                        </c:if>
+                    </p>
                 </div>
                 <div class="col-md-6 text-end">
-                    <button class="btn btn-primary">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createUserModal">
                         <i class="fas fa-plus"></i> Thêm người dùng
                     </button>
                 </div>
@@ -329,51 +335,57 @@
                 <div class="stat-icon text-primary">
                     <i class="fas fa-users"></i>
                 </div>
-                <div class="stat-number text-primary">1,234</div>
+                <div class="stat-number text-primary">${totalUsers}</div>
                 <div class="stat-label">Tổng người dùng</div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon text-success">
                     <i class="fas fa-user-check"></i>
                 </div>
-                <div class="stat-number text-success">1,180</div>
+                <div class="stat-number text-success">${activeUsers}</div>
                 <div class="stat-label">Người dùng hoạt động</div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon text-warning">
                     <i class="fas fa-user-shield"></i>
                 </div>
-                <div class="stat-number text-warning">5</div>
+                <div class="stat-number text-warning">${adminUsers}</div>
                 <div class="stat-label">Quản trị viên</div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon text-info">
                     <i class="fas fa-user-plus"></i>
                 </div>
-                <div class="stat-number text-info">54</div>
+                <div class="stat-number text-info">${newUsers}</div>
                 <div class="stat-label">Người dùng mới (tháng)</div>
             </div>
         </div>
 
         <!-- Search Box -->
         <div class="search-box">
+            <form method="GET" action="${pageContext.request.contextPath}/admin-users">
             <div class="row align-items-center">
                 <div class="col-md-6">
                     <div class="input-group">
                         <span class="input-group-text">
                             <i class="fas fa-search"></i>
                         </span>
-                        <input type="text" class="form-control" placeholder="Tìm kiếm người dùng...">
+                            <input type="text" class="form-control" name="search" 
+                                   placeholder="Tìm kiếm người dùng..." value="${searchTerm}">
                     </div>
                 </div>
                 <div class="col-md-6 text-end">
                     <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-outline-primary active">Tất cả</button>
-                        <button type="button" class="btn btn-outline-primary">Admin</button>
-                        <button type="button" class="btn btn-outline-primary">User</button>
+                            <a href="${pageContext.request.contextPath}/admin-users" 
+                               class="btn btn-outline-primary ${empty selectedRole || selectedRole == 'all' ? 'active' : ''}">Tất cả</a>
+                            <a href="${pageContext.request.contextPath}/admin-users?role=ADMIN" 
+                               class="btn btn-outline-primary ${selectedRole == 'ADMIN' ? 'active' : ''}">Admin</a>
+                            <a href="${pageContext.request.contextPath}/admin-users?role=USER" 
+                               class="btn btn-outline-primary ${selectedRole == 'USER' ? 'active' : ''}">User</a>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </form>
         </div>
 
         <!-- Users Table -->
@@ -390,241 +402,468 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <c:choose>
+                        <c:when test="${empty users}">
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">Không có người dùng nào</h5>
+                                    <p class="text-muted">Hãy thử tìm kiếm với từ khóa khác hoặc thay đổi bộ lọc</p>
+                        </td>
+                    </tr>
+                        </c:when>
+                        <c:otherwise>
+                            <c:forEach var="user" items="${users}">
                     <tr>
                         <td>
                             <div class="d-flex align-items-center">
                                 <img src="${pageContext.request.contextPath}/IMG/default-avatar.png" 
                                      alt="Avatar" class="user-avatar me-3">
                                 <div>
-                                    <div class="fw-bold">Nguyễn Văn A</div>
-                                    <small class="text-muted">ID: #1001</small>
+                                                <div class="fw-bold">${user.username}</div>
+                                                <small class="text-muted">ID: #${user.user_id}</small>
                                 </div>
                             </div>
                         </td>
-                        <td>nguyenvana@gmail.com</td>
+                                    <td>${user.email}</td>
                         <td>
-                            <span class="role-badge role-user">USER</span>
+                                        <span class="role-badge ${user.role == 'ADMIN' ? 'role-admin' : 'role-user'}">
+                                            ${user.role}
+                                        </span>
                         </td>
-                        <td>15/11/2024</td>
                         <td>
-                            <span class="badge bg-success">Hoạt động</span>
+                                        <span class="date-display" data-date="${user.date_create}">
+                                            <c:out value="${user.date_create}"/>
+                                        </span>
                         </td>
+                                    <td>
+                                        <span class="badge bg-success">Hoạt động</span>
+                                    </td>
                         <td>
                             <div class="action-buttons">
-                                <button class="btn-action btn-edit" title="Chỉnh sửa">
+                                            <button class="btn-action btn-edit" title="Chỉnh sửa" 
+                                                    onclick="editUser(${user.user_id}, '${user.username}', '${user.email}', '${user.phone}', '${user.role}')">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="btn-action btn-delete" title="Xóa">
+                                            <c:if test="${user.user_id != sessionScope.user.user_id}">
+                                                <button class="btn-action btn-delete" title="Xóa" 
+                                                        onclick="deleteUser(${user.user_id}, '${user.username}')">
                                     <i class="fas fa-trash"></i>
                                 </button>
+                                            </c:if>
                             </div>
                         </td>
                     </tr>
-                    <tr>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <img src="${pageContext.request.contextPath}/IMG/default-avatar.png" 
-                                     alt="Avatar" class="user-avatar me-3">
-                                <div>
-                                    <div class="fw-bold">Trần Thị B</div>
-                                    <small class="text-muted">ID: #1002</small>
-                                </div>
-                            </div>
-                        </td>
-                        <td>tranthib@gmail.com</td>
-                        <td>
-                            <span class="role-badge role-user">USER</span>
-                        </td>
-                        <td>20/11/2024</td>
-                        <td>
-                            <span class="badge bg-success">Hoạt động</span>
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="btn-action btn-edit" title="Chỉnh sửa">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn-action btn-delete" title="Xóa">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <img src="${pageContext.request.contextPath}/IMG/default-avatar.png" 
-                                     alt="Avatar" class="user-avatar me-3">
-                                <div>
-                                    <div class="fw-bold">Admin User</div>
-                                    <small class="text-muted">ID: #1003</small>
-                                </div>
-                            </div>
-                        </td>
-                        <td>admin@pinkycloud.com</td>
-                        <td>
-                            <span class="role-badge role-admin">ADMIN</span>
-                        </td>
-                        <td>01/12/2024</td>
-                        <td>
-                            <span class="badge bg-success">Hoạt động</span>
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="btn-action btn-edit" title="Chỉnh sửa">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn-action btn-delete" title="Xóa" disabled>
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <img src="${pageContext.request.contextPath}/IMG/default-avatar.png" 
-                                     alt="Avatar" class="user-avatar me-3">
-                                <div>
-                                    <div class="fw-bold">Lê Văn C</div>
-                                    <small class="text-muted">ID: #1004</small>
-                                </div>
-                            </div>
-                        </td>
-                        <td>levanc@gmail.com</td>
-                        <td>
-                            <span class="role-badge role-user">USER</span>
-                        </td>
-                        <td>25/11/2024</td>
-                        <td>
-                            <span class="badge bg-warning">Tạm khóa</span>
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="btn-action btn-edit" title="Chỉnh sửa">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn-action btn-delete" title="Xóa">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <img src="${pageContext.request.contextPath}/IMG/default-avatar.png" 
-                                     alt="Avatar" class="user-avatar me-3">
-                                <div>
-                                    <div class="fw-bold">Phạm Thị D</div>
-                                    <small class="text-muted">ID: #1005</small>
-                                </div>
-                            </div>
-                        </td>
-                        <td>phamthid@gmail.com</td>
-                        <td>
-                            <span class="role-badge role-user">USER</span>
-                        </td>
-                        <td>30/11/2024</td>
-                        <td>
-                            <span class="badge bg-success">Hoạt động</span>
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="btn-action btn-edit" title="Chỉnh sửa">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn-action btn-delete" title="Xóa">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
+                            </c:forEach>
+                        </c:otherwise>
+                    </c:choose>
                 </tbody>
             </table>
         </div>
 
         <!-- Pagination -->
+        <c:if test="${totalPages > 1}">
         <nav aria-label="Page navigation" class="mt-4">
-            <ul class="pagination justify-content-center">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-muted">
+                        Hiển thị ${(currentPage - 1) * pageSize + 1} - ${currentPage * pageSize > totalUsersInCurrentView ? totalUsersInCurrentView : currentPage * pageSize} 
+                        trong tổng số ${totalUsersInCurrentView} người dùng
+                    </div>
+                    <ul class="pagination mb-0">
+                        <!-- Previous button -->
+                        <c:choose>
+                            <c:when test="${currentPage > 1}">
+                                <li class="page-item">
+                                    <a class="page-link" href="${pageContext.request.contextPath}/admin-users?page=${currentPage - 1}&search=${searchTerm}&role=${selectedRole}">
+                                        <i class="fas fa-chevron-left"></i> Trước
+                                    </a>
+                                </li>
+                            </c:when>
+                            <c:otherwise>
+                                <li class="page-item disabled">
+                                    <span class="page-link">
+                                        <i class="fas fa-chevron-left"></i> Trước
+                                    </span>
+                                </li>
+                            </c:otherwise>
+                        </c:choose>
+                        
+                        <!-- Page numbers -->
+                        <c:set var="startPage" value="${currentPage - 2}"/>
+                        <c:set var="endPage" value="${currentPage + 2}"/>
+                        
+                        <c:if test="${startPage < 1}">
+                            <c:set var="startPage" value="1"/>
+                        </c:if>
+                        <c:if test="${endPage > totalPages}">
+                            <c:set var="endPage" value="${totalPages}"/>
+                        </c:if>
+                        
+                        <c:if test="${startPage > 1}">
+                            <li class="page-item">
+                                <a class="page-link" href="${pageContext.request.contextPath}/admin-users?page=1&search=${searchTerm}&role=${selectedRole}">1</a>
+                            </li>
+                            <c:if test="${startPage > 2}">
                 <li class="page-item disabled">
-                    <a class="page-link" href="#" tabindex="-1">Trước</a>
+                                    <span class="page-link">...</span>
                 </li>
+                            </c:if>
+                        </c:if>
+                        
+                        <c:forEach var="i" begin="${startPage}" end="${endPage}">
+                            <c:choose>
+                                <c:when test="${i == currentPage}">
                 <li class="page-item active">
-                    <a class="page-link" href="#">1</a>
+                                        <span class="page-link">${i}</span>
                 </li>
+                                </c:when>
+                                <c:otherwise>
                 <li class="page-item">
-                    <a class="page-link" href="#">2</a>
+                                        <a class="page-link" href="${pageContext.request.contextPath}/admin-users?page=${i}&search=${searchTerm}&role=${selectedRole}">${i}</a>
+                                    </li>
+                                </c:otherwise>
+                            </c:choose>
+                        </c:forEach>
+                        
+                        <c:if test="${endPage < totalPages}">
+                            <c:if test="${endPage < totalPages - 1}">
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
                 </li>
+                            </c:if>
                 <li class="page-item">
-                    <a class="page-link" href="#">3</a>
+                                <a class="page-link" href="${pageContext.request.contextPath}/admin-users?page=${totalPages}&search=${searchTerm}&role=${selectedRole}">${totalPages}</a>
                 </li>
+                        </c:if>
+                        
+                        <!-- Next button -->
+                        <c:choose>
+                            <c:when test="${currentPage < totalPages}">
                 <li class="page-item">
-                    <a class="page-link" href="#">Sau</a>
+                                    <a class="page-link" href="${pageContext.request.contextPath}/admin-users?page=${currentPage + 1}&search=${searchTerm}&role=${selectedRole}">
+                                        Sau <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            </c:when>
+                            <c:otherwise>
+                                <li class="page-item disabled">
+                                    <span class="page-link">
+                                        Sau <i class="fas fa-chevron-right"></i>
+                                    </span>
                 </li>
+                            </c:otherwise>
+                        </c:choose>
             </ul>
+                </div>
         </nav>
+        </c:if>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editUserModalLabel">Chỉnh sửa người dùng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" action="${pageContext.request.contextPath}/admin-users">
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="updateUser">
+                        <input type="hidden" name="userId" id="editUserId">
+                        
+                        <div class="mb-3">
+                            <label for="editFullName" class="form-label">Họ và tên</label>
+                            <input type="text" class="form-control" id="editFullName" name="fullName" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="editEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="editEmail" name="email" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="editPhone" class="form-label">Số điện thoại</label>
+                            <input type="text" class="form-control" id="editPhone" name="phone">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="editRole" class="form-label">Vai trò</label>
+                            <select class="form-select" id="editRole" name="role" required>
+                                <option value="USER">USER</option>
+                                <option value="ADMIN">ADMIN</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Cập nhật</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteUserModalLabel">Xác nhận xóa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn xóa người dùng <strong id="deleteUserName"></strong>?</p>
+                    <p class="text-danger"><small>Hành động này không thể hoàn tác!</small></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <form method="POST" action="${pageContext.request.contextPath}/admin-users" style="display: inline;">
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="userId" id="deleteUserId">
+                        <button type="submit" class="btn btn-danger">Xóa</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create User Modal -->
+    <div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="createUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createUserModalLabel">Thêm người dùng mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" action="${pageContext.request.contextPath}/admin-users" id="createUserForm">
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="createUser">
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="createUsername" class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="createUsername" name="username" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="createEmail" class="form-label">Email <span class="text-danger">*</span></label>
+                                    <input type="email" class="form-control" id="createEmail" name="email" 
+                                           placeholder="example@gmail.com" pattern="[a-zA-Z0-9._%+-]+@gmail\.com" required>
+                                    <div class="form-text">Chỉ chấp nhận email Gmail</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="createPhone" class="form-label">Số điện thoại</label>
+                                    <input type="text" class="form-control" id="createPhone" name="phone" 
+                                           placeholder="0123456789">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="createRole" class="form-label">Vai trò <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="createRole" name="role" required>
+                                        <option value="USER">USER</option>
+                                        <option value="ADMIN">ADMIN</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="createPassword" class="form-label">Mật khẩu <span class="text-danger">*</span></label>
+                                    <input type="password" class="form-control" id="createPassword" name="password" 
+                                           minlength="6" required>
+                                    <div class="form-text">Tối thiểu 6 ký tự</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="createConfirmPassword" class="form-label">Xác nhận mật khẩu <span class="text-danger">*</span></label>
+                                    <input type="password" class="form-control" id="createConfirmPassword" name="confirmPassword" 
+                                           minlength="6" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Lưu ý:</strong> Người dùng mới sẽ có thể đăng nhập ngay sau khi được tạo.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Tạo người dùng
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
     <script src="${pageContext.request.contextPath}/Js/home.js"></script>
     <script>
-        // Search functionality
-        document.querySelector('input[type="text"]').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const rows = document.querySelectorAll('tbody tr');
+        // Edit user function
+        function editUser(userId, username, email, phone, role) {
+            document.getElementById('editUserId').value = userId;
+            document.getElementById('editFullName').value = username;
+            document.getElementById('editEmail').value = email;
+            document.getElementById('editPhone').value = phone || '';
+            document.getElementById('editRole').value = role;
             
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                if (text.includes(searchTerm)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
+            const editModal = new bootstrap.Modal(document.getElementById('editUserModal'));
+            editModal.show();
+        }
+        
+        // Delete user function
+        function deleteUser(userId, username) {
+            document.getElementById('deleteUserId').value = userId;
+            document.getElementById('deleteUserName').textContent = username;
+            
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteUserModal'));
+            deleteModal.show();
+        }
+        
+        // Format dates
+        document.querySelectorAll('.date-display').forEach(function(element) {
+            const dateStr = element.getAttribute('data-date');
+            if (dateStr) {
+                try {
+                    // Parse LocalDateTime string and format it
+                    const date = new Date(dateStr);
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const year = date.getFullYear();
+                    element.textContent = day + '/' + month + '/' + year;
+                } catch (e) {
+                    // If parsing fails, keep original text
+                    console.log('Date parsing failed for:', dateStr);
                 }
-            });
+            }
         });
         
-        // Filter buttons
-        document.querySelectorAll('.btn-group button').forEach(btn => {
-            btn.addEventListener('click', function() {
-                // Remove active class from all buttons
-                document.querySelectorAll('.btn-group button').forEach(b => b.classList.remove('active'));
-                // Add active class to clicked button
-                this.classList.add('active');
-                
-                // Filter logic here
-                const filter = this.textContent.trim();
-                const rows = document.querySelectorAll('tbody tr');
-                
-                rows.forEach(row => {
-                    if (filter === 'Tất cả') {
-                        row.style.display = '';
-                    } else {
-                        const role = row.querySelector('.role-badge').textContent;
-                        if (role === filter) {
-                            row.style.display = '';
-                        } else {
-                            row.style.display = 'none';
-                        }
-                    }
-                });
-            });
+        // Auto-submit search form on input
+        document.querySelector('input[name="search"]').addEventListener('input', function(e) {
+            if (e.target.value.length > 2 || e.target.value.length === 0) {
+                e.target.form.submit();
+            }
         });
         
-        // Action buttons
-        document.querySelectorAll('.btn-edit').forEach(btn => {
-            btn.addEventListener('click', function() {
-                alert('Chức năng chỉnh sửa sẽ được phát triển');
+        // Create user form validation
+        document.getElementById('createUserForm').addEventListener('submit', function(e) {
+            const username = document.getElementById('createUsername').value.trim();
+            const email = document.getElementById('createEmail').value.trim();
+            const password = document.getElementById('createPassword').value;
+            const confirmPassword = document.getElementById('createConfirmPassword').value;
+            
+            // Clear previous errors
+            document.querySelectorAll('.form-control').forEach(input => {
+                input.classList.remove('is-invalid');
             });
+            document.querySelectorAll('.invalid-feedback').forEach(feedback => {
+                feedback.remove();
+            });
+            
+            let hasError = false;
+            
+            // Validate username
+            if (username.length < 2) {
+                showFieldError('createUsername', 'Họ tên phải có ít nhất 2 ký tự');
+                hasError = true;
+            }
+            
+            // Validate email
+            const emailPattern = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+            if (!emailPattern.test(email)) {
+                showFieldError('createEmail', 'Email phải có định dạng Gmail (xxx@gmail.com)');
+                hasError = true;
+            }
+            
+            // Validate password
+            if (password.length < 6) {
+                showFieldError('createPassword', 'Mật khẩu phải có ít nhất 6 ký tự');
+                hasError = true;
+            }
+            
+            // Validate confirm password
+            if (password !== confirmPassword) {
+                showFieldError('createConfirmPassword', 'Mật khẩu xác nhận không khớp');
+                hasError = true;
+            }
+            
+            if (hasError) {
+                e.preventDefault();
+                return false;
+            }
         });
         
-        document.querySelectorAll('.btn-delete').forEach(btn => {
-            btn.addEventListener('click', function() {
-                if (confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
-                    alert('Chức năng xóa sẽ được phát triển');
+        // Real-time password confirmation validation
+        document.getElementById('createConfirmPassword').addEventListener('input', function() {
+            const password = document.getElementById('createPassword').value;
+            const confirmPassword = this.value;
+            
+            if (confirmPassword && password !== confirmPassword) {
+                this.classList.add('is-invalid');
+                if (!this.nextElementSibling || !this.nextElementSibling.classList.contains('invalid-feedback')) {
+                    const feedback = document.createElement('div');
+                    feedback.className = 'invalid-feedback';
+                    feedback.textContent = 'Mật khẩu xác nhận không khớp';
+                    this.parentNode.appendChild(feedback);
                 }
-            });
+            } else {
+                this.classList.remove('is-invalid');
+                const feedback = this.parentNode.querySelector('.invalid-feedback');
+                if (feedback) {
+                    feedback.remove();
+                }
+            }
         });
+        
+        function showFieldError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            field.classList.add('is-invalid');
+            
+            const feedback = document.createElement('div');
+            feedback.className = 'invalid-feedback';
+            feedback.textContent = message;
+            field.parentNode.appendChild(feedback);
+        }
+        
+        // Show success/error messages
+        <c:if test="${not empty success}">
+            showAlert('<c:out value="${success}" escapeXml="true"/>', 'success');
+        </c:if>
+        
+        <c:if test="${not empty error}">
+            showAlert('<c:out value="${error}" escapeXml="true"/>', 'danger');
+        </c:if>
+        
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-' + type + ' alert-dismissible fade show position-fixed';
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = 
+                message +
+                '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+            document.body.appendChild(alertDiv);
+            
+            // Auto remove after 5 seconds
+            setTimeout(function() {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 5000);
+        }
     </script>
 </body>
 </html>
