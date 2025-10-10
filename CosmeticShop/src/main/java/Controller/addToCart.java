@@ -4,17 +4,24 @@
  */
 package Controller;
 
+import DAO.CartDB;
+import DAO.ProductDB;
+import Model.Cart;
+import Model.CartItems;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import Model.Product;
+import Model.user;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -34,7 +41,7 @@ public class addToCart extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-       response.setContentType("text/html;charset=UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         HttpSession session = request.getSession();
 
         // Lấy giỏ hàng từ session
@@ -68,7 +75,9 @@ public class addToCart extends HttpServlet {
                             break;
                         }
                     }
-                    if (removeProduct != null) cart.remove(removeProduct);
+                    if (removeProduct != null) {
+                        cart.remove(removeProduct);
+                    }
                     break;
             }
         }
@@ -123,7 +132,68 @@ public class addToCart extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+//        processRequest(request, response);
+        HttpSession session = request.getSession();
+        CartDB cd = new CartDB();
+        ProductDB pd = new ProductDB();
+        List<CartItems> cartItems = new ArrayList<>();
+        boolean isExist = false;
+        int p_id = 0;
+        String idRaw = request.getParameter("id");
+        try {
+            p_id = Integer.parseInt(idRaw);
+        } catch (NumberFormatException e) {
+            String error = e.getMessage();
+            request.setAttribute("error", error);
+            request.getRequestDispatcher("/VIew/bosuutap.jsp");
+            return;
+        }
+        if (session.getAttribute("user") != null) {
+            user user = (user) session.getAttribute("user");
+            Cart cart;
+            
+            if(cd.getCartByUserId(user.getUser_id()) == null){
+                cd.addNewCart(user.getUser_id(), 0);
+            }
+            cart = cd.getCartByUserId(user.getUser_id());
+            if (cd.getCartItemsByCartId(cart.getCart_id()) != null) {
+                cartItems = cd.getCartItemsByCartId(cart.getCart_id());
+            }
+            //Giỏ hàng có sản phẩm
+            if (!cartItems.isEmpty()) {
+                for (CartItems c : cartItems) {
+                    int quantity = c.getQuantity();
+                    if (p_id != 0 && p_id == c.getProduct_id()) {
+                        quantity+=1;
+                        c.setQuantity(quantity);
+                        cd.updateQuantityAddToCart(cart.getCart_id(), p_id, c.getQuantity());
+                        isExist = true;
+                    }
+                }
+
+            }
+            if (isExist == false) {
+                cd.addCartItems(cart.getCart_id(), p_id, 1, pd.getProductById(p_id).getPrice());
+            }
+            cartItems.clear();
+            cartItems = cd.getCartItemsByCartId(cart.getCart_id());
+            System.out.println(cartItems.getFirst().getQuantity());
+            session.setAttribute("cartItems", cartItems);
+            request.setAttribute("msg", "Thêm sản phẩm thành công");
+            //Tìm xem trang nào gửi request để điều hướng về lại
+//            String referer = request.getHeader("referer");
+//            String pageName = "";
+//
+//            if (referer != null && !referer.isEmpty()) {
+//                pageName = referer.substring(referer.lastIndexOf("/") + 1);
+//            }
+//            if(pageName == "products"){
+//                pageName = "product-detail.jsp";
+//                request.getRequestDispatcher("/View/" + pageName).forward(request, response);
+//            }
+            request.getRequestDispatcher("/products").forward(request, response);
+        }
+
     }
 
     /**
