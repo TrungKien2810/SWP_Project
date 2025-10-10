@@ -197,8 +197,31 @@
                                             </div>
 
                                             <div class="mb-3">
-                                                <label for="imageFile" class="form-label">Hình ảnh sản phẩm</label>
+                                                <label for="imageFile" class="form-label">Hình ảnh sản phẩm chính</label>
                                                 <input type="file" class="form-control" name="imageFile" id="imageFile" accept="image/*">
+                                            </div>
+
+                                            <!-- Các hình ảnh phụ -->
+                                            <div class="mb-3">
+                                                <label class="form-label">Các hình ảnh phụ</label>
+                                                <div id="modalAdditionalImagesContainer">
+                                                    <div class="additional-image-item mb-2">
+                                                        <div class="row">
+                                                            <div class="col-md-10">
+                                                                <input type="file" class="form-control" name="additionalImageFiles[]" accept="image/*">
+                                                            </div>
+                                                            <div class="col-md-2">
+                                                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeModalImageItem(this)">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="addModalImageItem()">
+                                                    <i class="fas fa-plus"></i> Thêm ảnh phụ
+                                                </button>
+                                                <!-- <small class="text-muted d-block mt-1">Upload ảnh phụ (thứ tự tự động theo thời gian upload)</small> -->
                                             </div>
 
                                             <div class="mb-3">
@@ -250,8 +273,31 @@
                                                 <textarea class="form-control" id="editProductDescription" rows="3">Son môi không thấm nước</textarea>
                                             </div>
                                             <div class="mb-3">
-                                                <label for="editProductImage" class="form-label">Hình ảnh</label>
+                                                <label for="editProductImage" class="form-label">Hình ảnh sản phẩm chính</label>
                                                 <input type="file" class="form-control" id="editProductImage" accept="image/*">
+                                            </div>
+
+                                            <!-- Các hình ảnh phụ -->
+                                            <div class="mb-3">
+                                                <label class="form-label">Các hình ảnh phụ</label>
+                                                <div id="editModalAdditionalImagesContainer">
+                                                    <div class="additional-image-item mb-2">
+                                                        <div class="row">
+                                                            <div class="col-md-10">
+                                                                <input type="file" class="form-control" name="editAdditionalImageFiles[]" accept="image/*">
+                                                            </div>
+                                                            <div class="col-md-2">
+                                                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeEditModalImageItem(this)">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="addEditModalImageItem()">
+                                                    <i class="fas fa-plus"></i> Thêm ảnh phụ
+                                                </button>
+                                                <!-- <small class="text-muted d-block mt-1">Upload ảnh phụ (thứ tự tự động theo thời gian upload)</small> -->
                                             </div>
                                         </form>
                                     </div>
@@ -265,8 +311,75 @@
 
                         </c:if>
                         
+                        <!-- Font Awesome for icons -->
+                        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+                        
                         <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
                         <script>
+                            // Variables for image management
+                            let modalImageItemCount = 1;
+                            let editModalImageItemCount = 1;
+                            
+                            // Functions for Add Product Modal
+                            function addModalImageItem() {
+                                modalImageItemCount++;
+                                const container = document.getElementById('modalAdditionalImagesContainer');
+                                const newItem = document.createElement('div');
+                                newItem.className = 'additional-image-item mb-2';
+                                newItem.innerHTML = `
+                                    <div class="row">
+                                        <div class="col-md-10">
+                                            <input type="file" class="form-control" name="additionalImageFiles[]" accept="image/*">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeModalImageItem(this)">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
+                                container.appendChild(newItem);
+                            }
+                            
+                            function removeModalImageItem(button) {
+                                const container = document.getElementById('modalAdditionalImagesContainer');
+                                if (container.children.length > 1) {
+                                    button.closest('.additional-image-item').remove();
+                                } else {
+                                    alert('Phải có ít nhất một ảnh phụ!');
+                                }
+                            }
+                            
+                            // Functions for Edit Product Modal
+                            function addEditModalImageItem() {
+                                editModalImageItemCount++;
+                                const container = document.getElementById('editModalAdditionalImagesContainer');
+                                const newItem = document.createElement('div');
+                                newItem.className = 'additional-image-item mb-2';
+                                newItem.innerHTML = `
+                                    <div class="row">
+                                        <div class="col-md-10">
+                                            <input type="file" class="form-control" name="editAdditionalImageFiles[]" accept="image/*">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeEditModalImageItem(this)">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
+                                container.appendChild(newItem);
+                            }
+                            
+                            function removeEditModalImageItem(button) {
+                                const container = document.getElementById('editModalAdditionalImagesContainer');
+                                if (container.children.length > 1) {
+                                    button.closest('.additional-image-item').remove();
+                                } else {
+                                    alert('Phải có ít nhất một ảnh phụ!');
+                                }
+                            }
+                            
                             // Đóng modal sau khi submit thành công
                             document.addEventListener('DOMContentLoaded', function() {
                                 // Kiểm tra nếu có thông báo thành công từ server
@@ -277,5 +390,44 @@
                                 }
                             });
                         </script>
+                        
+                        <style>
+                            .additional-image-item {
+                                border: 1px solid #e9ecef;
+                                border-radius: 8px;
+                                padding: 10px;
+                                background-color: #f8f9fa;
+                                transition: all 0.3s ease;
+                            }
+                            
+                            .additional-image-item:hover {
+                                border-color: #f76c85;
+                                background-color: #fff;
+                            }
+                            
+                            .additional-image-item .btn {
+                                width: 100%;
+                            }
+                            
+                            .additional-image-item input[type="text"] {
+                                border: 2px solid #e9ecef;
+                                transition: border-color 0.3s ease;
+                            }
+                            
+                            .additional-image-item input[type="text"]:focus {
+                                border-color: #f76c85;
+                                box-shadow: 0 0 0 0.2rem rgba(247, 108, 133, 0.25);
+                            }
+                            
+                            .additional-image-item input[type="number"] {
+                                border: 2px solid #e9ecef;
+                                transition: border-color 0.3s ease;
+                            }
+                            
+                            .additional-image-item input[type="number"]:focus {
+                                border-color: #f76c85;
+                                box-shadow: 0 0 0 0.2rem rgba(247, 108, 133, 0.25);
+                            }
+                        </style>
                         </body>
                         </html>

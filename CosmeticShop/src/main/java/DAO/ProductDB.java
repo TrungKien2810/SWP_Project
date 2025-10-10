@@ -25,16 +25,7 @@ public class ProductDB {
         try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
-                Product product = new Product(
-                        rs.getInt("product_id"),
-                        rs.getString("name"),
-                        rs.getDouble("price"),
-                        rs.getInt("stock"),
-                        rs.getString("description"),
-                        rs.getString("image_url"),
-                        rs.getInt("category_id")
-                );
-                productList.add(product);
+                productList.add(createProductWithImages(rs));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -49,21 +40,49 @@ public class ProductDB {
             stmt.setInt(1, id);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    return new Product(
-                            rs.getInt("product_id"),
-                            rs.getString("name"),
-                            rs.getDouble("price"),
-                            rs.getInt("stock"),
-                            rs.getString("description"),
-                            rs.getString("image_url"),
-                            rs.getInt("category_id")
-                    );
+                    return createProductWithImages(rs);
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
+    }
+    
+    // Lấy danh sách ảnh bổ sung của sản phẩm
+    public List<String> getProductImages(int productId) {
+        List<String> images = new ArrayList<>();
+        String sql = "SELECT image_url FROM ProductImages WHERE product_id = ? ORDER BY image_order";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, productId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    images.add(rs.getString("image_url"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return images;
+    }
+    
+    // Helper method để tạo Product object với ảnh bổ sung
+    private Product createProductWithImages(ResultSet rs) throws SQLException {
+        Product product = new Product(
+                rs.getInt("product_id"),
+                rs.getString("name"),
+                rs.getDouble("price"),
+                rs.getInt("stock"),
+                rs.getString("description"),
+                rs.getString("image_url"),
+                rs.getInt("category_id")
+        );
+        // Lấy danh sách ảnh bổ sung
+        List<String> additionalImages = getProductImages(rs.getInt("product_id"));
+        for (String imageUrl : additionalImages) {
+            product.addImageUrl(imageUrl);
+        }
+        return product;
     }
 
     // Tra cứu category_id theo tên danh mục
@@ -134,6 +153,20 @@ public class ProductDB {
             return false;
         }
     }
+    
+    // Lấy ID của sản phẩm vừa được thêm
+    public int getLastInsertedProductId() {
+        String sql = "SELECT TOP 1 product_id FROM Products ORDER BY product_id DESC";
+        try (PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("product_id");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
 
     // Cập nhật sản phẩm (Update)
     public boolean updateProduct(Product product) {
@@ -179,16 +212,7 @@ public class ProductDB {
             stmt.setString(2, searchPattern);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    Product product = new Product(
-                            rs.getInt("product_id"),
-                            rs.getString("name"),
-                            rs.getDouble("price"),
-                            rs.getInt("stock"),
-                            rs.getString("description"),
-                            rs.getString("image_url"),
-                            rs.getInt("category_id")
-                    );
-                    productList.add(product);
+                    productList.add(createProductWithImages(rs));
                 }
             }
         } catch (SQLException e) {
@@ -205,16 +229,7 @@ public class ProductDB {
             stmt.setString(1, categoryName);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    Product product = new Product(
-                            rs.getInt("product_id"),
-                            rs.getString("name"),
-                            rs.getDouble("price"),
-                            rs.getInt("stock"),
-                            rs.getString("description"),
-                            rs.getString("image_url"),
-                            rs.getInt("category_id")
-                    );
-                    productList.add(product);
+                    productList.add(createProductWithImages(rs));
                 }
             }
         } catch (SQLException e) {
@@ -232,16 +247,7 @@ public class ProductDB {
             stmt.setDouble(2, maxPrice);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    Product product = new Product(
-                            rs.getInt("product_id"),
-                            rs.getString("name"),
-                            rs.getDouble("price"),
-                            rs.getInt("stock"),
-                            rs.getString("description"),
-                            rs.getString("image_url"),
-                            rs.getInt("category_id")
-                    );
-                    productList.add(product);
+                    productList.add(createProductWithImages(rs));
                 }
             }
         } catch (SQLException e) {
@@ -278,16 +284,7 @@ public class ProductDB {
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    Product product = new Product(
-                            rs.getInt("product_id"),
-                            rs.getString("name"),
-                            rs.getDouble("price"),
-                            rs.getInt("stock"),
-                            rs.getString("description"),
-                            rs.getString("image_url"),
-                            rs.getInt("category_id")
-                    );
-                    productList.add(product);
+                    productList.add(createProductWithImages(rs));
                 }
             }
         } catch (SQLException e) {
@@ -389,16 +386,7 @@ public class ProductDB {
             }
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    Product product = new Product(
-                            rs.getInt("product_id"),
-                            rs.getString("name"),
-                            rs.getDouble("price"),
-                            rs.getInt("stock"),
-                            rs.getString("description"),
-                            rs.getString("image_url"),
-                            rs.getInt("category_id")
-                    );
-                    productList.add(product);
+                    productList.add(createProductWithImages(rs));
                 }
             }
         } catch (SQLException e) {
@@ -416,16 +404,7 @@ public class ProductDB {
             stmt.setInt(2, pageSize);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    Product product = new Product(
-                            rs.getInt("product_id"),
-                            rs.getString("name"),
-                            rs.getDouble("price"),
-                            rs.getInt("stock"),
-                            rs.getString("description"),
-                            rs.getString("image_url"),
-                            rs.getInt("category_id")
-                    );
-                    productList.add(product);
+                    productList.add(createProductWithImages(rs));
                 }
             }
         } catch (SQLException e) {
@@ -529,16 +508,7 @@ public class ProductDB {
             }
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    Product product = new Product(
-                            rs.getInt("product_id"),
-                            rs.getString("name"),
-                            rs.getDouble("price"),
-                            rs.getInt("stock"),
-                            rs.getString("description"),
-                            rs.getString("image_url"),
-                            rs.getInt("category_id")
-                    );
-                    productList.add(product);
+                    productList.add(createProductWithImages(rs));
                 }
             }
         } catch (SQLException e) {
@@ -628,5 +598,104 @@ public class ProductDB {
             e.printStackTrace();
         }
         return 0;
+    }
+    
+    // ========== QUẢN LÝ ẢNH SẢN PHẨM ==========
+    
+    // Thêm ảnh cho sản phẩm
+    public boolean addProductImage(int productId, String imageUrl, int imageOrder) {
+        String sql = "INSERT INTO ProductImages (product_id, image_url, image_order) VALUES (?, ?, ?)";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, productId);
+            stmt.setString(2, imageUrl);
+            stmt.setInt(3, imageOrder);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    // Cập nhật ảnh sản phẩm
+    public boolean updateProductImage(int imageId, String imageUrl, int imageOrder) {
+        String sql = "UPDATE ProductImages SET image_url = ?, image_order = ? WHERE image_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, imageUrl);
+            stmt.setInt(2, imageOrder);
+            stmt.setInt(3, imageId);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    // Xóa ảnh sản phẩm
+    public boolean deleteProductImage(int imageId) {
+        String sql = "DELETE FROM ProductImages WHERE image_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, imageId);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    // Cập nhật thứ tự ảnh
+    public boolean updateImageOrder(int imageId, int newOrder) {
+        String sql = "UPDATE ProductImages SET image_order = ? WHERE image_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, newOrder);
+            stmt.setInt(2, imageId);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    // Lấy tất cả ảnh của một sản phẩm với thông tin chi tiết
+    public List<ImageInfo> getProductImagesWithDetails(int productId) {
+        List<ImageInfo> images = new ArrayList<>();
+        String sql = "SELECT image_id, image_url, image_order FROM ProductImages WHERE product_id = ? ORDER BY image_order";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, productId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    images.add(new ImageInfo(
+                        rs.getInt("image_id"),
+                        rs.getString("image_url"),
+                        rs.getInt("image_order")
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return images;
+    }
+    
+    // Inner class để lưu thông tin ảnh
+    public static class ImageInfo {
+        private int imageId;
+        private String imageUrl;
+        private int imageOrder;
+        
+        public ImageInfo(int imageId, String imageUrl, int imageOrder) {
+            this.imageId = imageId;
+            this.imageUrl = imageUrl;
+            this.imageOrder = imageOrder;
+        }
+        
+        // Getters
+        public int getImageId() { return imageId; }
+        public String getImageUrl() { return imageUrl; }
+        public int getImageOrder() { return imageOrder; }
+        
+        // Setters
+        public void setImageId(int imageId) { this.imageId = imageId; }
+        public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+        public void setImageOrder(int imageOrder) { this.imageOrder = imageOrder; }
     }
 }
