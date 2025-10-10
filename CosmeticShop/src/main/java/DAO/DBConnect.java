@@ -27,10 +27,28 @@ public class DBConnect {
 
 
 
+    //         Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+    //         conn = DriverManager.getConnection(connectionUrl);
+    //     } catch (ClassNotFoundException | SQLException e) {
+    //         System.out.println("Không kết nối được với sql server");
+    //         e.printStackTrace();
+    //     }
+    // }
+    
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
             conn = DriverManager.getConnection(connectionUrl);
-        } catch (ClassNotFoundException | SQLException e) {
-            System.out.println("Không kết nối được với sql server");
+
+            if (conn != null) {
+                System.out.println("✅ Kết nối SQL Server thành công!");
+            } else {
+                System.out.println("⚠️ Kết nối SQL Server thất bại: conn = null");
+            }
+
+        } catch (ClassNotFoundException e) {
+            System.out.println("❌ Không tìm thấy driver JDBC. Hãy kiểm tra thư viện mssql-jdbc.jar.");
+            e.printStackTrace();
+        } catch (SQLException e) {
+            System.out.println("❌ Lỗi khi kết nối SQL Server. Kiểm tra thông tin đăng nhập hoặc cổng 1433.");
             e.printStackTrace();
         }
     }
