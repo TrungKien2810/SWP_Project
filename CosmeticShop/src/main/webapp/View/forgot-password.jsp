@@ -1,4 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -50,9 +52,31 @@
                             <form method="post" action="${pageContext.request.contextPath}/password/reset/request">
                                 <div class="mb-3">
                                     <label for="email" class="form-label">Địa chỉ email</label>
-                                    <input type="email" class="form-control" name="email" id="email" placeholder="Nhập Gmail đã đăng ký" pattern="^[A-Za-z0-9._%+-]+@gmail\.com$" value="${sessionScope.user.email}" 
-       readonly required>
+                                    <c:choose>
+    <c:when test="${not empty sessionScope.user and not empty sessionScope.user.email}">
+        <input type="email"
+               class="form-control"
+               name="email"
+               id="email"
+               value="${sessionScope.user.email}"
+               readonly
+               required
+               pattern="^[A-Za-z0-9._%+-]+@gmail\\.com$"
+               placeholder="Nhập Gmail đã đăng ký">
+    </c:when>
+
+    <c:otherwise>
+        <input type="email"
+               class="form-control"
+               name="email"
+               id="email"
+               placeholder="Nhập Gmail đã đăng ký"
+               required
+               pattern="^[A-Za-z0-9._%+-]+@gmail\\.com$">
+    </c:otherwise>
+</c:choose>
                                     <div class="form-text">Vui lòng nhập địa chỉ Gmail đã đăng ký (ví dụ: ten@gmail.com)</div>
+
                                 </div>
                                 
                                 <div class="d-grid">
