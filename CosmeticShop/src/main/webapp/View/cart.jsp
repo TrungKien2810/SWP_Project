@@ -3,6 +3,7 @@
 <%@page import="Model.CartItems"%>
 <%@ page import="java.util.*" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -13,6 +14,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
           crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="${pageContext.request.contextPath}/Js/home.js"></script>
 </head>
 <body>
 <!-- ===== HEADER ===== -->
@@ -28,24 +30,51 @@
 
 <!-- ===== MENU ===== -->
 <div class="menu">
-    <div class="menu_logo">
-        <img src="${pageContext.request.contextPath}/IMG/logo.jpg" alt="" style="width:230px;">
-    </div>
-    <div class="menu_list">
-        <ul class="menu_list_item">
-            <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/home.jsp">TRANG CHỦ</a></li>
-            <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/vechungtoi.jsp">VỀ CHÚNG TÔI</a></li>
-            <li><a class="menu_list_link" href="${pageContext.request.contextPath}/products">BỘ SƯU TẬP</a></li>
-            <c:if test="${empty sessionScope.user}">
-                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/signup">ĐĂNG NHẬP & ĐĂNG KÝ</a></li>
-            </c:if>
-            <c:if test="${not empty sessionScope.user && sessionScope.user.role == 'ADMIN'}">
-                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/products?action=manage">QUẢN LÝ SẢN PHẨM</a></li>
-            </c:if>
-            <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/lienhe.jsp">LIÊN HỆ</a></li>
-        </ul>
-    </div>
-</div>
+                            <div class="menu_logo">
+                                <img src="${pageContext.request.contextPath}/IMG/logo.jpg" alt="" style="width: 230px;">
+                            </div>
+                            <div class="menu_list">
+                                <ul class="menu_list_item">
+                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/home.jsp">TRANG CHỦ</a></li>
+                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/vechungtoi.jsp">VỀ CHÚNG TÔI</a></li>
+                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/products">BỘ SƯU TẬP</a></li>
+                                        <c:if test="${empty sessionScope.user}">
+                                        <li><a class="menu_list_link" href="${pageContext.request.contextPath}/signup">
+                                                ĐĂNG NHẬP & ĐĂNG KÝ
+                                            </a></li>
+                                        </c:if>
+                                        <c:if test="${not empty sessionScope.user && sessionScope.user.role == 'ADMIN'}">
+                                        <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/products?action=manage">QUẢN LÝ SẢN PHẨM</a></li>
+                                        </c:if>
+                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/lienhe.jsp">LIÊN HỆ</a></li>
+                                </ul>
+                                <div class="menu_search">
+                                    <div class="menu_search_input">
+                                        <input type="text" placeholder="Nhập từ khóa bạn cần tìm kiếm . . . ">
+                                    </div>
+                                    <div class="menu_search_icon">
+                                        <a href=""><i class="fa-solid fa-magnifying-glass fa-xl" style="color: #f76c85;"></i></a>
+                                    </div>
+                                </div>
+                                <div class="menu_search_cart">
+                                    <i class="fa-solid fa-cart-shopping cart-icon"></i>
+                                    <!-- Tài khoản -->
+                                    <c:if test="${!empty sessionScope.user}">
+                                        <div class="account-menu">
+                                        <i class="fas fa-user-circle account-icon"></i>
+                                        <c:if test="${not empty sessionScope.user}">
+                                            <div class="account-dropdown">
+                                                <p class="welcome-text">Welcome, ${sessionScope.user.username}</p>
+                                                <a href="${pageContext.request.contextPath}/account-management">Quản lý tài khoản</a>
+                                                <a href="${pageContext.request.contextPath}/cart">My Cart</a>
+                                                <a href="${pageContext.request.contextPath}/logout">Log Out</a>
+                                            </div>
+                                        </c:if>
+                                    </div>
+                                    </c:if> 
+                                </div>
+                            </div>    
+                        </div>
 
 <%
     List<CartItems> cartItems = new ArrayList<CartItems>();
@@ -56,6 +85,15 @@
 %>
 
 <div class="cart-page container mt-5">
+    <!-- Hiển thị thông báo -->
+    <c:if test="${not empty requestScope.msg}">
+        <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin-bottom: 20px;">
+            <i class="fas fa-check-circle me-2"></i>
+            ${requestScope.msg}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </c:if>
+    
     <h2 class="text-center mb-4">GIỎ HÀNG CỦA BẠN</h2>
 
     <div id="cartContent">
@@ -129,7 +167,7 @@
     </div>
 </div>
 
-<!--<script>
+<script>
     function updateCartUI() {
         const cartItems = document.querySelectorAll('.cart-item');
         const cartContentDiv = document.getElementById('cartContent');
@@ -146,15 +184,21 @@
     function updateTotal() {
         let subtotal = 0;
         document.querySelectorAll('.cart-item').forEach(item => {
-            const price = parseInt(item.querySelector('.cart-item-checkbox').dataset.price);
+            const checkbox = item.querySelector('.cart-item-checkbox');
+            const price = parseFloat(checkbox.dataset.price);
             const qty = parseInt(item.querySelector('.quantity-input').value);
-            item.querySelector('.cart-item-checkbox').dataset.quantity = qty;
+            
+            // Cập nhật data-quantity khi thay đổi số lượng
+            checkbox.dataset.quantity = qty;
             item.querySelector('.item-qty').textContent = qty;
             item.querySelector('.item-total-text').textContent = (price * qty).toLocaleString() + '₫';
-            if (item.querySelector('.cart-item-checkbox').checked) {
+            
+            // Chỉ tính vào tổng nếu checkbox được tick
+            if (checkbox.checked) {
                 subtotal += price * qty;
             }
         });
+        
         const subtotalDisplay = document.getElementById('subtotalDisplay');
         const totalDisplay = document.getElementById('totalDisplay');
         if(subtotalDisplay) subtotalDisplay.textContent = subtotal.toLocaleString() + '₫';
@@ -174,6 +218,7 @@
         });
     });
 
+    // Khởi tạo tính tổng ban đầu
     updateTotal();
 
     // Mã giảm giá
@@ -189,14 +234,15 @@
 
             let subtotal = 0;
             document.querySelectorAll('.cart-item').forEach(item => {
-                const price = parseInt(item.querySelector('.cart-item-checkbox').dataset.price);
+                const checkbox = item.querySelector('.cart-item-checkbox');
+                const price = parseFloat(checkbox.dataset.price);
                 const qty = parseInt(item.querySelector('.quantity-input').value);
-                if (item.querySelector('.cart-item-checkbox').checked) subtotal += price * qty;
+                if (checkbox.checked) subtotal += price * qty;
             });
             document.getElementById('totalDisplay').textContent = (subtotal - discount).toLocaleString() + '₫';
         });
     }
-</script>-->
+</script>
 
 <!-- ===== FOOTER ===== -->
 <footer class="text-white py-4 w-100 mt-5" style="background-color:#f76c85;">

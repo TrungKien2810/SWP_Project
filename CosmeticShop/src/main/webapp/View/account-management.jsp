@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-…" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="${pageContext.request.contextPath}/Js/home.js"></script>
     <title>PinkyCloud - Quản lý tài khoản</title>
     <style>
         .account-container {
@@ -125,7 +126,7 @@
                     <input type="text" placeholder="Nhập từ khóa bạn cần tìm kiếm . . . ">
                 </div>
                 <div class="menu_search_icon">
-                    <a href=""><i class="fa-solid fa-magnifying-glass fa-xl" style="color: #f76c85;"></i></a>
+                    <a href="${pageContext.request.contextPath}/cart"> <i class="fa-solid fa-cart-shopping cart-icon"></i></a>
                 </div>
             </div>
             <div class="menu_search_cart">

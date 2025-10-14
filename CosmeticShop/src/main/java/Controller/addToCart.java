@@ -177,7 +177,6 @@ public class addToCart extends HttpServlet {
             }
             cartItems.clear();
             cartItems = cd.getCartItemsByCartId(cart.getCart_id());
-            System.out.println(cartItems.getFirst().getQuantity());
             session.setAttribute("cartItems", cartItems);
             request.setAttribute("msg", "Thêm sản phẩm thành công");
             //Tìm xem trang nào gửi request để điều hướng về lại
