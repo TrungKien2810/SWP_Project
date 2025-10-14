@@ -1,3 +1,6 @@
+<%@page import="Model.Product"%>
+<%@page import="DAO.ProductDB"%>
+<%@page import="Model.CartItems"%>
 <%@ page import="java.util.*" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <!DOCTYPE html>
@@ -45,19 +48,11 @@
 </div>
 
 <%
-    class TestProduct {
-        String name, image;
-        int price, quantity;
-        TestProduct(String name, String image, int price, int quantity) {
-            this.name = name; this.image = image; this.price = price; this.quantity = quantity;
-        }
+    List<CartItems> cartItems = new ArrayList<CartItems>();
+    if(session.getAttribute("cartItems") != null){
+    cartItems = (List<CartItems>)session.getAttribute("cartItems");
     }
-
-    List<TestProduct> cartItems = new ArrayList<>();
-    cartItems.add(new TestProduct("Son dưỡng môi Pinky Cloud", "sonduong.jpg", 159000, 1));
-    cartItems.add(new TestProduct("Kem chống nắng SPF50+", "kemchongnang.jpg", 249000, 1));
-    cartItems.add(new TestProduct("Sữa rửa mặt dịu nhẹ", "suaruamat.jpg", 189000, 2));
-    cartItems.add(new TestProduct("Tinh chất dưỡng trắng da", "tinhchat.jpg", 329000, 1));
+    Double totalPrice = 0.0;
 %>
 
 <div class="cart-page container mt-5">
@@ -73,20 +68,29 @@
             <div class="cart-content row">
                 <!-- DANH SÁCH SẢN PHẨM -->
                 <div class="cart-items col-md-8">
-                    <% for(TestProduct p : cartItems) { %>
+                    <% for(CartItems p : cartItems) { %>
+                    <%
+                    
+                    totalPrice += p.getPrice() * p.getQuantity();
+                    Product product;    
+                    ProductDB pd = new ProductDB();
+                    product = pd.getProductById(p.getProduct_id());
+                    %>
                     <div class="cart-item d-flex align-items-center mb-4 p-3 border rounded shadow-sm">
                         <input type="checkbox" class="cart-item-checkbox me-2" checked
-                               data-price="<%=p.price%>" data-quantity="<%=p.quantity%>">
-                        <img src="${pageContext.request.contextPath}/IMG/<%=p.image%>"
-                             alt="<%=p.name%>" class="me-3" style="width:100px; height:100px; object-fit:cover;">
+                               data-price="<%=p.getPrice()%>" data-quantity="<%=p.getQuantity()%>">
+                        <img src="${pageContext.request.contextPath}<%=product.getImageUrl()%>"
+                             alt="<%=product.getName()%>" class="me-3" style="width:100px; height:100px; object-fit:cover;">
                         <div class="item-info flex-grow-1">
-                            <h5><%=p.name%></h5>
-                            <p class="item-price"><%=p.price%>₫ x <span class="item-qty"><%=p.quantity%></span></p>
-                            <input type="number" value="<%=p.quantity%>" min="1" class="form-control w-25 text-center quantity-input">
+                            <h5><%=product.getName()%></h5>
+                            <p class="item-price"><%=p.getPrice()%>₫ x <span class="item-qty"><%=p.getQuantity()%></span></p>
+                            <input type="number" value="<%=p.getQuantity()%>" min="1" class="form-control w-25 text-center quantity-input">
                         </div>
                         <div class="item-total ms-3">
-                            <p class="fw-bold item-total-text"><%=p.price * p.quantity%>₫</p>
+                            <p class="fw-bold item-total-text"><%=p.getPrice() * p.getQuantity()%>₫</p>
+                            <a href="${pageContext.request.contextPath}/removeFromCart?productId=<%=p.getProduct_id()%>">
                             <button class="btn btn-sm btn-outline-danger mt-2 delete-btn">Xóa</button>
+                            </a>
                         </div>
                     </div>
                     <% } %>
@@ -97,7 +101,7 @@
                     <h4 class="fw-bold mb-3">Tổng cộng</h4>
                     <div class="d-flex justify-content-between mb-2">
                         <span>Tạm tính:</span>
-                        <span id="subtotalDisplay">0₫</span>
+                        <span id="subtotalDisplay"><%=totalPrice%></span>
                     </div>
                     <div class="d-flex justify-content-between mb-2">
                         <span>Phí vận chuyển:</span>
@@ -115,7 +119,7 @@
 
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <span class="fw-bold">Tổng thanh toán:</span>
-                        <strong style="color:#f76c85;" id="totalDisplay">0₫</strong>
+                        <strong style="color:#f76c85;" id="totalDisplay"><%=totalPrice%></strong>
                     </div>
 
                     <a href="${pageContext.request.contextPath}/checkout" class="btn btn-danger w-100 fw-bold">THANH TOÁN NGAY</a>
@@ -125,7 +129,7 @@
     </div>
 </div>
 
-<script>
+<!--<script>
     function updateCartUI() {
         const cartItems = document.querySelectorAll('.cart-item');
         const cartContentDiv = document.getElementById('cartContent');
@@ -192,7 +196,7 @@
             document.getElementById('totalDisplay').textContent = (subtotal - discount).toLocaleString() + '₫';
         });
     }
-</script>
+</script>-->
 
 <!-- ===== FOOTER ===== -->
 <footer class="text-white py-4 w-100 mt-5" style="background-color:#f76c85;">

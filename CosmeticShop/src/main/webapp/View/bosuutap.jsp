@@ -338,7 +338,7 @@
                                                                         maxFractionDigits="0" /> VNĐ
                                                             </p>
                                                             <div class="action-buttons">
-                                                                <a href="${pageContext.request.contextPath}/products?action=edit&id=${product.productId}"
+                                                                <a href="${pageContext.request.contextPath}/addToCart?id=${product.productId}"
                                                                     class="btn btn-sm btn-buy-now"
                                                                     onclick="event.stopPropagation();">
                                                                     <i class="fas fa-shopping-bag"></i> Mua ngay
