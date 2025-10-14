@@ -14,6 +14,7 @@
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bosuutap.css">
+                <script src="${pageContext.request.contextPath}/Js/home.js"></script>
 
 
             </head>
@@ -38,57 +39,62 @@
                     </div>
 
                     <div class="menu">
-                        <div class="menu_logo">
-                            <img src="${pageContext.request.contextPath}/IMG/logo.jpg" alt="" style="width: 230px;">
-                        </div>
-                        <div class="menu_list">
-                            <ul class="menu_list_item">
-                                <li><a class="menu_list_link"
-                                        href="${pageContext.request.contextPath}/View/home.jsp">TRANG CHỦ</a></li>
-                                <li><a class="menu_list_link"
-                                        href="${pageContext.request.contextPath}/View/vechungtoi.jsp">VỀ CHÚNG TÔI</a>
-                                </li>
-                                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/products">BỘ SƯU
-                                        TẬP</a></li>
-                                <c:if test="${empty sessionScope.user}">
-                                    <li><a class="menu_list_link" href="${pageContext.request.contextPath}/signup">ĐĂNG
-                                            NHẬP & ĐĂNG KÝ</a></li>
-                                </c:if>
-                                <c:if test="${not empty sessionScope.user && sessionScope.user.role == 'ADMIN'}">
-                                    <li><a class="menu_list_link"
-                                            href="${pageContext.request.contextPath}/products?action=manage">QUẢN LÝ SẢN
-                                            PHẨM</a></li>
-                                </c:if>
-                                <li><a class="menu_list_link"
-                                        href="${pageContext.request.contextPath}/View/lienhe.jsp">LIÊN HỆ</a></li>
-                            </ul>
-                            <div class="menu_search">
-                                <div class="menu_search_input">
-                                    <input type="text" placeholder="Nhập từ khóa bạn cần tìm kiếm . . . ">
-                                </div>
-                                <div class="menu_search_icon">
-                                    <a href=""><i class="fa-solid fa-magnifying-glass fa-xl"
-                                            style="color: #f76c85;"></i></a>
-                                </div>
+                            <div class="menu_logo">
+                                <img src="${pageContext.request.contextPath}/IMG/logo.jpg" alt="" style="width: 230px;">
                             </div>
-                            <div class="menu_search_cart">
-                                <i class="fa-solid fa-cart-shopping"></i>
-                                <div class="account-menu">
-                                    <i class="fas fa-user-circle account-icon"></i>
-                                    <c:if test="${not empty sessionScope.user}">
-                                        <div class="account-dropdown">
-                                            <p class="welcome-text">Welcome, ${sessionScope.user.username}</p>
-                                            <a href="#">Account Setting</a>
-                                            <a href="#">My Cart</a>
-                                            <a href="${pageContext.request.contextPath}/logout">Log Out</a>
-                                        </div>
-                                    </c:if>
+                            <div class="menu_list">
+                                <ul class="menu_list_item">
+                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/home.jsp">TRANG CHỦ</a></li>
+                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/vechungtoi.jsp">VỀ CHÚNG TÔI</a></li>
+                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/products">BỘ SƯU TẬP</a></li>
+                                        <c:if test="${empty sessionScope.user}">
+                                        <li><a class="menu_list_link" href="${pageContext.request.contextPath}/signup">
+                                                ĐĂNG NHẬP & ĐĂNG KÝ
+                                            </a></li>
+                                        </c:if>
+                                        <c:if test="${not empty sessionScope.user && sessionScope.user.role == 'ADMIN'}">
+                                        <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/products?action=manage">QUẢN LÝ SẢN PHẨM</a></li>
+                                        </c:if>
+                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/lienhe.jsp">LIÊN HỆ</a></li>
+                                </ul>
+                                <div class="menu_search">
+                                    <div class="menu_search_input">
+                                        <input type="text" placeholder="Nhập từ khóa bạn cần tìm kiếm . . . ">
+                                    </div>
+                                    <div class="menu_search_icon">
+                                        <a href=""><i class="fa-solid fa-magnifying-glass fa-xl" style="color: #f76c85;"></i></a>
+                                    </div>
                                 </div>
-                            </div>
+                                <div class="menu_search_cart">
+                                    <a href="${pageContext.request.contextPath}/cart"> <i class="fa-solid fa-cart-shopping cart-icon"></i></a>       
+                                    <!-- Tài khoản -->
+                                    <c:if test="${!empty sessionScope.user}">
+                                        <div class="account-menu">
+                                        <i class="fas fa-user-circle account-icon"></i>
+                                        <c:if test="${not empty sessionScope.user}">
+                                            <div class="account-dropdown">
+                                                <p class="welcome-text">Welcome, ${sessionScope.user.username}</p>
+                                                <a href="${pageContext.request.contextPath}/account-management">Quản lý tài khoản</a>
+                                                <a href="${pageContext.request.contextPath}/cart">My Cart</a>
+                                                <a href="${pageContext.request.contextPath}/logout">Log Out</a>
+                                            </div>
+                                        </c:if>
+                                    </div>
+                                    </c:if> 
+                                </div>
+                            </div>    
                         </div>
-                    </div>
 
                     <main class="container-fluid my-5">
+                        <!-- Hiển thị thông báo -->
+                        <c:if test="${not empty requestScope.msg}">
+                            <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin-bottom: 20px;">
+                                <i class="fas fa-check-circle me-2"></i>
+                                ${requestScope.msg}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        </c:if>
+                        
                         <div class="text-center mb-4">
                             <h2 class="fw-bold" style="color: #f76c85; font-family: 'Times New Roman', Times, serif;">BỘ
                                 SƯU TẬP SẢN PHẨM</h2>
@@ -315,7 +321,7 @@
                                                 <p>Hãy thử tìm kiếm với từ khóa khác hoặc điều chỉnh bộ lọc của bạn.</p>
                                                 <a href="${pageContext.request.contextPath}/products"
                                                     class="btn btn-primary mt-3">
-                                                    <i class="fas fa-refresh"></i> Xem tất cả sản phẩm
+                                                     Xem tất cả sản phẩm
                                                 </a>
                                             </div>
                                         </c:when>
@@ -338,7 +344,7 @@
                                                                         maxFractionDigits="0" /> VNĐ
                                                             </p>
                                                             <div class="action-buttons">
-                                                                <a href="${pageContext.request.contextPath}/products?action=edit&id=${product.productId}"
+                                                                <a href="${pageContext.request.contextPath}/addToCart?id=${product.productId}"
                                                                     class="btn btn-sm btn-buy-now"
                                                                     onclick="event.stopPropagation();">
                                                                     <i class="fas fa-shopping-bag"></i> Mua ngay

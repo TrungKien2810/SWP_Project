@@ -4,13 +4,24 @@
  */
 package Controller;
 
+import DAO.CartDB;
+import DAO.ProductDB;
+import Model.Cart;
+import Model.CartItems;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
+
+import Model.Product;
+import Model.user;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -31,18 +42,82 @@ public class addToCart extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet addToCart</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet addToCart at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
+        HttpSession session = request.getSession();
+
+        // Lấy giỏ hàng từ session
+        Map<Product, Integer> cart = (Map<Product, Integer>) session.getAttribute("cart");
+        if (cart == null) {
+            cart = new HashMap<>();
+            session.setAttribute("cart", cart);
         }
+
+        // Thao tác trên giỏ hàng: add/update/remove
+        String action = request.getParameter("action");
+        if (action != null) {
+            switch (action) {
+                case "update":
+                    int updateId = Integer.parseInt(request.getParameter("id"));
+                    int quantity = Integer.parseInt(request.getParameter("quantity"));
+                    for (Product p : cart.keySet()) {
+                        if (p.getProductId() == updateId) {
+                            cart.put(p, quantity);
+                            break;
+                        }
+                    }
+                    break;
+
+                case "remove":
+                    int removeId = Integer.parseInt(request.getParameter("id"));
+                    Product removeProduct = null;
+                    for (Product p : cart.keySet()) {
+                        if (p.getProductId() == removeId) {
+                            removeProduct = p;
+                            break;
+                        }
+                    }
+                    if (removeProduct != null) {
+                        cart.remove(removeProduct);
+                    }
+                    break;
+            }
+        }
+
+        // Lấy các sản phẩm được chọn để tính tổng
+        String[] selectedIds = request.getParameterValues("selectedItems");
+        double cartTotalSelected = 0;
+        if (selectedIds != null) {
+            for (String idStr : selectedIds) {
+                int id = Integer.parseInt(idStr);
+                for (Map.Entry<Product, Integer> entry : cart.entrySet()) {
+                    if (entry.getKey().getProductId() == id) {
+                        cartTotalSelected += entry.getKey().getPrice() * entry.getValue();
+                    }
+                }
+            }
+        }
+
+        // Áp dụng mã giảm giá nếu có
+        String promoCode = request.getParameter("promoCode");
+        double discount = 0;
+        if (promoCode != null && !promoCode.isEmpty()) {
+            if (promoCode.equalsIgnoreCase("PINKY10")) {
+                discount = cartTotalSelected * 0.1; // giảm 10%
+            }
+            // Thêm các mã khác ở đây
+        }
+
+        double shipping = (cartTotalSelected > 0) ? 30000 : 0;
+        double total = cartTotalSelected + shipping - discount;
+
+        // Gửi dữ liệu sang JSP
+        request.setAttribute("cart", cart);
+        request.setAttribute("cartTotalSelected", cartTotalSelected);
+        request.setAttribute("shipping", shipping);
+        request.setAttribute("discount", discount);
+        request.setAttribute("total", total);
+        request.setAttribute("selectedIds", selectedIds);
+        request.setAttribute("promoCode", promoCode);
+        request.getRequestDispatcher("View/cart.jsp").forward(request, response);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -57,7 +132,67 @@ public class addToCart extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+//        processRequest(request, response);
+        HttpSession session = request.getSession();
+        CartDB cd = new CartDB();
+        ProductDB pd = new ProductDB();
+        List<CartItems> cartItems = new ArrayList<>();
+        boolean isExist = false;
+        int p_id = 0;
+        String idRaw = request.getParameter("id");
+        try {
+            p_id = Integer.parseInt(idRaw);
+        } catch (NumberFormatException e) {
+            String error = e.getMessage();
+            request.setAttribute("error", error);
+            request.getRequestDispatcher("/VIew/bosuutap.jsp");
+            return;
+        }
+        if (session.getAttribute("user") != null) {
+            user user = (user) session.getAttribute("user");
+            Cart cart;
+            
+            if(cd.getCartByUserId(user.getUser_id()) == null){
+                cd.addNewCart(user.getUser_id(), 0);
+            }
+            cart = cd.getCartByUserId(user.getUser_id());
+            if (cd.getCartItemsByCartId(cart.getCart_id()) != null) {
+                cartItems = cd.getCartItemsByCartId(cart.getCart_id());
+            }
+            //Giỏ hàng có sản phẩm
+            if (!cartItems.isEmpty()) {
+                for (CartItems c : cartItems) {
+                    int quantity = c.getQuantity();
+                    if (p_id != 0 && p_id == c.getProduct_id()) {
+                        quantity+=1;
+                        c.setQuantity(quantity);
+                        cd.updateQuantityAddToCart(cart.getCart_id(), p_id, c.getQuantity());
+                        isExist = true;
+                    }
+                }
+
+            }
+            if (isExist == false) {
+                cd.addCartItems(cart.getCart_id(), p_id, 1, pd.getProductById(p_id).getPrice());
+            }
+            cartItems.clear();
+            cartItems = cd.getCartItemsByCartId(cart.getCart_id());
+            session.setAttribute("cartItems", cartItems);
+            request.setAttribute("msg", "Thêm sản phẩm thành công");
+            //Tìm xem trang nào gửi request để điều hướng về lại
+//            String referer = request.getHeader("referer");
+//            String pageName = "";
+//
+//            if (referer != null && !referer.isEmpty()) {
+//                pageName = referer.substring(referer.lastIndexOf("/") + 1);
+//            }
+//            if(pageName == "products"){
+//                pageName = "product-detail.jsp";
+//                request.getRequestDispatcher("/View/" + pageName).forward(request, response);
+//            }
+            request.getRequestDispatcher("/products").forward(request, response);
+        }
+
     }
 
     /**
