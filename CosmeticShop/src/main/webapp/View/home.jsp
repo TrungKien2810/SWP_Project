@@ -55,7 +55,7 @@
                                     </div>
                                 </div>
                                 <div class="menu_search_cart">
-                                    <i class="fa-solid fa-cart-shopping cart-icon"></i>
+                                    <a href="${pageContext.request.contextPath}/cart"> <i class="fa-solid fa-cart-shopping cart-icon"></i></a>       
                                     <!-- Tài khoản -->
                                     <c:if test="${!empty sessionScope.user}">
                                         <div class="account-menu">

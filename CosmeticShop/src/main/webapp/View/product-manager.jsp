@@ -12,7 +12,8 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
       integrity="sha512-…"
       crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <title>Quản Lý Sản Phẩm - Pinky Cloud</title>
+       <script src="${pageContext.request.contextPath}/Js/home.js"></script>
+       <title>Quản Lý Sản Phẩm - Pinky Cloud</title>
     </head>
     <body>
         <!-- header -->
@@ -40,6 +41,9 @@
                                                 ĐĂNG NHẬP & ĐĂNG KÝ
                                             </a></li>
                                         </c:if>
+                                        <c:if test="${not empty sessionScope.user && sessionScope.user.role == 'ADMIN'}">
+                                        <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/products?action=manage">QUẢN LÝ SẢN PHẨM</a></li>
+                                        </c:if>
                                     <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/lienhe.jsp">LIÊN HỆ</a></li>
                                 </ul>
                                 <div class="menu_search">
@@ -51,22 +55,25 @@
                                     </div>
                                 </div>
                                 <div class="menu_search_cart">
-                                    <i class="fa-solid fa-cart-shopping"></i>
+                                    <a href="${pageContext.request.contextPath}/cart"> <i class="fa-solid fa-cart-shopping cart-icon"></i></a>       
                                     <!-- Tài khoản -->
-                                    <div class="account-menu">
+                                    <c:if test="${!empty sessionScope.user}">
+                                        <div class="account-menu">
                                         <i class="fas fa-user-circle account-icon"></i>
                                         <c:if test="${not empty sessionScope.user}">
                                             <div class="account-dropdown">
                                                 <p class="welcome-text">Welcome, ${sessionScope.user.username}</p>
-                                                <a href="${pageContext.request.contextPath}/View/account.jsp">Account Setting</a>
+                                                <a href="${pageContext.request.contextPath}/account-management">Quản lý tài khoản</a>
                                                 <a href="${pageContext.request.contextPath}/cart">My Cart</a>
                                                 <a href="${pageContext.request.contextPath}/logout">Log Out</a>
                                             </div>
                                         </c:if>
                                     </div>
+                                    </c:if> 
                                 </div>
                             </div>    
                         </div>
+
 
                         <!-- Kiểm tra quyền admin -->
                         <c:if test="${empty sessionScope.user || sessionScope.user.role != 'ADMIN'}">
