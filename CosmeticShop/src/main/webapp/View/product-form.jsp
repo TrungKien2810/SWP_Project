@@ -94,22 +94,45 @@
                         <c:when test="${not empty existingImages}">
                             <!-- Hiển thị ảnh phụ hiện có khi chỉnh sửa -->
                             <c:forEach var="image" items="${existingImages}" varStatus="loop">
-                                <div class="additional-image-item mb-2">
-                                    <div class="row">
-                                        <div class="col-md-10">
-                                            <input type="file" class="form-control" name="additionalImageFiles[]" accept="image/*">
-                                            <small class="text-muted">Ảnh hiện tại: ${image.imageUrl}</small>
+                                <div class="existing-image-item mb-3 p-3 border rounded">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-2">
+                                            <img src="${pageContext.request.contextPath}${image.imageUrl}" 
+                                                 alt="Ảnh phụ ${loop.index + 1}" 
+                                                 class="img-thumbnail" 
+                                                 style="max-width: 80px; max-height: 80px;">
+                                        </div>
+                                        <div class="col-md-8">
+                                            <small class="text-muted d-block">Ảnh hiện tại: ${image.imageUrl}</small>
+                                            <small class="text-muted">Thứ tự: ${image.imageOrder}</small>
                                         </div>
                                         <div class="col-md-2">
-                                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeImageItem(this)">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
+                                            <div class="form-check">
+                                                <input class="form-check-input" 
+                                                       type="checkbox" 
+                                                       name="deleteImageIds" 
+                                                       value="${image.imageId}" 
+                                                       id="deleteImage${image.imageId}">
+                                                <label class="form-check-label text-danger" for="deleteImage${image.imageId}">
+                                                    <i class="fas fa-trash"></i> Xóa
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </c:forEach>
                         </c:when>
-                        <c:otherwise>
+                    </c:choose>
+                    
+                    <!-- Phần thêm ảnh phụ mới -->
+                    <c:if test="${product != null}">
+                        <div class="mt-3">
+                            <h6 class="text-primary">Thêm ảnh phụ mới:</h6>
+                        </div>
+                    </c:if>
+                    
+                    <c:choose>
+                        <c:when test="${product == null}">
                             <!-- Hiển thị ảnh phụ mặc định khi thêm mới -->
                             <div class="additional-image-item mb-2">
                                 <div class="row">
@@ -123,13 +146,22 @@
                                     </div>
                                 </div>
                             </div>
-                        </c:otherwise>
+                        </c:when>
                     </c:choose>
                 </div>
                 <button type="button" class="btn btn-outline-primary btn-sm" onclick="addImageItem()">
-                    <i class="fas fa-plus"></i> Thêm ảnh phụ
+                    <i class="fas fa-plus"></i> Thêm ảnh phụ mới
                 </button>
-                <small class="text-muted d-block mt-1">Upload ảnh phụ (thứ tự tự động theo thời gian upload)</small>
+                <small class="text-muted d-block mt-1">
+                    <c:choose>
+                        <c:when test="${product != null}">
+                            Chọn checkbox để xóa ảnh phụ hiện có, hoặc upload ảnh mới để thêm vào
+                        </c:when>
+                        <c:otherwise>
+                            Upload ảnh phụ (thứ tự tự động theo thời gian upload)
+                        </c:otherwise>
+                    </c:choose>
+                </small>
             </div>
 
             <div class="mb-3">

@@ -126,15 +126,22 @@
                         <p><b>Số lượng:</b> <%= p.getStock() %> sản phẩm có sẵn</p>
                         <p><b>Danh mục:</b> <%= categoryName != null ? categoryName : "Không xác định" %></p>
                     </div>
+                    
+                    <!-- Nút thêm vào giỏ hàng -->
+                    <div class="action-buttons mb-4">
+                        <a href="${pageContext.request.contextPath}/addToCart?id=<%=p.getProductId()%>"> 
+                        <button class="btn btn-primary add-to-cart">
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            Thêm vào giỏ hàng
+                        </button>
+                        </a>
+                    </div>
+                    
                     <div class="description-section">
                         <h4>Mô tả sản phẩm</h4>
                         <div class="description-content">
                             <%= p.getDescription() != null ? p.getDescription().replace("\n", "<br>") : "Chưa có mô tả" %>
                         </div>
-                    </div>
-                    <div class="action-buttons">
-                        <button class="btn btn-primary add-to-cart">Thêm vào giỏ hàng</button>
-                        <button class="btn btn-secondary buy-now">Mua ngay</button>
                     </div>
                 </div>
             </div>
