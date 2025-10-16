@@ -68,7 +68,8 @@ public class PasswordResetRequestServlet extends HttpServlet {
 
             String baseUrl = req.getRequestURL().toString().replace("/password/reset/request", "/password/reset");
             String resetLink = baseUrl + "?token=" + token;
-            String body = "<p>Nhấn vào link để đặt lại mật khẩu:</p><p><a href=\"" + resetLink + "\">Đặt lại mật khẩu</a></p>";
+            // String body = "<p>Nhấn vào link để đặt lại mật khẩu:</p><p><a href=\"" + resetLink + "\">Đặt lại mật khẩu</a></p>";
+            String body = createEmailTemplate(resetLink, existingUser.getUsername());
             try {
                 String fromEmail = getFromEmail(req);
                 String appPassword = getAppPassword(req);
@@ -103,6 +104,98 @@ public class PasswordResetRequestServlet extends HttpServlet {
         new SecureRandom().nextBytes(b);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(b);
     }
+
+private String createEmailTemplate(String resetLink, String userName) {
+    String nameToShow = (userName != null ? userName : "bạn");
+    
+    String template = "<!DOCTYPE html>\n" +
+        "<html lang=\"vi\">\n" +
+        "<head>\n" +
+        "    <meta charset=\"UTF-8\">\n" +
+        "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+        "    <title>Khôi phục mật khẩu - Pinky Cloud</title>\n" +
+        "    <style>\n" +
+        "        body { margin: 0; padding: 0; font-family: 'Arial', sans-serif; background-color: #f9f9f9; color: #333; }\n" +
+        "        .email-container { max-width: 600px; margin: 0 auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }\n" +
+        "        .header { background: linear-gradient(135deg, #f76c85, #ff8fa3); padding: 30px 20px; text-align: center; }\n" +
+        "        .logo { max-width: 200px; height: auto; margin-bottom: 15px; }\n" +
+        "        .content { padding: 40px 30px; line-height: 1.6; }\n" +
+        "        .button { display: inline-block; background: #f76c85; color: white !important; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; margin: 25px 0; text-align: center; }\n" +
+        "        .button:hover { background: #e55a74; }\n" +
+        "        .warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 25px 0; border-radius: 4px; }\n" +
+        "        .footer { background: #f76c85; color: white; padding: 30px 20px; text-align: center; }\n" +
+        "        .footer-links a { color: white; text-decoration: none; margin: 0 15px; font-size: 14px; }\n" +
+        "        .social-icon { width: 32px; height: 32px; vertical-align: middle; }\n" +
+        "        .branch-info { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; font-size: 14px; }\n" +
+        "    </style>\n" +
+        "</head>\n" +
+        "<body>\n" +
+        "    <div class=\"email-container\">\n" +
+        "        <!-- Header với Logo -->\n" +
+        "        <div class=\"header\">\n" +
+        "            <h1 style=\"color: white; margin: 10px 0 5px 0; font-size: 28px;\">PINKY CLOUD</h1>\n" +
+        "            <p style=\"color: white; margin: 0; opacity: 0.9;\">Khôi phục mật khẩu của bạn</p>\n" +
+        "        </div>\n" +
+        "        \n" +
+        "        <!-- Nội dung chính -->\n" +
+        "        <div class=\"content\">\n" +
+        "            <h2 style=\"color: #f76c85; margin-top: 0;\">Xin chào " + nameToShow + "</h2>\n" +
+        "            \n" +
+        "            <p>Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu cho tài khoản <strong>Pinky Cloud</strong> của bạn.</p>\n" +
+        "            \n" +
+        "            <p>Để đặt lại mật khẩu, vui lòng nhấn vào nút bên dưới:</p>\n" +
+        "            \n" +
+        "            <div style=\"text-align: center;\">\n" +
+        "                <a href=\"" + resetLink + "\" class=\"button\" style=\"display: inline-block; background: #f76c85; color: white; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; margin: 25px 0;\">\n" +
+        "                    ĐẶT LẠI MẬT KHẨU\n" +
+        "                </a>\n" +
+        "            </div>\n" +
+        "            \n" +
+        "            <p>Hoặc sao chép và dán đường link sau vào trình duyệt:</p>\n" +
+        "            <div style=\"background: #f8f9fa; padding: 15px; border-radius: 5px; word-break: break-all;\">\n" +
+        "                <code style=\"color: #f76c85; font-size: 12px;\">" + resetLink + "</code>\n" +
+        "            </div>\n" +
+        "            \n" +
+        "            <!-- Cảnh báo bảo mật -->\n" +
+        "            <div class=\"warning\">\n" +
+        "                <strong>Lưu ý quan trọng:</strong>\n" +
+        "                <ul style=\"margin: 10px 0; padding-left: 20px;\">\n" +
+        "                    <li>Liên kết chỉ có hiệu lực trong <strong>1 giờ</strong></li>\n" +
+        "                    <li>Nếu bạn không yêu cầu đặt lại mật khẩu, hãy bỏ qua email này</li>\n" +
+        "                    <li>Liên hệ hỗ trợ ngay nếu bạn nghi ngờ có hoạt động đáng ngờ</li>\n" +
+        "                </ul>\n" +
+        "            </div>\n" +
+        "            \n" +
+        "            <!-- Thông tin liên hệ -->\n" +
+        "            <div class=\"branch-info\">\n" +
+        "                <h4 style=\"color: #f76c85; margin-top: 0;\">Hỗ trợ khách hàng</h4>\n" +
+        "                <p><strong>Trụ sở chính:</strong> Số 31, đường Nguyễn Thị Minh Khai, Phường Quy Nhơn, Gia Lai</p>\n" +
+        "                <p><strong>Email:</strong> pinkycloudvietnam@gmail.com</p>\n" +
+        "                <p><strong>Website:</strong> www.pinkycloud.vn</p>\n" +
+        "            </div>\n" +
+        "        </div>\n" +
+        "        \n" +
+        "        <!-- Footer -->\n" +
+        "        <div class=\"footer\">\n" +
+        "            <div class=\"footer-links\">\n" +
+        "                <a href=\"https://yourwebsite.com/View/vechungtoi.jsp\">VỀ CHÚNG TÔI</a>\n" +
+        "                <a href=\"https://yourwebsite.com/products\">BỘ SƯU TẬP</a>\n" +
+        "                <a href=\"https://yourwebsite.com/View/lienhe.jsp\">LIÊN HỆ</a>\n" +
+        "            </div>\n" +
+        "            \n" +
+        "            <div style=\"margin-top: 20px; font-size: 12px; opacity: 0.9;\">\n" +
+        "                <p style=\"margin: 5px 0;\">© 2024 Pinky Cloud. All rights reserved.</p>\n" +
+        "                <p style=\"margin: 5px 0;\">Sản phẩm chăm sóc da, Mỹ phẩm trang điểm, Mỹ phẩm chính hãng</p>\n" +
+        "            </div>\n" +
+        "        </div>\n" +
+        "    </div>\n" +
+        "</body>\n" +
+        "</html>";
+    
+    return template;
+}
+
+
 }
 
 
