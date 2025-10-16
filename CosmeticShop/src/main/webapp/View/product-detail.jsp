@@ -89,23 +89,67 @@
         </c:if>
         
         <% if (p != null) { %>  
-            <div class="product-image">
-                <img src="${pageContext.request.contextPath}<%= p.getImageUrl() %>" alt="Hình sản phẩm"/>
+            <div class="product-container">
+                <!-- Product Image Gallery -->
+                <div class="product-gallery">
+                    <div class="main-image-container">
+                        <img id="mainImage" src="${pageContext.request.contextPath}<%= p.getImageUrl() %>" alt="Hình sản phẩm" class="main-image"/>
+                        <div class="image-zoom-overlay" id="zoomOverlay">
+                            <span class="close-zoom">&times;</span>
+                            <img id="zoomedImage" src="" alt="Zoomed image" class="zoomed-image"/>
+                        </div>
+                    </div>
+                    
+                    <!-- Thumbnail Navigation -->
+                    <div class="thumbnail-container">
+                        <% if (p.getImageUrls() != null && !p.getImageUrls().isEmpty()) { %>
+                            <% for (int i = 0; i < p.getImageUrls().size(); i++) { %>
+                                <div class="thumbnail-item <%= i == 0 ? "active" : "" %>" onclick="changeMainImage('<%= p.getImageUrls().get(i) %>', this)">
+                                    <img src="${pageContext.request.contextPath}<%= p.getImageUrls().get(i) %>" alt="Thumbnail <%= i + 1 %>" class="thumbnail-image"/>
+                                </div>
+                            <% } %>
+                        <% } else { %>
+                            <div class="thumbnail-item active" onclick="changeMainImage('<%= p.getImageUrl() %>', this)">
+                                <img src="${pageContext.request.contextPath}<%= p.getImageUrl() %>" alt="Thumbnail" class="thumbnail-image"/>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+                
+                <!-- Product Details -->
+                <div class="product-details">
+                    <h2><%= p.getName() %></h2>
+                    <div class="price-section">
+                        <span class="price"><%= String.format("%.0f", p.getPrice()) %> VND</span>
+                    </div>
+                    <div class="product-info">
+                        <p><b>Số lượng:</b> <%= p.getStock() %> sản phẩm có sẵn</p>
+                        <p><b>Danh mục:</b> <%= categoryName != null ? categoryName : "Không xác định" %></p>
+                    </div>
+                    
+                    <!-- Nút thêm vào giỏ hàng -->
+                    <div class="action-buttons mb-4">
+                        <a href="${pageContext.request.contextPath}/addToCart?id=<%=p.getProductId()%>"> 
+                        <button class="btn btn-primary add-to-cart">
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            Thêm vào giỏ hàng
+                        </button>
+                        </a>
+                    </div>
+                    
+                    <div class="description-section">
+                        <h4>Mô tả sản phẩm</h4>
+                        <div class="description-content">
+                            <%= p.getDescription() != null ? p.getDescription().replace("\n", "<br>") : "Chưa có mô tả" %>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="product-details">
-                <h2>Thông tin sản phẩm</h2>
-                <p><b>Tên:</b> <%= p.getName() %></p>
-                <p><b>Giá:</b> 
-                    <span class="price"><%= p.getPrice() %> VND</span>
-                </p>
-                <p><b>Số lượng:</b> <%= p.getStock() %></p>
-                <p><b>Mô tả:</b> <%= p.getDescription() %></p>
-                <p><b>Danh mục:</b> <%= categoryName != null ? categoryName : "Không xác định" %></p>
-                <button class="btn">Mua ngay</button>
-            </div>
-            <div class="clear"></div>
         <% } else { %>
-            <p>Không tìm thấy sản phẩm</p>
+            <div class="no-product">
+                <h3>Không tìm thấy sản phẩm</h3>
+                <p>Sản phẩm bạn đang tìm kiếm không tồn tại hoặc đã bị xóa.</p>
+            </div>
         <% } %>
     </div>
     <footer class="text-white py-4 w-100" style="background-color:#f76c85;">
@@ -160,6 +204,70 @@
                         </footer>
     <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
     <script src="${pageContext.request.contextPath}/Js/home.js"></script>
+    
+    <script>
+        // Gallery functionality
+        function changeMainImage(imageUrl, thumbnailElement) {
+            // Update main image
+            const mainImage = document.getElementById('mainImage');
+            mainImage.src = '${pageContext.request.contextPath}' + imageUrl;
+            
+            // Update active thumbnail
+            document.querySelectorAll('.thumbnail-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            thumbnailElement.classList.add('active');
+        }
+        
+        // Image zoom functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const mainImage = document.getElementById('mainImage');
+            const zoomOverlay = document.getElementById('zoomOverlay');
+            const zoomedImage = document.getElementById('zoomedImage');
+            const closeZoom = document.querySelector('.close-zoom');
+            
+            // Click to zoom
+            mainImage.addEventListener('click', function() {
+                zoomedImage.src = this.src;
+                zoomOverlay.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            });
+            
+            // Close zoom
+            closeZoom.addEventListener('click', function() {
+                zoomOverlay.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            });
+            
+            // Close zoom when clicking overlay
+            zoomOverlay.addEventListener('click', function(e) {
+                if (e.target === zoomOverlay) {
+                    zoomOverlay.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            });
+            
+            // Close zoom with Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && zoomOverlay.style.display === 'flex') {
+                    zoomOverlay.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            });
+        });
+        
+        // Add to cart functionality
+        document.querySelector('.add-to-cart')?.addEventListener('click', function() {
+            // TODO: Implement add to cart
+            alert('Sản phẩm đã được thêm vào giỏ hàng!');
+        });
+        
+        // Buy now functionality
+        document.querySelector('.buy-now')?.addEventListener('click', function() {
+            // TODO: Implement buy now
+            alert('Chức năng mua ngay đang được phát triển!');
+        });
+    </script>
 </body>
 
 </html>

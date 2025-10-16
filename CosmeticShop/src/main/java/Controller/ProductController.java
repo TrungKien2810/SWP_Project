@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.ArrayList;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.UUID;
@@ -155,9 +156,14 @@ public class ProductController extends HttpServlet {
         Product existingProduct = db().getProductById(id);
         List<String> categories = db().getAllCategories();
         String currentCategoryName = db().getCategoryNameById(existingProduct.getCategoryId());
+        
+        // Lấy danh sách ảnh phụ hiện có
+        List<ProductDB.ImageInfo> existingImages = db().getProductImagesWithDetails(id);
+        
         request.setAttribute("product", existingProduct);
         request.setAttribute("categories", categories);
         request.setAttribute("currentCategoryName", currentCategoryName);
+        request.setAttribute("existingImages", existingImages);
         request.getRequestDispatcher("/View/product-form.jsp").forward(request, response);
     }
 
@@ -192,7 +198,19 @@ public class ProductController extends HttpServlet {
         String imageUrl = handleImageUpload(request, null);
 
         Product newProduct = new Product(0, name, price, stock, description, imageUrl, categoryId);
-        db().addProduct(newProduct);
+        boolean success = db().addProduct(newProduct);
+        
+        if (!success) {
+            response.sendRedirect("products?action=manage&error=add_failed");
+            return;
+        }
+        
+        // Lấy ID của sản phẩm vừa tạo
+        int productId = db().getLastInsertedProductId();
+        
+        // Xử lý ảnh phụ
+        handleAdditionalImages(request, productId);
+        
         response.sendRedirect("products?action=manage");
     }
 
@@ -226,6 +244,10 @@ public class ProductController extends HttpServlet {
 
         Product product = new Product(id, name, price, stock, description, imageUrl, categoryId);
         db().updateProduct(product);
+        
+        // Xử lý ảnh phụ - chỉ xóa ảnh được đánh dấu xóa và thêm ảnh mới
+        handleAdditionalImagesUpdate(request, id);
+        
         response.sendRedirect("products?action=manage");
     }
 
@@ -237,6 +259,10 @@ public class ProductController extends HttpServlet {
     }
 
     private String handleImageUpload(HttpServletRequest request, String fallbackUrl) throws IOException, ServletException {
+        return handleImageUpload(request, fallbackUrl, "main");
+    }
+    
+    private String handleImageUpload(HttpServletRequest request, String fallbackUrl, String prefix) throws IOException, ServletException {
         Part imagePart = null;
         try {
             imagePart = request.getPart("imageFile");
@@ -254,7 +280,103 @@ public class ProductController extends HttpServlet {
         if (dot >= 0) {
             ext = submittedFileName.substring(dot);
         }
-        String newFileName = UUID.randomUUID().toString() + ext;
+        String newFileName = prefix + "_" + UUID.randomUUID().toString() + ext;
+
+        // Lưu ảnh vào folder cố định trong ổ C
+        String uploadPath = "C:\\CosmeticShop\\uploads";
+        File dir = new File(uploadPath);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        File dest = new File(dir, newFileName);
+        try {
+            imagePart.write(dest.getAbsolutePath());
+        } catch (IOException ex) {
+            throw ex;
+        }
+
+        // Trả về đường dẫn tương đối để hiển thị ảnh
+        String contextRelativeUrl = "/uploads/" + newFileName;
+        return contextRelativeUrl.replace("\\", "/");
+    }
+    
+    private void handleAdditionalImages(HttpServletRequest request, int productId) throws IOException, ServletException {
+        List<Part> additionalImageParts = new ArrayList<>();
+        try {
+            for (Part part : request.getParts()) {
+                if (part.getName() != null && part.getName().startsWith("additionalImageFiles")) {
+                    additionalImageParts.add(part);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error processing additional image files: " + e.getMessage());
+            return;
+        }
+        
+        // Upload ảnh phụ và lưu vào database
+        for (int i = 0; i < additionalImageParts.size(); i++) {
+            Part imagePart = additionalImageParts.get(i);
+            if (imagePart != null && imagePart.getSize() > 0) {
+                String imageUrl = uploadAdditionalImage(imagePart, i + 1);
+                if (imageUrl != null && !imageUrl.trim().isEmpty()) {
+                    db().addProductImage(productId, imageUrl, i + 1);
+                }
+            }
+        }
+    }
+    
+    private void handleAdditionalImagesUpdate(HttpServletRequest request, int productId) throws IOException, ServletException {
+        // Lấy danh sách ảnh phụ hiện có
+        List<ProductDB.ImageInfo> existingImages = db().getProductImagesWithDetails(productId);
+        
+        // Xử lý xóa ảnh được đánh dấu xóa
+        String[] deleteImageIds = request.getParameterValues("deleteImageIds");
+        if (deleteImageIds != null) {
+            for (String imageIdStr : deleteImageIds) {
+                try {
+                    int imageId = Integer.parseInt(imageIdStr);
+                    db().deleteProductImage(imageId);
+                } catch (NumberFormatException e) {
+                    System.err.println("Invalid image ID for deletion: " + imageIdStr);
+                }
+            }
+        }
+        
+        // Xử lý ảnh phụ mới được upload
+        List<Part> additionalImageParts = new ArrayList<>();
+        try {
+            for (Part part : request.getParts()) {
+                if (part.getName() != null && part.getName().startsWith("additionalImageFiles")) {
+                    additionalImageParts.add(part);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error processing additional image files: " + e.getMessage());
+            return;
+        }
+        
+        // Upload ảnh phụ mới và lưu vào database
+        int nextOrder = existingImages.size() + 1; // Thứ tự tiếp theo
+        for (Part imagePart : additionalImageParts) {
+            if (imagePart != null && imagePart.getSize() > 0) {
+                String imageUrl = uploadAdditionalImage(imagePart, nextOrder);
+                if (imageUrl != null && !imageUrl.trim().isEmpty()) {
+                    db().addProductImage(productId, imageUrl, nextOrder);
+                    nextOrder++;
+                }
+            }
+        }
+    }
+    
+    private String uploadAdditionalImage(Part imagePart, int order) throws IOException {
+        String submittedFileName = Paths.get(imagePart.getSubmittedFileName()).getFileName().toString();
+        String ext = "";
+        int dot = submittedFileName.lastIndexOf('.');
+        if (dot >= 0) {
+            ext = submittedFileName.substring(dot);
+        }
+        String newFileName = "additional_" + order + "_" + UUID.randomUUID().toString() + ext;
 
         // Lưu ảnh vào folder cố định trong ổ C
         String uploadPath = "C:\\CosmeticShop\\uploads";

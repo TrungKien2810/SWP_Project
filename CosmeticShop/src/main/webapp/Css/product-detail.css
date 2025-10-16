@@ -1,8 +1,9 @@
 body {
-    font-family: Arial, sans-serif;
-    background-color: #fff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
     margin: 0;
     padding: 0;
+    line-height: 1.6;
 }
 
 .container {
@@ -11,68 +12,387 @@ body {
     padding: 20px;
 }
 
-.product-image {
-    float: left;
-    width: 40%;
-    padding: 10px;
+/* Product Container */
+.product-container {
+    display: flex;
+    gap: 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    margin-bottom: 30px;
 }
 
-.product-image img {
+/* Product Gallery */
+.product-gallery {
+    flex: 1;
+    max-width: 500px;
+}
+
+.main-image-container {
+    position: relative;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.main-image {
     width: 100%;
-    max-width: 300px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    height: 400px;
+    object-fit: cover;
+    cursor: pointer;
+    transition: transform 0.3s ease;
 }
 
+.main-image:hover {
+    transform: scale(1.02);
+}
+
+/* Thumbnail Container */
+.thumbnail-container {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 10px 0;
+    scrollbar-width: thin;
+    scrollbar-color: #ff69b4 #f0f0f0;
+}
+
+.thumbnail-container::-webkit-scrollbar {
+    height: 6px;
+}
+
+.thumbnail-container::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-radius: 3px;
+}
+
+.thumbnail-container::-webkit-scrollbar-thumb {
+    background: #ff69b4;
+    border-radius: 3px;
+}
+
+.thumbnail-item {
+    flex-shrink: 0;
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.thumbnail-item:hover {
+    border-color: #ff69b4;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
+}
+
+.thumbnail-item.active {
+    border-color: #ff69b4;
+    box-shadow: 0 0 0 2px rgba(255, 105, 180, 0.3);
+}
+
+.thumbnail-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.thumbnail-item:hover .thumbnail-image {
+    transform: scale(1.1);
+}
+
+/* Image Zoom Overlay */
+.image-zoom-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    cursor: pointer;
+}
+
+.zoomed-image {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.close-zoom {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    color: white;
+    font-size: 40px;
+    cursor: pointer;
+    z-index: 1001;
+    transition: color 0.3s ease;
+}
+
+.close-zoom:hover {
+    color: #ff69b4;
+}
+
+/* Product Details */
 .product-details {
-    float: right;
-    width: 60%;
-    padding: 10px;
+    flex: 1;
+    padding-left: 20px;
 }
 
 .product-details h2 {
-    color: #ff69b4; /* Màu hồng giống PINKYCLOUD */
-    font-size: 24px;
-    margin-bottom: 10px;
+    color: #2c3e50;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    line-height: 1.3;
 }
 
-.product-details p {
+.price-section {
+    margin-bottom: 20px;
+}
+
+.price {
+    font-size: 32px;
+    color: #e74c3c;
+    font-weight: 700;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.product-info {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid #ff69b4;
+}
+
+.product-info p {
     font-size: 16px;
-    color: #333;
-    margin: 5px 0;
+    color: #555;
+    margin: 8px 0;
+    display: flex;
+    align-items: center;
 }
 
-.product-details .price {
+.product-info b {
+    color: #2c3e50;
+    min-width: 120px;
+    display: inline-block;
+}
+
+.description-section {
+    margin-bottom: 25px;
+}
+
+.description-section * {
+    background-color: transparent !important;
+    background: none !important;
+}
+
+.description-section h4 {
+    color: #2c3e50;
     font-size: 20px;
-    color: #ff0000; /* Màu đỏ giá khuyến mãi giống Shopee */
-    font-weight: bold;
+    margin-bottom: 10px;
+    font-weight: 600;
 }
 
-.product-details .original-price {
-    text-decoration: line-through;
-    color: #888;
-    margin-left: 10px;
+.description-section p {
+    color: #666;
+    font-size: 16px;
+    line-height: 1.8;
+    text-align: left;
+    white-space: pre-line;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    margin-bottom: 15px;
+    width: 100%;
+    display: block;
+    text-indent: 0;
+    padding: 0;
 }
 
-.product-details .discount {
-    color: #ff69b4;
-    font-weight: bold;
+.description-content {
+    color: #666 !important;
+    font-size: 16px;
+    line-height: 1.8;
+    text-align: left;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    margin-bottom: 15px;
+    white-space: Normal;
+    font-family: inherit;
+    background-color: transparent !important;
+    background: none !important;
+    width: 100%;
+    display: block;
+    text-indent: 0;
+    padding: 0;
+    margin-top: 20px;
+    position: relative;
+    top: 30px;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
 }
 
 .btn {
-    background-color: #ff69b4;
-    color: white;
-    padding: 10px 20px;
+    padding: 12px 30px;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
     cursor: pointer;
-    margin-top: 10px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: 150px;
 }
 
-.btn:hover {
-    background-color: #ff1493;
+.btn-primary {
+    background: linear-gradient(135deg, #ff69b4, #ff1493);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
 }
 
-.clear {
-    clear: both;
+.btn-primary:hover {
+    background: linear-gradient(135deg, #ff1493, #ff69b4);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #6c757d, #495057);
+    color: white;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(135deg, #495057, #6c757d);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+}
+
+/* No Product */
+.no-product {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.no-product h3 {
+    color: #e74c3c;
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+
+.no-product p {
+    color: #666;
+    font-size: 16px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .product-container {
+        flex-direction: column;
+        padding: 20px;
+        gap: 20px;
+    }
+    
+    .product-gallery {
+        max-width: 100%;
+    }
+    
+    .main-image {
+        height: 300px;
+    }
+    
+    .thumbnail-container {
+        justify-content: center;
+    }
+    
+    .thumbnail-item {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .product-details {
+        padding-left: 0;
+    }
+    
+    .product-details h2 {
+        font-size: 24px;
+    }
+    
+    .price {
+        font-size: 28px;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+        min-width: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .product-container {
+        padding: 15px;
+    }
+    
+    .main-image {
+        height: 250px;
+    }
+    
+    .thumbnail-item {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .product-details h2 {
+        font-size: 20px;
+    }
+    
+    .price {
+        font-size: 24px;
+    }
+    
+    .product-info p {
+        font-size: 14px;
+    }
+    
+    .product-info b {
+        min-width: 100px;
+    }
+    
+    .description-content {
+        font-size: 14px;
+        line-height: 1.6;
+    }
 }
