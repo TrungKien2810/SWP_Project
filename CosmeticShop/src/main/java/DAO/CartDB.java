@@ -39,8 +39,11 @@ public class CartDB {
                     java.sql.Timestamp uts = rs.getTimestamp("updated_at");
                     if (uts != null) updatedAt = uts.toLocalDateTime();
                 } catch (Exception ignore) { updatedAt = null; }
-                return new Cart(rs.getInt("cart_id"), rs.getInt("user_id"), createdAt, updatedAt);
+                Cart cart = new Cart(rs.getInt("cart_id"), rs.getInt("user_id"), createdAt, updatedAt);
+                System.out.println("[CartDB] getCartByUserId found cart_id=" + cart.getCart_id() + " for user_id=" + userId);
+                return cart;
             } else {
+                System.out.println("[CartDB] getCartByUserId no cart for user_id=" + userId);
                 return null;
             }
         } catch (SQLException e) {
@@ -96,7 +99,9 @@ public class CartDB {
         try{
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, user_id);
-            return stmt.executeUpdate()>0;
+            boolean ok = stmt.executeUpdate()>0;
+            System.out.println("[CartDB] addNewCart user_id=" + user_id + ", created=" + ok);
+            return ok;
         }
         catch(SQLException e){
             e.printStackTrace();
@@ -109,7 +114,11 @@ public class CartDB {
         if (cart != null) return cart;
         boolean created = addNewCart(userId);
         if (!created) return null;
-        return getCartByUserId(userId);
+        Cart reloaded = getCartByUserId(userId);
+        if (reloaded == null) {
+            System.out.println("[CartDB] getOrCreateCartByUserId: created but cannot reload cart for user_id=" + userId);
+        }
+        return reloaded;
     }
 
     public boolean addCartItems(int cart_id, int product_id, int quantity, double price) {

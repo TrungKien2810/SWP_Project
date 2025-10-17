@@ -121,6 +121,10 @@ public class login extends HttpServlet {
             user user = ud.getUserByEmail(email);
             session.setAttribute("user", user);
             Cart cart = cd.getCartByUserId(user.getUser_id());
+            if(cart == null){
+                cd.addNewCart(user.getUser_id());
+                cart = cd.getCartByUserId(user.getUser_id());       
+            }
             List<CartItems> cartItems = new ArrayList<>();
             if (!cd.getCartItemsByCartId(cart.getCart_id()).isEmpty()) {
                 cartItems = cd.getCartItemsByCartId(cart.getCart_id());

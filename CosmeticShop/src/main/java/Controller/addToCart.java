@@ -145,17 +145,18 @@ public class addToCart extends HttpServlet {
         } catch (NumberFormatException e) {
             String error = e.getMessage();
             request.setAttribute("error", error);
-            request.getRequestDispatcher("/View/bosuutap.jsp");
+            request.getRequestDispatcher("/View/bosuutap.jsp").forward(request, response);
             return;
         }
         if (session.getAttribute("user") != null) {
             user user = (user) session.getAttribute("user");
             Cart cart;
             
-            cart = cd.getCartByUserId(user.getUser_id());
+            cart = cd.getOrCreateCartByUserId(user.getUser_id());
             if (cart == null) {
-                cd.addNewCart(user.getUser_id());
-                cart = cd.getCartByUserId(user.getUser_id());
+                request.setAttribute("error", "Không thể tạo/tải giỏ hàng. Vui lòng thử lại sau.");
+                request.getRequestDispatcher("/products").forward(request, response);
+                return;
             }
             // Kiểm tra sản phẩm hợp lệ
             Product product = pd.getProductById(p_id);
