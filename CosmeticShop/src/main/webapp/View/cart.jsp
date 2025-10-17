@@ -82,6 +82,19 @@
     cartItems = (List<CartItems>)session.getAttribute("cartItems");
     }
     Double totalPrice = 0.0;
+    // Lưu cartId vào session nếu có để apply promo từ server
+    if (cartItems != null && !cartItems.isEmpty()) {
+        // best-effort: lấy cartId từ phần tử đầu, nếu controller có set khác thì bỏ qua
+        session.setAttribute("cartId", cartItems.get(0).getCart_id());
+    }
+    // Lấy giảm giá đã áp dụng từ server (nếu có)
+    Double appliedDiscount = 0.0;
+    Object ad = session.getAttribute("appliedDiscountAmount");
+    if (ad instanceof Double) {
+        appliedDiscount = (Double) ad;
+    } else if (ad != null) {
+        try { appliedDiscount = Double.parseDouble(ad.toString()); } catch (Exception ignore) {}
+    }
 %>
 
 <div class="cart-page container mt-5">
@@ -148,16 +161,27 @@
                     <hr>
 
                     <div class="mb-3">
-                        <form id="promoForm" class="d-flex">
-                            <input type="text" id="promoCodeInput" class="form-control me-2" placeholder="Nhập mã khuyến mãi">
+                        <form id="promoForm" class="d-flex" method="post" action="${pageContext.request.contextPath}/apply-promo">
+                            <input type="text" name="promoCode" id="promoCodeInput" class="form-control me-2" placeholder="Nhập mã khuyến mãi" value="${sessionScope.appliedDiscountCode}">
                             <button type="submit" class="btn btn-outline-danger">Áp dụng</button>
                         </form>
-                        <small id="promoDisplay" class="text-success" style="display:none;"></small>
+                        <c:if test="${not empty sessionScope.appliedDiscountCode}">
+                            <small class="text-success">Đã áp dụng: ${sessionScope.appliedDiscountCode} (-${sessionScope.appliedDiscountAmount})</small>
+                        </c:if>
+                        <c:if test="${not empty requestScope.error}">
+                            <small class="text-danger">${requestScope.error}</small>
+                        </c:if>
                     </div>
 
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Giảm giá:</span>
+                        <span id="discountDisplay">${sessionScope.appliedDiscountAmount != null ? sessionScope.appliedDiscountAmount : 0}</span>
+                    </div>
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <span class="fw-bold">Tổng thanh toán:</span>
-                        <strong style="color:#f76c85;" id="totalDisplay"><%=totalPrice%></strong>
+                        <strong style="color:#f76c85;" id="totalDisplay"><%=
+                            (totalPrice - appliedDiscount) > 0 ? (totalPrice - appliedDiscount) : 0
+                        %></strong>
                     </div>
 
                     <a href="${pageContext.request.contextPath}/checkout" class="btn btn-danger w-100 fw-bold">THANH TOÁN NGAY</a>
@@ -181,6 +205,14 @@
         }
     }
 
+    function getServerDiscount() {
+        const el = document.getElementById('discountDisplay');
+        if (!el) return 0;
+        const raw = (el.textContent || '0').toString();
+        const num = Number(raw.replace(/[^0-9.\-]/g, ''));
+        return isNaN(num) ? 0 : num;
+    }
+
     function updateTotal() {
         let subtotal = 0;
         document.querySelectorAll('.cart-item').forEach(item => {
@@ -201,8 +233,10 @@
         
         const subtotalDisplay = document.getElementById('subtotalDisplay');
         const totalDisplay = document.getElementById('totalDisplay');
-        if(subtotalDisplay) subtotalDisplay.textContent = subtotal.toLocaleString() + '₫';
-        if(totalDisplay) totalDisplay.textContent = subtotal.toLocaleString() + '₫';
+        if (subtotalDisplay) subtotalDisplay.textContent = subtotal.toLocaleString() + '₫';
+        const discount = getServerDiscount();
+        const total = Math.max(0, subtotal - discount);
+        if (totalDisplay) totalDisplay.textContent = total.toLocaleString() + '₫';
     }
 
     // Event checkbox & quantity input
@@ -221,27 +255,7 @@
     // Khởi tạo tính tổng ban đầu
     updateTotal();
 
-    // Mã giảm giá
-    const promoForm = document.getElementById('promoForm');
-    if(promoForm) {
-        promoForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const code = document.getElementById('promoCodeInput').value.trim();
-            let discount = 0;
-            if (code === "GIAM10") discount = 10000;
-            document.getElementById('promoDisplay').textContent = "Mã giảm giá áp dụng: -" + discount.toLocaleString() + "₫";
-            document.getElementById('promoDisplay').style.display = 'inline';
-
-            let subtotal = 0;
-            document.querySelectorAll('.cart-item').forEach(item => {
-                const checkbox = item.querySelector('.cart-item-checkbox');
-                const price = parseFloat(checkbox.dataset.price);
-                const qty = parseInt(item.querySelector('.quantity-input').value);
-                if (checkbox.checked) subtotal += price * qty;
-            });
-            document.getElementById('totalDisplay').textContent = (subtotal - discount).toLocaleString() + '₫';
-        });
-    }
+    // Mã giảm giá: xử lý phía server (không cập nhật client-side tại đây)
 </script>
 
 <!-- ===== FOOTER ===== -->
