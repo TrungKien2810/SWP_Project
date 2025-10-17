@@ -145,17 +145,25 @@ public class addToCart extends HttpServlet {
         } catch (NumberFormatException e) {
             String error = e.getMessage();
             request.setAttribute("error", error);
-            request.getRequestDispatcher("/VIew/bosuutap.jsp");
+            request.getRequestDispatcher("/View/bosuutap.jsp");
             return;
         }
         if (session.getAttribute("user") != null) {
             user user = (user) session.getAttribute("user");
             Cart cart;
             
-            if(cd.getCartByUserId(user.getUser_id()) == null){
-                cd.addNewCart(user.getUser_id(), 0);
-            }
             cart = cd.getCartByUserId(user.getUser_id());
+            if (cart == null) {
+                cd.addNewCart(user.getUser_id());
+                cart = cd.getCartByUserId(user.getUser_id());
+            }
+            // Kiểm tra sản phẩm hợp lệ
+            Product product = pd.getProductById(p_id);
+            if (product == null) {
+                request.setAttribute("error", "Sản phẩm không tồn tại hoặc đã bị xóa.");
+                request.getRequestDispatcher("/products").forward(request, response);
+                return;
+            }
             if (cd.getCartItemsByCartId(cart.getCart_id()) != null) {
                 cartItems = cd.getCartItemsByCartId(cart.getCart_id());
             }
@@ -173,7 +181,7 @@ public class addToCart extends HttpServlet {
 
             }
             if (isExist == false) {
-                cd.addCartItems(cart.getCart_id(), p_id, 1, pd.getProductById(p_id).getPrice());
+                cd.addCartItems(cart.getCart_id(), p_id, 1, product.getPrice());
             }
             cartItems.clear();
             cartItems = cd.getCartItemsByCartId(cart.getCart_id());
@@ -191,6 +199,10 @@ public class addToCart extends HttpServlet {
 //                request.getRequestDispatcher("/View/" + pageName).forward(request, response);
 //            }
             request.getRequestDispatcher("/products").forward(request, response);
+        } else {
+            // Chưa đăng nhập
+            request.setAttribute("error", "Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.");
+            request.getRequestDispatcher("/View/log.jsp").forward(request, response);
         }
 
     }

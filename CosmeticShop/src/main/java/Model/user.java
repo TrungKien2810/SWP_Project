@@ -36,7 +36,6 @@ public class user {
         this.password = password;
         this.role = role != null ? role : "USER"; // Mặc định là "USER" nếu null
         this.date_create = date_create;
-        this.role = role;
     }
 
     public int getUser_id() {

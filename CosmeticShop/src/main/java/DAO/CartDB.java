@@ -10,7 +10,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,11 +29,22 @@ public class CartDB {
             stmt.setInt(1, userId);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                return new Cart(rs.getInt("cart_id"), rs.getInt("user_id"), rs.getDouble("totalPrice"), rs.getTimestamp("created_at").toLocalDateTime(), rs.getTimestamp("updated_at").toLocalDateTime());
+                java.time.LocalDateTime createdAt = null;
+                java.time.LocalDateTime updatedAt = null;
+                try {
+                    java.sql.Timestamp cts = rs.getTimestamp("created_at");
+                    if (cts != null) createdAt = cts.toLocalDateTime();
+                } catch (Exception ignore) { createdAt = null; }
+                try {
+                    java.sql.Timestamp uts = rs.getTimestamp("updated_at");
+                    if (uts != null) updatedAt = uts.toLocalDateTime();
+                } catch (Exception ignore) { updatedAt = null; }
+                return new Cart(rs.getInt("cart_id"), rs.getInt("user_id"), createdAt, updatedAt);
             } else {
                 return null;
             }
         } catch (SQLException e) {
+            e.printStackTrace();
             return null;
         }
     }
@@ -81,30 +91,25 @@ public class CartDB {
         }
     }
     
-    public boolean addNewCart(int user_id, double totalPrice){
-        String sql = "insert into Carts(user_id, totalPrice) values (?, ?)";
+    public boolean addNewCart(int user_id){
+        String sql = "insert into Carts(user_id) values (?)";
         try{
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, user_id);
-            stmt.setDouble(2, totalPrice);
             return stmt.executeUpdate()>0;
         }
         catch(SQLException e){
+            e.printStackTrace();
             return false;
         }
     }
-    
-    public boolean updateTotalPrice (int cart_id, double totalPrice){
-        String sql = "Update Carts set totalPrice = ? where cart_id = ?";
-        try{
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setDouble(1, totalPrice);
-            stmt.setInt(2, cart_id);
-            return stmt.executeUpdate()>0;
-        }
-        catch(SQLException e){
-            return false;
-        }
+
+    public Cart getOrCreateCartByUserId(int userId) {
+        Cart cart = getCartByUserId(userId);
+        if (cart != null) return cart;
+        boolean created = addNewCart(userId);
+        if (!created) return null;
+        return getCartByUserId(userId);
     }
 
     public boolean addCartItems(int cart_id, int product_id, int quantity, double price) {
@@ -121,6 +126,22 @@ public class CartDB {
             return false;
         }
     }
+
+    public double calculateCartTotal(int cart_id) {
+        String sql = "select ISNULL(SUM(price * quantity), 0) as total from CartItems where cart_id = ?";
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, cart_id);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble("total");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0.0;
+    }
+
     public boolean removeFromCart(int cart_id, int product_id){
         String sql = "DELETE FROM CartItems WHERE cart_id = ? AND product_id = ?";
         try{
