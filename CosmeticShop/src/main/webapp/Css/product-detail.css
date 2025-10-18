@@ -253,6 +253,80 @@ body {
     flex-wrap: wrap;
 }
 
+/* Ensure form children don't overlap */
+.action-buttons form {
+    display: flex;
+    align-items: center;
+    column-gap: 12px;
+    row-gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Shopee-like quantity control */
+.qty-control {
+    display: inline-flex;
+    align-items: center;
+    border: 2px solid #fbd0da; /* subtle brand tint */
+    border-radius: 4px;
+    overflow: hidden;
+    height: 40px;
+    background: #fff;
+    margin-right: 8px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 2; /* keep above adjacent button if overlapping occurs */
+}
+
+.qty-control:hover {
+    border-color: #f8a8b8;
+}
+
+.qty-control:focus-within {
+    border-color: #f76c85;
+    box-shadow: 0 0 0 3px rgba(247, 108, 133, 0.15);
+}
+
+.qty-btn {
+    width: 40px;
+    height: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    color: #f76c85;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    user-select: none;
+    font-size: 18px;
+}
+
+.qty-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.qty-btn:hover:not(:disabled) {
+    background: #fff2f5;
+}
+
+.qty-input {
+    width: 84px;
+    height: 100%;
+    text-align: center;
+    border: none;
+    border-left: 1px solid #fbd0da;
+    border-right: 1px solid #fbd0da;
+    outline: none;
+    font-size: 18px;
+    font-weight: 700;
+    color: #f76c85;
+}
+
+.qty-input:disabled {
+    background: #fafafa;
+}
+
 .btn {
     padding: 12px 30px;
     border: none;
@@ -270,6 +344,8 @@ body {
     background: linear-gradient(135deg, #ff69b4, #ff1493);
     color: white;
     box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+    position: relative;
+    z-index: 1;
 }
 
 .btn-primary:hover {
@@ -288,6 +364,28 @@ body {
     background: linear-gradient(135deg, #495057, #6c757d);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+}
+
+/* Quantity hint pill */
+.qty-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 13px;
+    line-height: 1;
+}
+
+.qty-hint.ok {
+    background: #fff2f5;
+    color: #c74d68;
+}
+
+.qty-hint.low {
+    background: #fff6e5;
+    color: #c27a1a;
 }
 
 /* No Product */

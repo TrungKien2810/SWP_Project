@@ -15,6 +15,17 @@ public class Discount {
     private Timestamp startDate;
     private Timestamp endDate;
 
+    // Optional extended fields for assignment conditions and limits
+    private String description;
+    private Integer usageLimit;
+    private Integer usedCount;
+    private String conditionType; // TOTAL_SPENT | ORDER_COUNT | FIRST_ORDER | SPECIAL_EVENT | null
+    private Double conditionValue;
+    private String conditionDescription;
+    private Boolean specialEvent;
+    private Boolean autoAssignAll;
+    private Timestamp assignDate;
+
     public Discount(int discountId, String code, String name, String type,
                     double value, double minOrderAmount, Double maxDiscountAmount,
                     Boolean active, Timestamp startDate, Timestamp endDate) {
@@ -112,6 +123,26 @@ public class Discount {
     public void setEndDate(Timestamp endDate) {
         this.endDate = endDate;
     }
+
+    // Extended fields getters/setters
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+    public Integer getUsageLimit() { return usageLimit; }
+    public void setUsageLimit(Integer usageLimit) { this.usageLimit = usageLimit; }
+    public Integer getUsedCount() { return usedCount; }
+    public void setUsedCount(Integer usedCount) { this.usedCount = usedCount; }
+    public String getConditionType() { return conditionType; }
+    public void setConditionType(String conditionType) { this.conditionType = conditionType; }
+    public Double getConditionValue() { return conditionValue; }
+    public void setConditionValue(Double conditionValue) { this.conditionValue = conditionValue; }
+    public String getConditionDescription() { return conditionDescription; }
+    public void setConditionDescription(String conditionDescription) { this.conditionDescription = conditionDescription; }
+    public Boolean getSpecialEvent() { return specialEvent; }
+    public void setSpecialEvent(Boolean specialEvent) { this.specialEvent = specialEvent; }
+    public Boolean getAutoAssignAll() { return autoAssignAll; }
+    public void setAutoAssignAll(Boolean autoAssignAll) { this.autoAssignAll = autoAssignAll; }
+    public Timestamp getAssignDate() { return assignDate; }
+    public void setAssignDate(Timestamp assignDate) { this.assignDate = assignDate; }
 }
 
 

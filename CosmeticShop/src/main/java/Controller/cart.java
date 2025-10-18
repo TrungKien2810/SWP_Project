@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
+import DAO.DiscountDB;
 
 /**
  *
@@ -66,9 +67,21 @@ public class cart extends HttpServlet {
         Object CartItems = session.getAttribute("cartItems");
         if(CartItems!=null){
             cartItems = (List<CartItems>) CartItems;
+            // Lấy danh sách voucher được gán cho user để hiển thị select
+            if (session.getAttribute("user") != null) {
+                Model.user u = (Model.user) session.getAttribute("user");
+                // Auto-assign due discounts before loading list
+                new DiscountDB().assignDueForUser(u.getUser_id());
+                request.setAttribute("assignedDiscounts", new DiscountDB().listAssignedDiscountsForUser(u.getUser_id()));
+            }
             request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
         }
         else{
+            if (session.getAttribute("user") != null) {
+                Model.user u = (Model.user) session.getAttribute("user");
+                new DiscountDB().assignDueForUser(u.getUser_id());
+                request.setAttribute("assignedDiscounts", new DiscountDB().listAssignedDiscountsForUser(u.getUser_id()));
+            }
             request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
         }
     }
