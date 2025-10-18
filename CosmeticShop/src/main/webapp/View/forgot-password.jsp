@@ -18,7 +18,7 @@
         <div class="header_social">
             <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/fb.png" alt="" ></a>
             <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/ins.png" alt=""></a>
-            <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/tt.png"alt=""><a>
+            <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/tt.png" alt=""></a>
             <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/ytb.png" alt="" ></a>
         </div>
     </div>

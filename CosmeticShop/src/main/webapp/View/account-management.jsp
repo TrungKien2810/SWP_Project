@@ -104,7 +104,7 @@
         <div class="header_social">
             <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/fb.png" alt="" ></a>
             <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/ins.png" alt=""></a>
-            <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/tt.png"alt=""><a>
+            <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/tt.png" alt=""></a>
             <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/ytb.png" alt="" ></a>
         </div>
     </div>
@@ -183,6 +183,14 @@
                     </div>
                     <div class="action-title">Giỏ hàng</div>
                     <div class="action-description">Xem và quản lý giỏ hàng của bạn</div>
+                </div>
+
+                <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/shipping-address'">
+                    <div class="action-icon">
+                        <i class="fas fa-location-dot"></i>
+                    </div>
+                    <div class="action-title">Địa chỉ giao hàng</div>
+                    <div class="action-description">Quản lý địa chỉ nhận hàng của bạn</div>
                 </div>
 
                 <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/View/forgot-password.jsp'">

@@ -22,7 +22,7 @@
             <div class="header_social">
                 <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/fb.png" alt="" ></a>
                 <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/ins.png" alt=""></a>
-                <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/tt.png"alt=""><a>
+                <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/tt.png" alt=""></a>
                         <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/ytb.png" alt="" ></a>
                         </div>
                         </div>
@@ -73,6 +73,12 @@
                                 </div>
                             </div>    
                         </div>
+
+                        <c:if test="${not empty param.msg}">
+                            <div class="container mt-3">
+                                <div class="alert alert-success">${param.msg}</div>
+                            </div>
+                        </c:if>
 
                         <!-- MODAL LOGIN -->
                         <!-- Modal Đăng Nhập -->
