@@ -91,6 +91,59 @@ public class OrderDB {
             return false;
         }
     }
+
+    // Lưu txnRef và số tiền để đối chiếu IPN
+    public void attachVnpTxnRef(int orderId, String txnRef, long amount) {
+        String sql = "update Orders set vnp_txn_ref = ?, vnp_amount = ? where order_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, txnRef);
+            ps.setLong(2, amount);
+            ps.setInt(3, orderId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Tìm đơn theo id
+    public Order getById(int orderId) {
+        String sql = "select top 1 order_id, total_amount, payment_status from Orders where order_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, orderId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Order o = new Order();
+                    o.setOrderId(rs.getInt("order_id"));
+                    o.setTotalAmount(rs.getDouble("total_amount"));
+                    o.setPaymentStatus(rs.getString("payment_status"));
+                    return o;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Tìm đơn theo txnRef
+    public Order findByVnpTxnRef(String txnRef) {
+        String sql = "select top 1 order_id, total_amount, payment_status from Orders where vnp_txn_ref = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, txnRef);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Order o = new Order();
+                    o.setOrderId(rs.getInt("order_id"));
+                    o.setTotalAmount(rs.getDouble("total_amount"));
+                    o.setPaymentStatus(rs.getString("payment_status"));
+                    return o;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
 
 

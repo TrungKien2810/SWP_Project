@@ -58,23 +58,10 @@
                             <label class="form-check-label" for="cod">Thanh toán khi nhận hàng (COD)</label>
                         </div>
                         <div class="form-check mt-2">
-                            <input class="form-check-input" type="radio" name="payment_method" id="bank" value="BANK">
-                            <label class="form-check-label" for="bank">Thanh toán qua ngân hàng</label>
+                            <input class="form-check-input" type="radio" name="payment_method" id="vnpay" value="BANK">
+                            <label class="form-check-label" for="vnpay">Thanh toán qua VNPAY</label>
                         </div>
-                        <div class="form-text">Nếu chọn ngân hàng, bạn sẽ được chuyển đến cổng thanh toán.</div>
-                        <input type="hidden" name="bank_code" id="bank_code">
-
-                        <div id="bankList" class="mt-3" style="display:none;">
-                            <label class="form-label mb-2">Chọn ngân hàng:</label>
-                            <div class="d-flex flex-wrap gap-2">
-                                <button type="button" class="btn btn-outline-secondary bank-btn" data-bank="VCB">Vietcombank (VCB)</button>
-                                <button type="button" class="btn btn-outline-secondary bank-btn" data-bank="BIDV">BIDV</button>
-                                <button type="button" class="btn btn-outline-secondary bank-btn" data-bank="ACB">ACB</button>
-                                <button type="button" class="btn btn-outline-secondary bank-btn" data-bank="TCB">Techcombank (TCB)</button>
-                                <button type="button" class="btn btn-outline-secondary bank-btn" data-bank="VPB">VPBank (VPB)</button>
-                            </div>
-                            <div class="form-text mt-2">Bạn có thể chọn ngân hàng trước khi bấm Đặt hàng.</div>
-                        </div>
+                        <div class="form-text">Chọn VNPAY để chuyển đến cổng thanh toán VNPAY.</div>
                     </div>
 
                     <div class="card p-3 mb-3">
@@ -133,10 +120,6 @@
             }
             document.addEventListener('change', function(e){
                 if (e.target && e.target.name === 'shipping_method_id') updateTotals();
-                if (e.target && e.target.name === 'payment_method') {
-                    var isBank = e.target.value === 'BANK';
-                    document.getElementById('bankList').style.display = isBank ? 'block' : 'none';
-                }
             });
             document.addEventListener('DOMContentLoaded', function(){
                 var radios = document.querySelectorAll('input[name="shipping_method_id"]');
@@ -145,17 +128,7 @@
                     radios[0].checked = true;
                 }
                 updateTotals();
-
-                // bank selection handlers
-                var bankButtons = document.querySelectorAll('.bank-btn');
-                bankButtons.forEach(function(btn){
-                    btn.addEventListener('click', function(){
-                        var code = btn.getAttribute('data-bank');
-                        document.getElementById('bank_code').value = code;
-                        bankButtons.forEach(function(b){ b.classList.remove('active'); });
-                        btn.classList.add('active');
-                    });
-                });
+                // No bank list UI; VNPAY used when BANK is selected
             });
         })();
     </script>

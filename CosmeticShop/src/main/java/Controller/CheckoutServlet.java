@@ -18,7 +18,6 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import Util.PaymentClient;
 
 @WebServlet(name = "checkout", urlPatterns = {"/checkout"})
 public class CheckoutServlet extends HttpServlet {
@@ -67,7 +66,7 @@ public class CheckoutServlet extends HttpServlet {
         int addressId = Integer.parseInt(req.getParameter("shipping_address_id"));
         int methodId = Integer.parseInt(req.getParameter("shipping_method_id"));
         String paymentMethod = req.getParameter("payment_method");
-        String bankCode = req.getParameter("bank_code");
+        // bank_code UI removed; always redirect to VNPAY when BANK is selected
         String notes = req.getParameter("notes");
 
         double itemsTotal = cartDB.calculateSelectedTotal(cart.getCart_id());
@@ -106,18 +105,9 @@ public class CheckoutServlet extends HttpServlet {
             return;
         }
         if ("BANK".equalsIgnoreCase(paymentMethod)) {
-            String apiUrl = System.getenv("PAYMENT_API_URL");
-            if (apiUrl == null || apiUrl.trim().isEmpty()) {
-                String internal = req.getContextPath() + "/bank-pay?orderId=" + orderId + "&amount=" + totalAmount + (bankCode != null && !bankCode.isEmpty() ? ("&bank=" + bankCode) : "");
-                resp.sendRedirect(internal);
-                return;
-            } else {
-                String returnUrl = req.getRequestURL().toString().replace("/checkout", "/payment-callback");
-                PaymentClient client = new PaymentClient();
-                String redirect = client.initiateBankPayment(totalAmount, orderId, returnUrl);
-                resp.sendRedirect(redirect);
-                return;
-            }
+            String createUrl = req.getContextPath() + "/payment/vnpay/create?orderId=" + orderId;
+            resp.sendRedirect(createUrl);
+            return;
         } else {
             orderDB.clearSelectedCartItems(cart.getCart_id());
             session.removeAttribute("cartItems");
