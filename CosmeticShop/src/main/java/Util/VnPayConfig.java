@@ -60,5 +60,29 @@ public class VnPayConfig {
 		for (int i = 0; i < len; i++) sb.append(digits.charAt(r.nextInt(digits.length())));
 		return sb.toString();
 	}
+
+	public static String describeResponseCode(String code) {
+		if (code == null) return "Lỗi không xác định";
+		switch (code) {
+			case "00": return "Giao dịch thành công";
+			case "07": return "Trừ tiền thành công nhưng giao dịch bị nghi ngờ";
+			case "09": return "Thẻ/Tài khoản chưa đăng ký InternetBanking";
+			case "10": return "Xác thực thẻ/tài khoản sai quá 3 lần";
+			case "11": return "Hết hạn chờ thanh toán";
+			case "12": return "Thẻ/Tài khoản bị khóa";
+			case "13": return "Nhập sai OTP";
+			case "24": return "Khách hàng hủy giao dịch";
+			case "51": return "Không đủ số dư";
+			case "65": return "Vượt hạn mức giao dịch trong ngày";
+			case "75": return "Ngân hàng thanh toán đang bảo trì";
+			case "79": return "Nhập sai mật khẩu thanh toán quá số lần quy định";
+			case "99": return "Lỗi khác";
+			default: return "Lỗi không xác định";
+		}
+	}
+
+	public static String statusForResponseCode(String code) {
+		return "00".equals(code) ? "PAID" : ("07".equals(code) ? "REVIEW" : "FAILED");
+	}
 }
 
