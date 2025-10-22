@@ -4,7 +4,6 @@
  */
 package Model;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -19,17 +18,15 @@ public class Cart {
 //    updated_at DATETIME DEFAULT GETDATE()
     private int cart_id;
     private int user_id;
-    private double totalPrice;
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
 
     public Cart() {
     }
 
-    public Cart(int cart_id, int user_id, double totalPrice, LocalDateTime created_at, LocalDateTime updated_at) {
+    public Cart(int cart_id, int user_id, LocalDateTime created_at, LocalDateTime updated_at) {
         this.cart_id = cart_id;
         this.user_id = user_id;
-        this.totalPrice = totalPrice;
         this.created_at = created_at;
         this.updated_at = updated_at;
     }
@@ -50,13 +47,6 @@ public class Cart {
         this.user_id = user_id;
     }
 
-    public double getTotalPrice() {
-        return totalPrice;
-    }
-
-    public void setTotalPrice(double totalPrice) {
-        this.totalPrice = totalPrice;
-    }
 
     public LocalDateTime getCreated_at() {
         return created_at;

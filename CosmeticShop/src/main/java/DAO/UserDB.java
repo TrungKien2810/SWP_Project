@@ -20,22 +20,25 @@ public class UserDB {
     Connection conn = db.conn;
 
     public user getUserByEmail(String email) {
-        String sql = "select * from Users where email = ?";
+        String sql = "select user_id, full_name as username, email, phone, password, role, date_create from Users where email = ?";
         try {
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, email);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-
-                return new user(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5),
-                        rs.getString("role"), rs.getTimestamp("created_at").toLocalDateTime());
-
+                return new user(
+                    rs.getInt("user_id"),
+                    rs.getString("username"),
+                    rs.getString("email"),
+                    rs.getString("phone"),
+                    rs.getString("password"),
+                    rs.getString("role"),
+                    rs.getTimestamp("date_create").toLocalDateTime()
+                );
             }
         } catch (SQLException e) {
-
             e.printStackTrace();
             return null;
-
         }
         return null;
     }
@@ -64,17 +67,13 @@ public class UserDB {
         if (check == null) {
             return false;
         } else {
-            String sql = "select * from Users where email = ?";
+            String sql = "select password from Users where email = ?";
             try {
                 PreparedStatement stmt = conn.prepareStatement(sql);
                 stmt.setString(1, email);
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next()) {
-                    if (rs.getString("password").equals(password)) {
-                        return true;
-                    } else {
-                        return false;
-                    }
+                    return rs.getString("password").equals(password);
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -99,14 +98,21 @@ public class UserDB {
     }
 
     public user getUserByResetToken(String token) {
-        String sql = "select * from Users where reset_token = ? and reset_token_expiry > GETDATE()";
+        String sql = "select user_id, full_name as username, email, phone, password, role, date_create from Users where reset_token = ? and reset_token_expiry > GETDATE()";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, token);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return new user(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5),
-                        rs.getString("role"), rs.getTimestamp("created_at").toLocalDateTime());
+                return new user(
+                    rs.getInt("user_id"),
+                    rs.getString("username"),
+                    rs.getString("email"),
+                    rs.getString("phone"),
+                    rs.getString("password"),
+                    rs.getString("role"),
+                    rs.getTimestamp("date_create").toLocalDateTime()
+                );
             }
         } catch (SQLException e) {
             e.printStackTrace();
