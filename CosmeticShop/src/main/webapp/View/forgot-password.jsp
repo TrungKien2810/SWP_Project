@@ -7,37 +7,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/log.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <title>PinkyCloud - Quên mật khẩu</title>
 </head>
 <body>
-    <!-- header -->
-    <div class="header">
-        <div class="header_text"><p>THEO DÕI CHÚNG TÔI</p></div>
-        <div class="header_social">
-            <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/fb.png" alt="" ></a>
-            <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/ins.png" alt=""></a>
-            <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/tt.png" alt=""></a>
-            <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/ytb.png" alt="" ></a>
-        </div>
-    </div>
-    
-    <!-- menu -->
-    <div class="menu">
-        <div class="menu_logo">
-            <img src="${pageContext.request.contextPath}/IMG/logo.jpg" alt="" style="width: 230px;">
-        </div>
-        <div class="menu_list">
-            <ul class="menu_list_item">
-                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/home.jsp">TRANG CHỦ</a></li>
-                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/vechungtoi.jsp">VỀ CHÚNG TÔI</a></li>
-                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/bosuutap.jsp">BỘ SƯU TẬP</a></li>
-                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/login">ĐĂNG NHẬP & ĐĂNG KÝ</a></li>
-                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/lienhe.jsp">LIÊN HỆ</a></li>
-            </ul>
-        </div>
-    </div>
+    <%@ include file="/View/includes/header.jspf" %>
 
     <!-- Phần Quên mật khẩu -->
     <div class="login-section">
@@ -157,7 +134,8 @@
         </div>
     </footer>
 
-    <script src="${pageContext.request.contextPath}/JS/bootstrap.bundle.min.js"></script>
+    <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
+    <script src="${pageContext.request.contextPath}/Js/home.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>

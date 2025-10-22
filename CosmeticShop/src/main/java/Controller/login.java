@@ -9,6 +9,8 @@ import DAO.UserDB;
 import Model.Cart;
 import Model.CartItems;
 import Model.user;
+import DAO.ProductDB;
+import Model.Product;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -20,6 +22,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
+import Util.CartCookieUtil;
 
 /**
  *
@@ -125,11 +128,39 @@ public class login extends HttpServlet {
                 cd.addNewCart(user.getUser_id());
                 cart = cd.getCartByUserId(user.getUser_id());       
             }
-            List<CartItems> cartItems = new ArrayList<>();
-            if (!cd.getCartItemsByCartId(cart.getCart_id()).isEmpty()) {
-                cartItems = cd.getCartItemsByCartId(cart.getCart_id());
-                session.setAttribute("cartItems", cartItems);
+            // Merge guest cart from cookie
+            java.util.Map<Integer, Integer> cookieCart = CartCookieUtil.readCartMap(request);
+            if (!cookieCart.isEmpty()) {
+                ProductDB pd = new ProductDB();
+                List<CartItems> existing = cd.getCartItemsByCartId(cart.getCart_id());
+                for (java.util.Map.Entry<Integer, Integer> e : cookieCart.entrySet()) {
+                    int pid = e.getKey();
+                    int addQty = Math.max(0, e.getValue());
+                    if (addQty <= 0) continue;
+                    boolean found = false;
+                    int currentQty = 0;
+                    for (CartItems ci : existing) {
+                        if (ci.getProduct_id() == pid) {
+                            found = true;
+                            currentQty = ci.getQuantity();
+                            break;
+                        }
+                    }
+                    if (found) {
+                        cd.updateQuantityAddToCart(cart.getCart_id(), pid, currentQty + addQty);
+                    } else {
+                        Product p = pd.getProductById(pid);
+                        if (p != null) {
+                            cd.addCartItems(cart.getCart_id(), pid, addQty, p.getPrice());
+                        }
+                    }
+                }
+                // Clear cookie after merge
+                CartCookieUtil.clearCartCookie(response);
             }
+            // Reload cart items to session
+            List<CartItems> cartItems = cd.getCartItemsByCartId(cart.getCart_id());
+            session.setAttribute("cartItems", cartItems);
             request.getRequestDispatcher("/View/home.jsp").forward(request, response);
             return;
 

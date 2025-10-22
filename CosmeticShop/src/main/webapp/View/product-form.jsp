@@ -8,9 +8,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý Sản phẩm - PinkyCloud</title>
-    
-    <%-- Sử dụng Bootstrap để giao diện trông đẹp hơn --%>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-…" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
     <style>
         body {
@@ -32,6 +32,7 @@
     </style>
 </head>
 <body>
+    <%@ include file="/View/includes/header.jspf" %>
     <div class="container form-container">
         <h2 class="text-center">
             <%-- Tiêu đề sẽ tự động thay đổi tùy theo hành động là Sửa hay Thêm mới --%>
@@ -270,5 +271,6 @@
             box-shadow: 0 0 0 0.2rem rgba(247, 108, 133, 0.25);
         }
     </style>
+    <script src="${pageContext.request.contextPath}/Js/home.js"></script>
 </body>
 </html>

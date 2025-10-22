@@ -12,67 +12,10 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
       integrity="sha512-…"
       crossorigin="anonymous" referrerpolicy="no-referrer" />
-       <script src="${pageContext.request.contextPath}/Js/home.js"></script>
        <title>Quản Lý Sản Phẩm - Pinky Cloud</title>
     </head>
     <body>
-        <!-- header -->
-        <div class="header">
-            <div class="header_text"><p>THEO DÕI CHÚNG TÔI</p></div>
-            <div class="header_social">
-                <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/fb.png" alt="" ></a>
-                <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/ins.png" alt=""></a>
-                <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/tt.png" alt=""></a>
-                        <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/ytb.png" alt="" ></a>
-                        </div>
-                        </div>
-                        <!-- menu -->
-                        <div class="menu">
-                            <div class="menu_logo">
-                                <img src="${pageContext.request.contextPath}/IMG/logo.jpg" alt="" style="width: 230px;">
-                            </div>
-                            <div class="menu_list">
-                                <ul class="menu_list_item">
-                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/home.jsp">TRANG CHỦ</a></li>
-                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/vechungtoi.jsp">VỀ CHÚNG TÔI</a></li>
-                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/products">BỘ SƯU TẬP</a></li>
-                                        <c:if test="${empty sessionScope.user}">
-                                        <li><a class="menu_list_link" href="${pageContext.request.contextPath}/signup">
-                                                ĐĂNG NHẬP & ĐĂNG KÝ
-                                            </a></li>
-                                        </c:if>
-                                        <c:if test="${not empty sessionScope.user && sessionScope.user.role == 'ADMIN'}">
-                                        <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/products?action=manage">QUẢN LÝ SẢN PHẨM</a></li>
-                                        </c:if>
-                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/lienhe.jsp">LIÊN HỆ</a></li>
-                                </ul>
-                                <div class="menu_search">
-                                    <div class="menu_search_input">
-                                        <input type="text" placeholder="Nhập từ khóa bạn cần tìm kiếm . . . ">
-                                    </div>
-                                    <div class="menu_search_icon">
-                                        <a href=""><i class="fa-solid fa-magnifying-glass fa-xl" style="color: #f76c85;"></i></a>
-                                    </div>
-                                </div>
-                                <div class="menu_search_cart">
-                                    <a href="${pageContext.request.contextPath}/cart"> <i class="fa-solid fa-cart-shopping cart-icon"></i></a>       
-                                    <!-- Tài khoản -->
-                                    <c:if test="${!empty sessionScope.user}">
-                                        <div class="account-menu">
-                                        <i class="fas fa-user-circle account-icon"></i>
-                                        <c:if test="${not empty sessionScope.user}">
-                                            <div class="account-dropdown">
-                                                <p class="welcome-text">Welcome, ${sessionScope.user.username}</p>
-                                                <a href="${pageContext.request.contextPath}/account-management">Quản lý tài khoản</a>
-                                                <a href="${pageContext.request.contextPath}/cart">My Cart</a>
-                                                <a href="${pageContext.request.contextPath}/logout">Log Out</a>
-                                            </div>
-                                        </c:if>
-                                    </div>
-                                    </c:if> 
-                                </div>
-                            </div>    
-                        </div>
+        <%@ include file="/View/includes/header.jspf" %>
 
 
                         <!-- Kiểm tra quyền admin -->
@@ -322,6 +265,7 @@
                         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
                         
                         <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
+                        <script src="${pageContext.request.contextPath}/Js/home.js"></script>
                         <script>
                             // Variables for image management
                             let modalImageItemCount = 1;
