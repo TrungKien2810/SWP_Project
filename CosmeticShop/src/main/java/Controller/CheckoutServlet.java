@@ -63,7 +63,12 @@ public class CheckoutServlet extends HttpServlet {
             return;
         }
 
-        int addressId = Integer.parseInt(req.getParameter("shipping_address_id"));
+        String addressIdStr = req.getParameter("shipping_address_id");
+        if (addressIdStr == null || addressIdStr.isEmpty()) {
+            resp.sendRedirect(req.getContextPath() + "/checkout?error=no_address");
+            return;
+        }
+        int addressId = Integer.parseInt(addressIdStr);
         int methodId = Integer.parseInt(req.getParameter("shipping_method_id"));
         String paymentMethod = req.getParameter("payment_method");
         // bank_code UI removed; always redirect to VNPAY when BANK is selected
