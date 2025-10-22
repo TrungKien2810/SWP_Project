@@ -9,6 +9,8 @@ import Model.Cart;
 import Model.CartItems;
 import Model.CartItems;
 import Model.user;
+import DAO.ProductDB;
+import Model.Product;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -19,6 +21,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
+import Util.CartCookieUtil;
 
 /**
  *
@@ -65,22 +68,41 @@ public class removeFromCart extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        CartDB cd = new CartDB();
         HttpSession session = request.getSession();
         user user = (user) session.getAttribute("user");
-        Cart cart = cd.getCartByUserId(user.getUser_id());
         String rawId = request.getParameter("productId");
-        List<CartItems> cartItems = new ArrayList<>();
         int p_id = 0;
         try{
             p_id = Integer.parseInt(rawId);
         }catch(NumberFormatException e){
             e.printStackTrace();
         }
-        cd.removeFromCart(cart.getCart_id(), p_id);
-        cartItems = cd.getCartItemsByCartId(cart.getCart_id());
-        session.setAttribute("cartItems", cartItems);
-        request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
+        if (user != null) {
+            CartDB cd = new CartDB();
+            Cart cart = cd.getCartByUserId(user.getUser_id());
+            List<CartItems> cartItems = new ArrayList<>();
+            if (cart != null) {
+                cd.removeFromCart(cart.getCart_id(), p_id);
+                cartItems = cd.getCartItemsByCartId(cart.getCart_id());
+            }
+            session.setAttribute("cartItems", cartItems);
+            request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
+        } else {
+            // Guest: remove from cookie
+            java.util.Map<Integer, Integer> cookieCart = CartCookieUtil.readCartMap(request);
+            cookieCart.remove(p_id);
+            CartCookieUtil.writeCartMap(response, cookieCart);
+            // rebuild session cartItems
+            ProductDB pd = new ProductDB();
+            List<CartItems> cartItems = new ArrayList<>();
+            for (java.util.Map.Entry<Integer, Integer> e : cookieCart.entrySet()) {
+                Product p = pd.getProductById(e.getKey());
+                if (p == null) continue;
+                cartItems.add(new CartItems(0, 0, p.getProductId(), e.getValue(), p.getPrice()));
+            }
+            session.setAttribute("cartItems", cartItems);
+            request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
+        }
     }
 
     /**
