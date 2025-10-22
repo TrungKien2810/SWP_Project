@@ -14,67 +14,9 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
           crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <script src="${pageContext.request.contextPath}/Js/home.js"></script>
 </head>
 <body>
-<!-- ===== HEADER ===== -->
-<div class="header">
-    <div class="header_text"><p>THEO DÕI CHÚNG TÔI</p></div>
-    <div class="header_social">
-        <a href="#"><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/fb.png" alt=""></a>
-        <a href="#"><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/ins.png" alt=""></a>
-        <a href="#"><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/tt.png" alt=""></a>
-        <a href="#"><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/ytb.png" alt=""></a>
-    </div>
-</div>
-
-<!-- ===== MENU ===== -->
-<div class="menu">
-                            <div class="menu_logo">
-                                <img src="${pageContext.request.contextPath}/IMG/logo.jpg" alt="" style="width: 230px;">
-                            </div>
-                            <div class="menu_list">
-                                <ul class="menu_list_item">
-                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/home.jsp">TRANG CHỦ</a></li>
-                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/vechungtoi.jsp">VỀ CHÚNG TÔI</a></li>
-                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/products">BỘ SƯU TẬP</a></li>
-                                        <c:if test="${empty sessionScope.user}">
-                                        <li><a class="menu_list_link" href="${pageContext.request.contextPath}/signup">
-                                                ĐĂNG NHẬP & ĐĂNG KÝ
-                                            </a></li>
-                                        </c:if>
-                                        <c:if test="${not empty sessionScope.user && sessionScope.user.role == 'ADMIN'}">
-                                        <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/products?action=manage">QUẢN LÝ SẢN PHẨM</a></li>
-                                        </c:if>
-                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/lienhe.jsp">LIÊN HỆ</a></li>
-                                </ul>
-                                <div class="menu_search">
-                                    <div class="menu_search_input">
-                                        <input type="text" placeholder="Nhập từ khóa bạn cần tìm kiếm . . . ">
-                                    </div>
-                                    <div class="menu_search_icon">
-                                        <a href=""><i class="fa-solid fa-magnifying-glass fa-xl" style="color: #f76c85;"></i></a>
-                                    </div>
-                                </div>
-                                <div class="menu_search_cart">
-                                    <i class="fa-solid fa-cart-shopping cart-icon"></i>
-                                    <!-- Tài khoản -->
-                                    <c:if test="${!empty sessionScope.user}">
-                                        <div class="account-menu">
-                                        <i class="fas fa-user-circle account-icon"></i>
-                                        <c:if test="${not empty sessionScope.user}">
-                                            <div class="account-dropdown">
-                                                <p class="welcome-text">Welcome, ${sessionScope.user.username}</p>
-                                                <a href="${pageContext.request.contextPath}/account-management">Quản lý tài khoản</a>
-                                                <a href="${pageContext.request.contextPath}/cart">My Cart</a>
-                                                <a href="${pageContext.request.contextPath}/logout">Log Out</a>
-                                            </div>
-                                        </c:if>
-                                    </div>
-                                    </c:if> 
-                                </div>
-                            </div>    
-                        </div>
+<%@ include file="/View/includes/header.jspf" %>
 
 <%
     List<CartItems> cartItems = new ArrayList<CartItems>();
@@ -82,6 +24,19 @@
     cartItems = (List<CartItems>)session.getAttribute("cartItems");
     }
     Double totalPrice = 0.0;
+    // Lưu cartId vào session nếu có để apply promo từ server
+    if (cartItems != null && !cartItems.isEmpty()) {
+        // best-effort: lấy cartId từ phần tử đầu, nếu controller có set khác thì bỏ qua
+        session.setAttribute("cartId", cartItems.get(0).getCart_id());
+    }
+    // Lấy giảm giá đã áp dụng từ server (nếu có)
+    Double appliedDiscount = 0.0;
+    Object ad = session.getAttribute("appliedDiscountAmount");
+    if (ad instanceof Double) {
+        appliedDiscount = (Double) ad;
+    } else if (ad != null) {
+        try { appliedDiscount = Double.parseDouble(ad.toString()); } catch (Exception ignore) {}
+    }
 %>
 
 <div class="cart-page container mt-5">
@@ -148,16 +103,37 @@
                     <hr>
 
                     <div class="mb-3">
-                        <form id="promoForm" class="d-flex">
-                            <input type="text" id="promoCodeInput" class="form-control me-2" placeholder="Nhập mã khuyến mãi">
+                        <form id="promoForm" class="d-flex" method="post" action="${pageContext.request.contextPath}/apply-promo">
+                            <select class="form-select me-2" id="promoSelect" onchange="onSelectPromo(this)">
+                                <option value="">-- Chọn mã của bạn (nếu có) --</option>
+                                <c:forEach var="d" items="${requestScope.assignedDiscounts}">
+                                    <option value="${d.code}">${d.code} - ${d.name}</option>
+                                </c:forEach>
+                            </select>
+                            <input type="text" name="promoCode" id="promoCodeInput" class="form-control me-2" placeholder="Nhập mã khuyến mãi" value="${sessionScope.appliedDiscountCode}">
                             <button type="submit" class="btn btn-outline-danger">Áp dụng</button>
                         </form>
-                        <small id="promoDisplay" class="text-success" style="display:none;"></small>
+                        <div class="mt-2 d-flex justify-content-between">
+                            <a class="small" href="${pageContext.request.contextPath}/my-promos">My Vouchers</a>
+                            <a class="small" href="${pageContext.request.contextPath}/products">Tiếp tục mua sắm</a>
+                        </div>
+                        <c:if test="${not empty sessionScope.appliedDiscountCode}">
+                            <small class="text-success">Đã áp dụng: ${sessionScope.appliedDiscountCode} (-${sessionScope.appliedDiscountAmount})</small>
+                        </c:if>
+                        <c:if test="${not empty requestScope.error}">
+                            <small class="text-danger">${requestScope.error}</small>
+                        </c:if>
                     </div>
 
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Giảm giá:</span>
+                        <span id="discountDisplay">${sessionScope.appliedDiscountAmount != null ? sessionScope.appliedDiscountAmount : 0}</span>
+                    </div>
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <span class="fw-bold">Tổng thanh toán:</span>
-                        <strong style="color:#f76c85;" id="totalDisplay"><%=totalPrice%></strong>
+                        <strong style="color:#f76c85;" id="totalDisplay"><%=
+                            (totalPrice - appliedDiscount) > 0 ? (totalPrice - appliedDiscount) : 0
+                        %></strong>
                     </div>
 
                     <a href="${pageContext.request.contextPath}/checkout" class="btn btn-danger w-100 fw-bold">THANH TOÁN NGAY</a>
@@ -181,6 +157,14 @@
         }
     }
 
+    function getServerDiscount() {
+        const el = document.getElementById('discountDisplay');
+        if (!el) return 0;
+        const raw = (el.textContent || '0').toString();
+        const num = Number(raw.replace(/[^0-9.\-]/g, ''));
+        return isNaN(num) ? 0 : num;
+    }
+
     function updateTotal() {
         let subtotal = 0;
         document.querySelectorAll('.cart-item').forEach(item => {
@@ -201,8 +185,10 @@
         
         const subtotalDisplay = document.getElementById('subtotalDisplay');
         const totalDisplay = document.getElementById('totalDisplay');
-        if(subtotalDisplay) subtotalDisplay.textContent = subtotal.toLocaleString() + '₫';
-        if(totalDisplay) totalDisplay.textContent = subtotal.toLocaleString() + '₫';
+        if (subtotalDisplay) subtotalDisplay.textContent = subtotal.toLocaleString() + '₫';
+        const discount = getServerDiscount();
+        const total = Math.max(0, subtotal - discount);
+        if (totalDisplay) totalDisplay.textContent = total.toLocaleString() + '₫';
     }
 
     // Event checkbox & quantity input
@@ -221,78 +207,33 @@
     // Khởi tạo tính tổng ban đầu
     updateTotal();
 
-    // Mã giảm giá
-    const promoForm = document.getElementById('promoForm');
-    if(promoForm) {
-        promoForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const code = document.getElementById('promoCodeInput').value.trim();
-            let discount = 0;
-            if (code === "GIAM10") discount = 10000;
-            document.getElementById('promoDisplay').textContent = "Mã giảm giá áp dụng: -" + discount.toLocaleString() + "₫";
-            document.getElementById('promoDisplay').style.display = 'inline';
-
-            let subtotal = 0;
-            document.querySelectorAll('.cart-item').forEach(item => {
-                const checkbox = item.querySelector('.cart-item-checkbox');
-                const price = parseFloat(checkbox.dataset.price);
-                const qty = parseInt(item.querySelector('.quantity-input').value);
-                if (checkbox.checked) subtotal += price * qty;
-            });
-            document.getElementById('totalDisplay').textContent = (subtotal - discount).toLocaleString() + '₫';
-        });
+    // Mã giảm giá: xử lý phía server (không cập nhật client-side tại đây)
+    function onSelectPromo(sel){
+        var code = sel && sel.value ? sel.value : '';
+        var input = document.getElementById('promoCodeInput');
+        if(input){ input.value = code; }
     }
+
+    // Prefill và tự áp dụng mã khi điều hướng từ trang "My Vouchers"
+    document.addEventListener('DOMContentLoaded', function(){
+        try {
+            var prefill = localStorage.getItem('promoCodePrefill');
+            if (prefill) {
+                localStorage.removeItem('promoCodePrefill');
+                var input = document.getElementById('promoCodeInput');
+                var form = document.getElementById('promoForm');
+                if (input) input.value = prefill;
+                if (form && input && input.value) {
+                    form.submit();
+                }
+            }
+        } catch(e) {}
+    });
 </script>
 
-<!-- ===== FOOTER ===== -->
-<footer class="text-white py-4 w-100 mt-5" style="background-color:#f76c85;">
-    <!-- footer giữ nguyên -->
-    <div class="container-fluid text-center">
-        <div class="row">
-            <div class="col-md-3">
-                <h5 class="fw-bold">PINKYCLOUD OFFICE</h5>
-                <p>Địa chỉ: Số 31, đường Nguyễn Thị Minh Khai, Phường Quy Nhơn, Gia Lai</p>
-                <p>Mail: <a href="mailto:pinkycloudvietnam@gmail.com" class="text-white">pinkycloudvietnam@gmail.com</a></p>
-                <p>Website: <a href="${pageContext.request.contextPath}/View/home.jsp" class="text-white">www.pinkycloud.vn</a></p>
-            </div>
-            <div class="col-md-3">
-                <h5 class="fw-bold">DANH MỤC</h5>
-                <ul class="list-unstyled">
-                    <li><a href="${pageContext.request.contextPath}/products" class="text-white text-decoration-none">Sức khỏe và làm đẹp</a></li>
-                    <li><a href="${pageContext.request.contextPath}/products" class="text-white text-decoration-none">Chăm sóc cơ thể</a></li>
-                    <li><a href="${pageContext.request.contextPath}/products" class="text-white text-decoration-none">Chăm sóc da mặt</a></li>
-                    <li><a href="${pageContext.request.contextPath}/products" class="text-white text-decoration-none">Chăm sóc tóc</a></li>
-                    <li><a href="${pageContext.request.contextPath}/products" class="text-white text-decoration-none">Clinic & Spa</a></li>
-                    <li><a href="${pageContext.request.contextPath}/products" class="text-white text-decoration-none">Trang điểm</a></li>
-                </ul>
-            </div>
-            <div class="col-md-3">
-                <h5 class="fw-bold">CHÍNH SÁCH HỖ TRỢ</h5>
-                <ul class="list-unstyled">
-                    <li><a href="#" class="text-white text-decoration-none">Hỗ trợ đặt hàng</a></li>
-                    <li><a href="#" class="text-white text-decoration-none">Chính sách trả hàng</a></li>
-                    <li><a href="#" class="text-white text-decoration-none">Chính sách bảo hành</a></li>
-                    <li><a href="#" class="text-white text-decoration-none">Chính sách người dùng</a></li>
-                    <li><a href="#" class="text-white text-decoration-none">Chính sách mua hàng</a></li>
-                </ul>
-            </div>
-            <div class="col-md-3">
-                <h5 class="fw-bold">THEO DÕI CHÚNG TÔI</h5>
-                <div class="d-flex justify-content-center">
-                    <a href="#" class="me-3"><img src="${pageContext.request.contextPath}/IMG/fbf.png" width="32"></a>
-                    <a href="#" class="me-3"><img src="${pageContext.request.contextPath}/IMG/linkedin-54890.png" width="32"></a>
-                    <a href="#" class="me-3"><img src="${pageContext.request.contextPath}/IMG/tiktok-56510.png" width="32"></a>
-                    <a href="#" class="me-3"><img src="${pageContext.request.contextPath}/IMG/youtube-11341.png" width="32"></a>
-                </div>
-            </div>
-        </div>
-        <hr class="border-white my-3">
-        <div class="text-center">
-            <p class="mb-0">2023 Copyright PinkyCloud.vn - Sản phẩm chăm sóc da, Mỹ phẩm chính hãng</p>
-        </div>
-    </div>
-</footer>
+<%@ include file="/View/includes/footer.jspf" %>
 
 <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
+<script src="${pageContext.request.contextPath}/Js/home.js"></script>
 </body>
 </html>

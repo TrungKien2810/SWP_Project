@@ -12,46 +12,10 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/log.css">
-        <script src="${pageContext.request.contextPath}/JS/home.js"></script>
         <title>PinkyCloud - Đăng Nhập</title>
     </head>
     <body>
-        <!-- header -->
-        <div class="header">
-            <div class="header_text"><p>THEO DÕI CHÚNG TÔI</p></div>
-            <div class="header_social">
-                <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/fb.png" alt="" ></a>
-                <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/ins.png" alt=""></a>
-                <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/tt.png"alt=""><a>
-                        <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/ytb.png" alt="" ></a>
-                        </div>
-                        </div>
-                        <!-- menu -->
-                        <div class="menu">
-                            <div class="menu_logo">
-                                <img src="${pageContext.request.contextPath}/IMG/logo.jpg" alt="" style="width: 230px;">
-                            </div>
-                            <div class="menu_list">
-                                <ul class="menu_list_item">
-                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/home.jsp">TRANG CHỦ</a></li>
-                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/vechungtoi.jsp">VỀ CHÚNG TÔI</a></li>
-                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/products">BỘ SƯU TẬP</a></li>
-                                    <li><a class="menu_list_link" href="${pageContext.request.contextPath}/signup">ĐĂNG NHẬP & ĐĂNG KÝ</a></li>
-                                    <li><a class="menu_list_link" href="${pageContext.request.contextPath}/HTML/lienhe.jsp">LIÊN HỆ</a></li>
-                                </ul>
-                                <div class="menu_search">
-                                    <div class="menu_search_input">
-                                        <input type="text" placeholder="Nhập từ khóa bạn cần tìm kiếm . . . ">
-                                    </div>
-                                    <div class="menu_search_icon">
-                                        <a href=""><i class="fa-solid fa-magnifying-glass fa-xl" style="color: #f76c85;"></i></a>
-                                    </div>
-                                </div>
-                                <div class="menu_search_cart">
-                                    <i class="fa-solid fa-cart-shopping"></i>
-                                </div>
-                            </div>
-                        </div>
+        <%@ include file="/View/includes/header.jspf" %>
 
                         <!-- Phần Đăng Nhập -->
                         <div class="login-section">
@@ -211,7 +175,8 @@
                             </div>
                         </footer>
 
-                        <script src="${pageContext.request.contextPath}/JS/bootstrap.bundle.min.js"></script>
+                        <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
+                        <script src="${pageContext.request.contextPath}/Js/home.js"></script>
                         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
                         <script src="${pageContext.request.contextPath}/JS/login.js"></script>
                         </body>

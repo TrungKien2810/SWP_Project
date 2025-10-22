@@ -141,7 +141,9 @@ public class addToCart extends HttpServlet {
         List<CartItems> cartItems = new ArrayList<>();
         boolean isExist = false;
         int p_id = 0;
+        int addQuantity = 1;
         String idRaw = request.getParameter("id");
+        String qtyRaw = request.getParameter("quantity");
         try {
             p_id = Integer.parseInt(idRaw);
         } catch (NumberFormatException e) {
@@ -149,6 +151,17 @@ public class addToCart extends HttpServlet {
             request.setAttribute("error", error);
             request.getRequestDispatcher("/View/bosuutap.jsp").forward(request, response);
             return;
+        }
+        // Parse optional quantity, default 1
+        try {
+            if (qtyRaw != null && !qtyRaw.trim().isEmpty()) {
+                addQuantity = Integer.parseInt(qtyRaw.trim());
+            }
+        } catch (NumberFormatException ignore) {
+            addQuantity = 1;
+        }
+        if (addQuantity < 1) {
+            addQuantity = 1;
         }
         if (session.getAttribute("user") != null) {
             user user = (user) session.getAttribute("user");
@@ -175,7 +188,14 @@ public class addToCart extends HttpServlet {
                 for (CartItems c : cartItems) {
                     int quantity = c.getQuantity();
                     if (p_id != 0 && p_id == c.getProduct_id()) {
-                        quantity+=1;
+                        // Increase by requested quantity with simple stock clamp
+                        int maxAvailable = product.getStock() > 0 ? product.getStock() : Integer.MAX_VALUE;
+                        long requestedTotal = (long) quantity + (long) addQuantity;
+                        if (requestedTotal > maxAvailable) {
+                            quantity = maxAvailable;
+                        } else {
+                            quantity = (int) requestedTotal;
+                        }
                         c.setQuantity(quantity);
                         cd.updateQuantityAddToCart(cart.getCart_id(), p_id, c.getQuantity());
                         isExist = true;
@@ -184,7 +204,12 @@ public class addToCart extends HttpServlet {
 
             }
             if (isExist == false) {
-                cd.addCartItems(cart.getCart_id(), p_id, 1, product.getPrice());
+                int createQty = addQuantity;
+                int maxAvailable = product.getStock() > 0 ? product.getStock() : Integer.MAX_VALUE;
+                if (createQty > maxAvailable) {
+                    createQty = maxAvailable;
+                }
+                cd.addCartItems(cart.getCart_id(), p_id, createQty, product.getPrice());
             }
             cartItems.clear();
             cartItems = cd.getCartItemsByCartId(cart.getCart_id());

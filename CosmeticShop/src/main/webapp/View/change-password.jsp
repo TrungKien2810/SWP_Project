@@ -7,6 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/log.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
@@ -15,64 +16,7 @@
     <title>PinkyCloud - Đổi mật khẩu</title>
 </head>
 <body>
-    <!-- header -->
-    <div class="header">
-        <div class="header_text"><p>THEO DÕI CHÚNG TÔI</p></div>
-        <div class="header_social">
-            <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/fb.png" alt="" ></a>
-            <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/ins.png" alt=""></a>
-            <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/tt.png"alt=""><a>
-            <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/ytb.png" alt="" ></a>
-        </div>
-    </div>
-    
-    <!-- menu -->
-                        <div class="menu">
-                            <div class="menu_logo">
-                                <img src="${pageContext.request.contextPath}/IMG/logo.jpg" alt="" style="width: 230px;">
-                            </div>
-                            <div class="menu_list">
-                                <ul class="menu_list_item">
-                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/home.jsp">TRANG CHỦ</a></li>
-                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/vechungtoi.jsp">VỀ CHÚNG TÔI</a></li>
-                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/products">BỘ SƯU TẬP</a></li>
-                                        <c:if test="${empty sessionScope.user}">
-                                        <li><a class="menu_list_link" href="${pageContext.request.contextPath}/signup">
-                                                ĐĂNG NHẬP & ĐĂNG KÝ
-                                            </a></li>
-                                        </c:if>
-                                        <c:if test="${not empty sessionScope.user && sessionScope.user.role == 'ADMIN'}">
-                                        <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/products?action=manage">QUẢN LÝ SẢN PHẨM</a></li>
-                                        </c:if>
-                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/lienhe.jsp">LIÊN HỆ</a></li>
-                                </ul>
-                                <div class="menu_search">
-                                    <div class="menu_search_input">
-                                        <input type="text" placeholder="Nhập từ khóa bạn cần tìm kiếm . . . ">
-                                    </div>
-                                    <div class="menu_search_icon">
-                                        <a href=""><i class="fa-solid fa-magnifying-glass fa-xl" style="color: #f76c85;"></i></a>
-                                    </div>
-                                </div>
-                                <div class="menu_search_cart">
-                                    <i class="fa-solid fa-cart-shopping cart-icon"></i>
-                                    <!-- Tài khoản -->
-                                    <c:if test="${!empty sessionScope.user}">
-                                        <div class="account-menu">
-                                        <i class="fas fa-user-circle account-icon"></i>
-                                        <c:if test="${not empty sessionScope.user}">
-                                            <div class="account-dropdown">
-                                                <p class="welcome-text">Welcome, ${sessionScope.user.username}</p>
-                                                <a href="${pageContext.request.contextPath}/account-management">Quản lý tài khoản</a>
-                                                <a href="${pageContext.request.contextPath}/cart">My Cart</a>
-                                                <a href="${pageContext.request.contextPath}/logout">Log Out</a>
-                                            </div>
-                                        </c:if>
-                                    </div>
-                                    </c:if> 
-                                </div>
-                            </div>    
-                        </div>
+    <%@ include file="/View/includes/header.jspf" %>
  
 
     <!-- Phần Đổi mật khẩu -->
@@ -136,7 +80,7 @@
     </div>
 
     <!-- Footer -->
-    <footer class="text-white py-4 w-100" style="background-color:#f76c85;">
+    <%@ include file="/View/includes/footer.jspf" %>
         <div class="container-fluid text-center">
             <div class="row">
                 <div class="col-md-3">
@@ -185,10 +129,8 @@
                 <p class="mb-0">2023 Copyright PinkyCloud.vn - Sản phẩm chăm sóc da, Mỹ phẩm trang điểm, Mỹ phẩm chính hãng</p>
             </div>
         </div>
-    </footer>
-
     <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
-        <script src="${pageContext.request.contextPath}/Js/home.js"></script>
+    <script src="${pageContext.request.contextPath}/Js/home.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>
