@@ -5,7 +5,7 @@
    version="6.0">
    <welcome-file-list>
     <welcome-file>View/home.jsp</welcome-file>
-</welcome-file-list>
+   </welcome-file-list>
 
     <session-config>
         <session-timeout>
@@ -33,6 +33,33 @@
     <servlet-mapping>
         <servlet-name>ImageServlet</servlet-name>
         <url-pattern>/uploads/*</url-pattern>
+    </servlet-mapping>
+    
+    <servlet>
+        <servlet-name>VnPayCreateServlet</servlet-name>
+        <servlet-class>Controller.VnPayCreateServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>VnPayCreateServlet</servlet-name>
+        <url-pattern>/payment/vnpay/create</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>VnPayReturnServlet</servlet-name>
+        <servlet-class>Controller.VnPayReturnServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>VnPayReturnServlet</servlet-name>
+        <url-pattern>/payment/vnpay/return</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>VnPayIpnServlet</servlet-name>
+        <servlet-class>Controller.VnPayIpnServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>VnPayIpnServlet</servlet-name>
+        <url-pattern>/payment/vnpay/ipn</url-pattern>
     </servlet-mapping>
     
 </web-app>

@@ -68,6 +68,43 @@ public class CartDB {
         }
     }
 
+    public List<Model.CheckoutItem> getSelectedCheckoutItems(int cartId) {
+        List<Model.CheckoutItem> list = new ArrayList<>();
+        String sql = "select ci.product_id, ci.quantity, ci.price, p.name, p.image_url from CartItems ci join Products p on p.product_id = ci.product_id where ci.cart_id = ? and ci.is_selected = 1";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, cartId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Model.CheckoutItem it = new Model.CheckoutItem();
+                it.setProductId(rs.getInt("product_id"));
+                it.setQuantity(rs.getInt("quantity"));
+                it.setPrice(rs.getDouble("price"));
+                it.setProductName(rs.getString("name"));
+                it.setImageUrl(rs.getString("image_url"));
+                list.add(it);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public double calculateSelectedTotal(int cart_id) {
+        String sql = "select ISNULL(SUM(price * quantity), 0) as total from CartItems where cart_id = ? and is_selected = 1";
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, cart_id);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble("total");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0.0;
+    }
+
     public boolean updateQuantityAddToCart(int cart_id, int product_id, int quantity) {
         boolean CheckExist = false;
         String Check = "select * from CartItems where cart_id = ? and product_id = ?";
