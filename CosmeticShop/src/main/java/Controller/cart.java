@@ -5,6 +5,11 @@
 package Controller;
 
 import Model.CartItems;
+import Model.user;
+import DAO.CartDB;
+import DAO.ProductDB;
+import Model.Cart;
+import Model.Product;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -15,6 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
+import Util.CartCookieUtil;
 
 /**
  *
@@ -62,13 +68,27 @@ public class cart extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
+        user user = (user) session.getAttribute("user");
         List<CartItems> cartItems = new ArrayList<>();
-        Object CartItems = session.getAttribute("cartItems");
-        if(CartItems!=null){
-            cartItems = (List<CartItems>) CartItems;
+        if (user != null) {
+            CartDB cd = new CartDB();
+            Cart cart = cd.getCartByUserId(user.getUser_id());
+            if (cart != null) {
+                cartItems = cd.getCartItemsByCartId(cart.getCart_id());
+            }
+            session.setAttribute("cartItems", cartItems);
             request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
-        }
-        else{
+        } else {
+            // Guest: build from cookie
+            ProductDB pd = new ProductDB();
+            java.util.Map<Integer, Integer> cookieCart = CartCookieUtil.readCartMap(request);
+            for (java.util.Map.Entry<Integer, Integer> e : cookieCart.entrySet()) {
+                Product p = pd.getProductById(e.getKey());
+                if (p == null) continue;
+                CartItems ci = new CartItems(0, 0, p.getProductId(), e.getValue(), p.getPrice());
+                cartItems.add(ci);
+            }
+            session.setAttribute("cartItems", cartItems);
             request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
         }
     }

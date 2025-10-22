@@ -22,6 +22,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
+import Util.CartCookieUtil;
+import jakarta.servlet.http.Cookie;
 
 /**
  *
@@ -201,9 +203,21 @@ public class addToCart extends HttpServlet {
 //            }
             request.getRequestDispatcher("/products").forward(request, response);
         } else {
-            // Chưa đăng nhập
-            request.setAttribute("error", "Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.");
-            request.getRequestDispatcher("/View/log.jsp").forward(request, response);
+            // Guest user: store to cookie
+            // Validate product exists
+            Product product = pd.getProductById(p_id);
+            if (product == null) {
+                request.setAttribute("error", "Sản phẩm không tồn tại hoặc đã bị xóa.");
+                request.getRequestDispatcher("/products").forward(request, response);
+                return;
+            }
+            // Read cookie map, increment, write back
+            java.util.Map<Integer, Integer> cookieCart = CartCookieUtil.readCartMap(request);
+            int newQty = cookieCart.getOrDefault(p_id, 0) + 1;
+            cookieCart.put(p_id, newQty);
+            CartCookieUtil.writeCartMap(response, cookieCart);
+            request.setAttribute("msg", "Thêm sản phẩm thành công");
+            request.getRequestDispatcher("/products").forward(request, response);
         }
 
     }
