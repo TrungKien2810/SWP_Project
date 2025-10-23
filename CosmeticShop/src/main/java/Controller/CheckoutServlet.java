@@ -158,14 +158,14 @@ public class CheckoutServlet extends HttpServlet {
             return;
         }
         
-        // // Nếu có discount được áp dụng, đánh dấu đã sử dụng
-        // if (appliedDiscountCode != null && appliedDiscountAmount > 0) {
-        //     DiscountDB discountDB = new DiscountDB();
-        //     Model.Discount discount = discountDB.validateAndGetDiscount(appliedDiscountCode);
-        //     if (discount != null) {
-        //         discountDB.decrementAssignedDiscountUse(currentUser.getUser_id(), discount.getDiscountId());
-        //     }
-        // }
+        // Nếu có discount được áp dụng, đánh dấu đã sử dụng
+        if (appliedDiscountCode != null && appliedDiscountAmount > 0) {
+            DiscountDB discountDB = new DiscountDB();
+            Model.Discount discount = discountDB.validateAndGetDiscount(appliedDiscountCode);
+            if (discount != null) {
+                discountDB.decrementAssignedDiscountUse(currentUser.getUser_id(), discount.getDiscountId());
+            }
+        }
         
         // Xóa discount khỏi session sau khi đặt hàng thành công
         session.removeAttribute("appliedDiscountCode");
