@@ -79,19 +79,19 @@
                                 <p>Email: pinkycloudvietnam@gmail.com</p>
                             </div>
                             <div class="col-lg-6 px-5">
-                                <form id="contactForm">
+                                <form id="contactForm" action="${pageContext.request.contextPath}/lienheServlet" method="post">
                                     <h2 class="text-center text-uppercase" style="margin-top: 30px; color: gray;">
                                         <strong>Nhập thông tin và ý kiến góp ý</strong></h2>
                                     <br>
                                     <div class="row mb-3">
                                         <div class="col-md-6"><input type="text" class="form-control"
-                                                placeholder="Họ tên" required></div>
+                                                placeholder="Name" required></div>
                                         <div class="col-md-6"><input type="text" class="form-control"
-                                                placeholder="Số điện thoại" required></div>
+                                                placeholder="Phone" required></div>
                                     </div>
                                     <div class="row mb-3">
                                         <div class="col-md-6"><input type="text" class="form-control"
-                                                placeholder="Địa chỉ"></div>
+                                                placeholder="Address"></div>
                                         <div class="col-md-6"><input type="email" class="form-control"
                                                 placeholder="Email" required></div>
                                     </div>
