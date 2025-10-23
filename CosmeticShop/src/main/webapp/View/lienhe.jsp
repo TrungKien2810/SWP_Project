@@ -11,6 +11,7 @@
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/lienhe.css">
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
                     integrity="sha512-…" crossorigin="anonymous" referrerpolicy="no-referrer" />
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
                 <title>Pinky Cloud</title>
             </head>
 
@@ -79,13 +80,15 @@
                                 <p>Email: pinkycloudvietnam@gmail.com</p>
                             </div>
                             <div class="col-lg-6 px-5">
-                                <form id="contactForm" action="${pageContext.request.contextPath}/lienheServlet" method="post">
+                                <form id="contactForm" action="${pageContext.request.contextPath}/lienheServlet"
+                                    method="post">
                                     <h2 class="text-center text-uppercase" style="margin-top: 30px; color: gray;">
-                                        <strong>Nhập thông tin và ý kiến góp ý</strong></h2>
+                                        <strong>Nhập thông tin và ý kiến góp ý</strong>
+                                    </h2>
                                     <br>
                                     <div class="row mb-3">
-                                        <div class="col-md-6"><input type="text" class="form-control"
-                                                placeholder="Name" required></div>
+                                        <div class="col-md-6"><input type="text" class="form-control" placeholder="Name"
+                                                required></div>
                                         <div class="col-md-6"><input type="text" class="form-control"
                                                 placeholder="Phone" required></div>
                                     </div>

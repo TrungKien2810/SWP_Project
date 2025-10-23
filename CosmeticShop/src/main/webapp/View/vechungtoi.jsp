@@ -11,6 +11,7 @@
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/vechungtoi.css">
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
                     integrity="sha512-…" crossorigin="anonymous" referrerpolicy="no-referrer" />
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
                 <title>Pinky Cloud</title>
             </head>
 
@@ -63,9 +64,9 @@
                                     da phụ nữ Việt.
                                 </p>
                                 <p class="brand-text">
-                                    Trụ sở chính của PINKYCLOUD được đặt tại Phường Ngô Mây, TP Quy Nhơn Hiện nay, hệ
+                                    Trụ sở chính của PINKYCLOUD được đặt tại Phường Quy Nhơn, Tỉnh Gia Lai Hiện nay, hệ
                                     thống chi nhánh của PINKYCLOUD đã có mặt tại TP. Hồ Chí Minh, Nha Trang, Đà Nẵng,
-                                    Bình Dương và Quy Nhơn, nhằm phục vụ khách hàng trên khắp cả nước. Đặc biệt, cửa
+                                    Bình Dương và Gia Lai, nhằm phục vụ khách hàng trên khắp cả nước. Đặc biệt, cửa
                                     hàng trải nghiệm và mua sắm <strong>PINKYCLOUD Beauty Concept Store</strong> chính
                                     thức khai trương vào tháng 03/2024, là điểm đến lý tưởng cho những ai yêu thích mỹ
                                     phẩm chính hãng, muốn trực tiếp trải nghiệm các dòng sản phẩm trang điểm và chăm sóc
