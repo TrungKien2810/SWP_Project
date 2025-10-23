@@ -1,4 +1,5 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -143,22 +144,28 @@
                                             <div class="text-muted">SL: ${it.quantity}</div>
                                         </div>
                                     </div>
-                                    <div>${it.price * it.quantity}</div>
+                                    <div><fmt:formatNumber value="${it.price * it.quantity}" pattern="#,##0" />₫</div>
                                 </div>
                             </c:forEach>
                         </div>
                         <div class="d-flex justify-content-between">
                             <span>Tạm tính:</span>
-                            <strong>${itemsTotal}</strong>
+                            <strong><fmt:formatNumber value="${itemsTotal}" pattern="#,##0" />₫</strong>
                         </div>
+                        <c:if test="${appliedDiscountAmount > 0}">
+                            <div class="d-flex justify-content-between text-success">
+                                <span>Giảm giá:</span>
+                                <strong>-<fmt:formatNumber value="${appliedDiscountAmount}" pattern="#,##0" />₫</strong>
+                            </div>
+                        </c:if>
                         <div class="d-flex justify-content-between">
                             <span>Phí vận chuyển:</span>
-                            <strong id="shippingCost">0</strong>
+                            <strong id="shippingCost">0₫</strong>
                         </div>
                         <hr>
                         <div class="d-flex justify-content-between">
                             <span>Tổng cộng:</span>
-                            <strong id="grandTotal">${itemsTotal}</strong>
+                            <strong id="grandTotal"><fmt:formatNumber value="${finalTotal}" pattern="#,##0" />₫</strong>
                         </div>
                         <div class="mt-3">
                             <button class="btn btn-primary w-100" style="background-color:#f76c85;border-color:#f76c85;">Đặt hàng</button>
@@ -170,13 +177,24 @@
     </div>
     <script>
         (function(){
-            var itemsTotal = Number('${itemsTotal}'.replace(',', '')) || 0;
+            var itemsTotal = Number('${itemsTotal}'.replace(/,/g, '')) || 0;
+            var appliedDiscountAmount = Number('${appliedDiscountAmount}'.replace(/,/g, '')) || 0;
+            var finalTotal = Number('${finalTotal}'.replace(/,/g, '')) || 0;
+            
+            // Function để format số tiền với dấu chấm phân cách
+            function formatCurrency(amount) {
+                return Math.round(amount).toLocaleString('vi-VN') + '₫';
+            }
+            
             function updateTotals(){
                 var checked = document.querySelector('input[name="shipping_method_id"]:checked');
                 var cost = checked ? Number(checked.getAttribute('data-cost')) : 0;
                 if (isNaN(cost)) cost = 0;
-                document.getElementById('shippingCost').textContent = cost;
-                document.getElementById('grandTotal').textContent = (itemsTotal + cost);
+                document.getElementById('shippingCost').textContent = formatCurrency(cost);
+                
+                // Tính tổng cuối cùng = (itemsTotal - discount) + shipping
+                var grandTotal = Math.max(0, itemsTotal - appliedDiscountAmount) + cost;
+                document.getElementById('grandTotal').textContent = formatCurrency(grandTotal);
             }
             document.addEventListener('change', function(e){
                 if (e.target && e.target.name === 'shipping_method_id') updateTotals();
@@ -192,7 +210,12 @@
             });
         })();
     </script>
+    <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
+    <script src="${pageContext.request.contextPath}/Js/home.js"></script>
 </body>
 </html>
+
+
+
 
 

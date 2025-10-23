@@ -1,10 +1,10 @@
 package Controller;
-
 import DAO.CartDB;
 import DAO.OrderDB;
 import DAO.ShippingAddressDB;
 import DAO.ShippingMethodDB;
 import DAO.ShippingMethodDB.ShippingMethod;
+import DAO.DiscountDB;
 import Model.Cart;
 import Model.Order;
 import Model.OrderDetail;
@@ -39,11 +39,29 @@ public class CheckoutServlet extends HttpServlet {
         Cart cart = cartDB.getOrCreateCartByUserId(currentUser.getUser_id());
         List<Model.CheckoutItem> items = cartDB.getSelectedCheckoutItems(cart.getCart_id());
         double itemsTotal = cartDB.calculateSelectedTotal(cart.getCart_id());
+        
+        // Lấy discount từ session (nếu có)
+        Double appliedDiscountAmount = 0.0;
+        Object discountObj = session.getAttribute("appliedDiscountAmount");
+        if (discountObj instanceof Double) {
+            appliedDiscountAmount = (Double) discountObj;
+        } else if (discountObj != null) {
+            try {
+                appliedDiscountAmount = Double.parseDouble(discountObj.toString());
+            } catch (NumberFormatException e) {
+                appliedDiscountAmount = 0.0;
+            }
+        }
+        
+        // Tính tổng tiền sau khi áp dụng discount
+        double finalTotal = Math.max(0, itemsTotal - appliedDiscountAmount);
 
         req.setAttribute("addresses", addressDB.getByUserId(currentUser.getUser_id()));
         req.setAttribute("methods", methodDB.getActiveMethods());
         req.setAttribute("items", items);
         req.setAttribute("itemsTotal", itemsTotal);
+        req.setAttribute("appliedDiscountAmount", appliedDiscountAmount);
+        req.setAttribute("finalTotal", finalTotal);
         req.getRequestDispatcher("/View/checkout.jsp").forward(req, resp);
     }
 
@@ -75,9 +93,33 @@ public class CheckoutServlet extends HttpServlet {
         String notes = req.getParameter("notes");
 
         double itemsTotal = cartDB.calculateSelectedTotal(cart.getCart_id());
+        
+        // Lấy discount từ session (nếu có)
+        Double appliedDiscountAmount = 0.0;
+        String appliedDiscountCode = null;
+        Object discountObj = session.getAttribute("appliedDiscountAmount");
+        Object discountCodeObj = session.getAttribute("appliedDiscountCode");
+        
+        if (discountObj instanceof Double) {
+            appliedDiscountAmount = (Double) discountObj;
+        } else if (discountObj != null) {
+            try {
+                appliedDiscountAmount = Double.parseDouble(discountObj.toString());
+            } catch (NumberFormatException e) {
+                appliedDiscountAmount = 0.0;
+            }
+        }
+        
+        if (discountCodeObj instanceof String) {
+            appliedDiscountCode = (String) discountCodeObj;
+        }
+        
+        // Tính tổng tiền sau khi áp dụng discount
+        double subtotalAfterDiscount = Math.max(0, itemsTotal - appliedDiscountAmount);
+        
         ShippingMethod method = methodDB.getById(methodId);
         double shippingCost = method != null ? method.getCost() : 0.0;
-        double totalAmount = itemsTotal + shippingCost;
+        double totalAmount = subtotalAfterDiscount + shippingCost;
 
         Order order = new Order();
         order.setUserId(currentUser.getUser_id());
@@ -89,6 +131,17 @@ public class CheckoutServlet extends HttpServlet {
         order.setOrderStatus("PENDING");
         order.setNotes(notes);
         order.setTotalAmount(totalAmount);
+        
+        // Lưu thông tin discount vào order (nếu có)
+        if (appliedDiscountCode != null && appliedDiscountAmount > 0) {
+            // Tìm discount_id từ code để lưu vào order
+            DiscountDB discountDB = new DiscountDB();
+            Model.Discount discount = discountDB.validateAndGetDiscount(appliedDiscountCode);
+            if (discount != null) {
+                order.setDiscountId(discount.getDiscountId());
+                order.setDiscountAmount(appliedDiscountAmount);
+            }
+        }
 
         List<OrderDetail> details = new ArrayList<>();
         for (Model.CheckoutItem ci : items) {
@@ -109,6 +162,20 @@ public class CheckoutServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/checkout?error=details");
             return;
         }
+        
+        // // Nếu có discount được áp dụng, đánh dấu đã sử dụng
+        // if (appliedDiscountCode != null && appliedDiscountAmount > 0) {
+        //     DiscountDB discountDB = new DiscountDB();
+        //     Model.Discount discount = discountDB.validateAndGetDiscount(appliedDiscountCode);
+        //     if (discount != null) {
+        //         discountDB.decrementAssignedDiscountUse(currentUser.getUser_id(), discount.getDiscountId());
+        //     }
+        // }
+        
+        // Xóa discount khỏi session sau khi đặt hàng thành công
+        session.removeAttribute("appliedDiscountCode");
+        session.removeAttribute("appliedDiscountAmount");
+        
         if ("BANK".equalsIgnoreCase(paymentMethod)) {
             String createUrl = req.getContextPath() + "/payment/vnpay/create?orderId=" + orderId;
             resp.sendRedirect(createUrl);
@@ -123,5 +190,3 @@ public class CheckoutServlet extends HttpServlet {
         }
     }
 }
-
-
