@@ -27,9 +27,13 @@ public class ShippingAddressServlet extends HttpServlet {
         }
 
         String action = req.getParameter("action");
+        String returnTo = req.getParameter("return_to");
         if (action == null || action.isEmpty()) {
             List<ShippingAddress> addresses = shippingAddressDB.getByUserId(currentUser.getUser_id());
             req.setAttribute("addresses", addresses);
+            if (returnTo != null) {
+                req.setAttribute("return_to", returnTo);
+            }
             req.getRequestDispatcher("/View/shipping-address.jsp").forward(req, resp);
             return;
         }
@@ -41,6 +45,9 @@ public class ShippingAddressServlet extends HttpServlet {
                 ShippingAddress sa = shippingAddressDB.getById(id, currentUser.getUser_id());
                 req.setAttribute("address", sa);
             }
+            if (returnTo != null) {
+                req.setAttribute("return_to", returnTo);
+            }
             req.getRequestDispatcher("/View/shipping-address.jsp").forward(req, resp);
             return;
         }
@@ -49,7 +56,11 @@ public class ShippingAddressServlet extends HttpServlet {
             String idStr = req.getParameter("id");
             if (idStr != null) {
                 int id = Integer.parseInt(idStr);
-                shippingAddressDB.delete(id, currentUser.getUser_id());
+                boolean ok = shippingAddressDB.delete(id, currentUser.getUser_id());
+                if (!ok) {
+                    resp.sendRedirect(req.getContextPath() + "/shipping-address?error=cannot_delete");
+                    return;
+                }
             }
             resp.sendRedirect(req.getContextPath() + "/shipping-address");
             return;
@@ -75,6 +86,7 @@ public class ShippingAddressServlet extends HttpServlet {
         }
 
         String addressIdStr = req.getParameter("address_id");
+        String returnTo = req.getParameter("return_to");
         String fullName = req.getParameter("full_name");
         String phone = req.getParameter("phone");
         String address = req.getParameter("address");
@@ -100,7 +112,11 @@ public class ShippingAddressServlet extends HttpServlet {
             shippingAddressDB.update(sa);
         }
 
-        resp.sendRedirect(req.getContextPath() + "/shipping-address");
+        if ("checkout".equalsIgnoreCase(returnTo)) {
+            resp.sendRedirect(req.getContextPath() + "/checkout?address_added=true");
+        } else {
+            resp.sendRedirect(req.getContextPath() + "/shipping-address");
+        }
     }
 }
 

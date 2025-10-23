@@ -77,7 +77,7 @@
                         <div class="item-info flex-grow-1">
                             <h5><%=product.getName()%></h5>
                             <p class="item-price"><%=p.getPrice()%>₫ x <span class="item-qty"><%=p.getQuantity()%></span></p>
-                            <input type="number" value="<%=p.getQuantity()%>" min="1" class="form-control w-25 text-center quantity-input">
+                            <input type="number" value="<%=p.getQuantity()%>" min="1" class="form-control w-25 text-center quantity-input" data-product-id="<%=p.getProduct_id()%>">
                         </div>
                         <div class="item-total ms-3">
                             <p class="fw-bold item-total-text"><%=p.getPrice() * p.getQuantity()%>₫</p>
@@ -192,7 +192,21 @@
     }
 
     // Event checkbox & quantity input
-    document.querySelectorAll('.quantity-input').forEach(input => input.addEventListener('input', updateTotal));
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('input', updateTotal);
+        input.addEventListener('change', function(){
+            var qty = parseInt(this.value);
+            if (!qty || qty < 1) { qty = 1; this.value = 1; }
+            var productId = this.getAttribute('data-product-id');
+            fetch('${pageContext.request.contextPath}/cart/update-quantity', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'productId=' + encodeURIComponent(productId) + '&quantity=' + encodeURIComponent(qty)
+            }).then(r => r.json()).then(function(){
+                // server refreshed session cart; totals already updated client-side
+            }).catch(function(){ /* ignore */ });
+        });
+    });
     document.querySelectorAll('.cart-item-checkbox').forEach(cb => cb.addEventListener('change', updateTotal));
 
     // Event nút xóa
