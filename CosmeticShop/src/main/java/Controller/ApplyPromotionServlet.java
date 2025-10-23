@@ -59,6 +59,7 @@ public class ApplyPromotionServlet extends HttpServlet {
 
         session.setAttribute("appliedDiscountCode", discount.getCode());
         session.setAttribute("appliedDiscountAmount", discountAmount);
+        // KHÔNG trừ lượt dùng khi mới áp dụng trong giỏ hàng. Chỉ trừ khi đơn hàng hoàn tất.
         request.setAttribute("msg", "Áp dụng mã thành công: " + discount.getCode());
         request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
     }

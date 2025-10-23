@@ -9,7 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.Timestamp;
 
-@WebServlet(name = "DiscountController", urlPatterns = {"/discounts"})
+@WebServlet(name = "DiscountController", urlPatterns = {"/discounts", "/my-promos"})
 public class DiscountController extends HttpServlet {
 
     private DiscountDB db;
@@ -21,6 +21,21 @@ public class DiscountController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String servletPath = request.getServletPath();
+        if ("/my-promos".equals(servletPath)) {
+            jakarta.servlet.http.HttpSession session = request.getSession(false);
+            if (session == null || session.getAttribute("user") == null) {
+                request.setAttribute("error", "Vui lòng đăng nhập để xem mã của bạn.");
+                request.getRequestDispatcher("/View/log.jsp").forward(request, response);
+                return;
+            }
+            Model.user u = (Model.user) session.getAttribute("user");
+            // Auto-assign due discounts for this user then load
+            db().assignDueForUser(u.getUser_id());
+            request.setAttribute("assignedDiscounts", db().listAssignedDiscountsForUser(u.getUser_id()));
+            request.getRequestDispatcher("/View/my-discounts.jsp").forward(request, response);
+            return;
+        }
         String action = request.getParameter("action");
         if (action == null) action = "list";
         switch (action) {
@@ -78,11 +93,36 @@ public class DiscountController extends HttpServlet {
         Timestamp start = parseTimestamp(req.getParameter("start"));
         Timestamp end = parseTimestamp(req.getParameter("end"));
 
+        // Extended fields
+        String description = req.getParameter("description");
+        Integer usageLimit = null;
+        try { String s = req.getParameter("usageLimit"); if (s != null && !s.isBlank()) usageLimit = Integer.parseInt(s.trim()); } catch (Exception ignored) {}
+        String conditionType = req.getParameter("conditionType");
+        if (conditionType != null) {
+            conditionType = conditionType.trim();
+            if (conditionType.isEmpty()) {
+                conditionType = null;
+            } else if (!("TOTAL_SPENT".equals(conditionType) || "ORDER_COUNT".equals(conditionType) ||
+                    "FIRST_ORDER".equals(conditionType) || "SPECIAL_EVENT".equals(conditionType))) {
+                conditionType = null;
+            }
+        }
+        Double conditionValue = parseNullableDouble(req.getParameter("conditionValue"));
+        if ("FIRST_ORDER".equals(conditionType) || "SPECIAL_EVENT".equals(conditionType)) {
+            conditionValue = null; // server-side guard
+        }
+        String conditionDescription = req.getParameter("conditionDescription");
+        Boolean specialEvent = "on".equalsIgnoreCase(req.getParameter("specialEvent"));
+        Boolean autoAssignAll = "on".equalsIgnoreCase(req.getParameter("autoAssignAll"));
+        Timestamp assignDate = parseTimestamp(req.getParameter("assignDate"));
+
         if (update) {
             int id = parseInt(req.getParameter("id"), -1);
-            db().update(id, code, name, type, value, minOrder, maxDiscount, start, end, active);
+            db().update(id, code, name, type, value, minOrder, maxDiscount, start, end, active,
+                    description, usageLimit, conditionType, conditionValue, conditionDescription, specialEvent, autoAssignAll, assignDate);
         } else {
-            db().create(code, name, type, value, minOrder, maxDiscount, start, end, active);
+            db().create(code, name, type, value, minOrder, maxDiscount, start, end, active,
+                    description, usageLimit, conditionType, conditionValue, conditionDescription, specialEvent, autoAssignAll, assignDate);
         }
     }
 
