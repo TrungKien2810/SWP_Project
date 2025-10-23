@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <title>Thanh toán</title>
     <style>
         .container-sm { max-width: 1000px; }
@@ -15,9 +16,64 @@
         .highlight { color:#f76c85; }
     </style>
     <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
+    <script src="${pageContext.request.contextPath}/Js/home.js"></script>
 </head>
 <body>
+    <!-- header -->
+    <div class="header">
+        <div class="header_text"><p>THEO DÕI CHÚNG TÔI</p></div>
+        <div class="header_social">
+            <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/fb.png" alt="" ></a>
+            <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/ins.png" alt=""></a>
+            <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/tt.png" alt=""></a>
+            <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/ytb.png" alt="" ></a>
+        </div>
+    </div>
+
+    <!-- menu -->
+    <div class="menu">
+        <div class="menu_logo">
+            <a href="${pageContext.request.contextPath}/View/home.jsp"><img src="${pageContext.request.contextPath}/IMG/logo.jpg" alt="" style="width: 230px;"></a>
+        </div>
+        <div class="menu_list">
+            <ul class="menu_list_item">
+                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/home.jsp">TRANG CHỦ</a></li>
+                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/vechungtoi.jsp">VỀ CHÚNG TÔI</a></li>
+                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/products">BỘ SƯU TẬP</a></li>
+                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/lienhe.jsp">LIÊN HỆ</a></li>
+            </ul>
+            <div class="menu_search">
+                <div class="menu_search_input">
+                    <input type="text" placeholder="Nhập từ khóa bạn cần tìm kiếm . . . ">
+                </div>
+                <div class="menu_search_icon">
+                    <a href="${pageContext.request.contextPath}/cart"> <i class="fa-solid fa-cart-shopping cart-icon"></i></a>
+                </div>
+            </div>
+            <div class="menu_search_cart">
+                <a href="${pageContext.request.contextPath}/cart"> <i class="fa-solid fa-cart-shopping cart-icon"></i></a>
+                <!-- Tài khoản -->
+                <c:if test="${!empty sessionScope.user}">
+                    <div class="account-menu">
+                        <i class="fas fa-user-circle account-icon"></i>
+                        <c:if test="${not empty sessionScope.user}">
+                            <div class="account-dropdown">
+                                <p class="welcome-text">Welcome, ${sessionScope.user.username}</p>
+                                <a href="${pageContext.request.contextPath}/account-management">Quản lý tài khoản</a>
+                                <a href="${pageContext.request.contextPath}/cart">My Cart</a>
+                                <a href="${pageContext.request.contextPath}/logout">Log Out</a>
+                            </div>
+                        </c:if>
+                    </div>
+                </c:if>
+            </div>
+        </div>
+    </div>
+
     <div class="container-sm my-4">
+        <c:if test="${param.error == 'no_address'}">
+            <div class="alert alert-danger">Cần thêm địa chỉ giao hàng trước khi đặt hàng.</div>
+        </c:if>
         <h3 class="mb-3">Thanh toán</h3>
 
         <form method="post" action="${pageContext.request.contextPath}/checkout">
@@ -27,16 +83,19 @@
                         <h5 class="mb-3">Địa chỉ giao hàng</h5>
                         <c:choose>
                             <c:when test="${empty addresses}">
-                                <p>Bạn chưa có địa chỉ. <a href="${pageContext.request.contextPath}/shipping-address">Thêm địa chỉ</a></p>
+                                <p>Bạn chưa có địa chỉ. <a href="${pageContext.request.contextPath}/shipping-address?return_to=checkout">Thêm địa chỉ</a></p>
                             </c:when>
                             <c:otherwise>
-                                <select class="form-select" name="shipping_address_id" required>
+                                <div class="d-flex gap-2">
+                                    <select class="form-select" name="shipping_address_id" required>
                                     <c:forEach var="a" items="${addresses}">
                                         <option value="${a.addressId}" ${a['default'] ? 'selected' : ''}>
                                             ${a.fullName} - ${a.phone} | ${a.address}, ${a.ward}, ${a.district}, ${a.city}
                                         </option>
                                     </c:forEach>
-                                </select>
+                                    </select>
+                                    <a class="btn btn-outline-primary" href="${pageContext.request.contextPath}/shipping-address?return_to=checkout">Thêm địa chỉ</a>
+                                </div>
                             </c:otherwise>
                         </c:choose>
                     </div>
