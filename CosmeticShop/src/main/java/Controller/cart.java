@@ -88,6 +88,9 @@ public class cart extends HttpServlet {
                 Model.user u = (Model.user) session.getAttribute("user");
                 new DiscountDB().assignDueForUser(u.getUser_id());
                 request.setAttribute("assignedDiscounts", new DiscountDB().listAssignedDiscountsForUser(u.getUser_id()));
+            } else {
+                // Guest user - không có assigned discounts
+                request.setAttribute("assignedDiscounts", new ArrayList<>());
             }
         if (user != null) {
             CartDB cd = new CartDB();
@@ -110,6 +113,7 @@ public class cart extends HttpServlet {
             session.setAttribute("cartItems", cartItems);
             request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
         }
+    }
     }
 
     /**

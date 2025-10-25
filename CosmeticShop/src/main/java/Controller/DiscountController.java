@@ -66,12 +66,14 @@ public class DiscountController extends HttpServlet {
 
         switch (action) {
             case "create":
-                handleUpsert(request, false);
-                response.sendRedirect("discounts");
+                if (handleUpsert(request, response, false)) {
+                    response.sendRedirect("discounts");
+                }
                 break;
             case "update":
-                handleUpsert(request, true);
-                response.sendRedirect("discounts");
+                if (handleUpsert(request, response, true)) {
+                    response.sendRedirect("discounts");
+                }
                 break;
             case "delete":
                 try { db().delete(Integer.parseInt(request.getParameter("id"))); } catch (NumberFormatException ignored) {}
@@ -82,13 +84,19 @@ public class DiscountController extends HttpServlet {
         }
     }
 
-    private void handleUpsert(HttpServletRequest req, boolean update) {
+    private boolean handleUpsert(HttpServletRequest req, HttpServletResponse resp, boolean update) throws ServletException, IOException {
+        String assignmentMode = req.getParameter("assignmentMode");
         String code = req.getParameter("code");
         String name = req.getParameter("name");
         String type = req.getParameter("type");
         double value = parseDouble(req.getParameter("value"), 0);
         Double minOrder = parseNullableDouble(req.getParameter("minOrder"));
         Double maxDiscount = parseNullableDouble(req.getParameter("maxDiscount"));
+        
+        // Giới hạn giá trị để tránh arithmetic overflow
+        if (value > 999999999) value = 999999999;
+        if (minOrder != null && minOrder > 999999999) minOrder = 999999999.0;
+        if (maxDiscount != null && maxDiscount > 999999999) maxDiscount = 999999999.0;
         boolean active = "on".equalsIgnoreCase(req.getParameter("active"));
         Timestamp start = parseTimestamp(req.getParameter("start"));
         Timestamp end = parseTimestamp(req.getParameter("end"));
@@ -108,22 +116,95 @@ public class DiscountController extends HttpServlet {
             }
         }
         Double conditionValue = parseNullableDouble(req.getParameter("conditionValue"));
+        // Giới hạn giá trị để tránh arithmetic overflow
+        if (conditionValue != null && conditionValue > 999999999) conditionValue = 999999999.0;
         if ("FIRST_ORDER".equals(conditionType) || "SPECIAL_EVENT".equals(conditionType)) {
             conditionValue = null; // server-side guard
         }
         String conditionDescription = req.getParameter("conditionDescription");
         Boolean specialEvent = "on".equalsIgnoreCase(req.getParameter("specialEvent"));
-        Boolean autoAssignAll = "on".equalsIgnoreCase(req.getParameter("autoAssignAll"));
+        // Derive assignment mode if not provided (backward compatibility)
+        if (assignmentMode == null || assignmentMode.isBlank()) {
+            boolean autoParam = "on".equalsIgnoreCase(req.getParameter("autoAssignAll"));
+            if (autoParam) assignmentMode = "AUTO_ALL";
+            else if (conditionType != null) assignmentMode = "AUTO_CONDITION";
+            else assignmentMode = "MANUAL";
+        }
+        boolean isAutoAll = "AUTO_ALL".equalsIgnoreCase(assignmentMode);
+        boolean isAutoCondition = "AUTO_CONDITION".equalsIgnoreCase(assignmentMode);
+        Boolean autoAssignAll = isAutoAll;
         Timestamp assignDate = parseTimestamp(req.getParameter("assignDate"));
+        // Sanitize inconsistent fields based on assignment mode
+        if (!isAutoCondition) {
+            conditionType = null;
+            conditionValue = null;
+            conditionDescription = null;
+        }
 
+        // Validation
+        if (code == null || code.trim().isEmpty()) {
+            req.setAttribute("error", "Code không được để trống");
+            forwardToForm(req, resp, update);
+            return false;
+        }
+        if (name == null || name.trim().isEmpty()) {
+            req.setAttribute("error", "Tên không được để trống");
+            forwardToForm(req, resp, update);
+            return false;
+        }
+        if (value <= 0) {
+            req.setAttribute("error", "Giá trị phải lớn hơn 0");
+            forwardToForm(req, resp, update);
+            return false;
+        }
+        // Kiểm tra ngày tháng: luôn cần start & end; nếu AUTO_ALL, kiểm tra thêm assignDate <= end
+        if (start == null || end == null) {
+            req.setAttribute("error", "Ngày bắt đầu và kết thúc không được để trống");
+            forwardToForm(req, resp, update);
+            return false;
+        }
+        if (start.after(end)) {
+            req.setAttribute("error", "Ngày bắt đầu không được sau ngày kết thúc");
+            forwardToForm(req, resp, update);
+            return false;
+        }
+        if (isAutoAll && assignDate != null && assignDate.after(end)) {
+            req.setAttribute("error", "Ngày gán không được sau ngày kết thúc");
+            forwardToForm(req, resp, update);
+            return false;
+        }
+
+        // Xử lý ngày bắt đầu cho voucher tự động gán
+        Timestamp finalStart = start;
+
+        boolean success;
         if (update) {
             int id = parseInt(req.getParameter("id"), -1);
-            db().update(id, code, name, type, value, minOrder, maxDiscount, start, end, active,
+            success = db().update(id, code, name, type, value, minOrder, maxDiscount, finalStart, end, active,
                     description, usageLimit, conditionType, conditionValue, conditionDescription, specialEvent, autoAssignAll, assignDate);
         } else {
-            db().create(code, name, type, value, minOrder, maxDiscount, start, end, active,
+            success = db().create(code, name, type, value, minOrder, maxDiscount, finalStart, end, active,
                     description, usageLimit, conditionType, conditionValue, conditionDescription, specialEvent, autoAssignAll, assignDate);
         }
+        
+        if (!success) {
+            req.setAttribute("error", "Có lỗi xảy ra khi lưu dữ liệu");
+            forwardToForm(req, resp, update);
+            return false;
+        }
+        
+        return true;
+    }
+    
+    private void forwardToForm(HttpServletRequest req, HttpServletResponse resp, boolean update) throws ServletException, IOException {
+        // Forward lại form với tất cả parameters để giữ lại giá trị đã nhập
+        if (update) {
+            try {
+                int id = parseInt(req.getParameter("id"), -1);
+                req.setAttribute("discount", db().getById(id));
+            } catch (NumberFormatException ignored) {}
+        }
+        req.getRequestDispatcher("/View/discount-form.jsp").forward(req, resp);
     }
 
     private int parseInt(String s, int def) {
