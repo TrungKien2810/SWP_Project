@@ -74,7 +74,9 @@ public class cart extends HttpServlet {
         List<CartItems> cartItems = new ArrayList<>();
         Object CartItems = session.getAttribute("cartItems");
         if (CartItems != null) {
-            cartItems = (List<CartItems>) CartItems;
+            @SuppressWarnings("unchecked")
+            List<CartItems> sessionCartItems = (List<CartItems>) CartItems;
+            cartItems = sessionCartItems;
             // Lấy danh sách voucher được gán cho user để hiển thị select
             if (session.getAttribute("user") != null) {
                 Model.user u = (Model.user) session.getAttribute("user");
@@ -114,7 +116,6 @@ public class cart extends HttpServlet {
                 request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
             }
         }
-    }
     }
 
     /**
