@@ -15,7 +15,7 @@ import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Base64;
-
+import jakarta.servlet.http.HttpSession;
 @WebServlet(name = "passwordResetRequest", urlPatterns = {"/password/reset/request", "/test-servlet"})
 public class PasswordResetRequestServlet extends HttpServlet {
 
@@ -82,10 +82,17 @@ public class PasswordResetRequestServlet extends HttpServlet {
                     resp.sendRedirect(req.getContextPath() + "/View/log.jsp?msg=" + URLEncoder.encode(message, StandardCharsets.UTF_8));
                     return;
                 }
-                
-                EmailUtil.send(email, "Đặt lại mật khẩu - Pinky Cloud", body, fromEmail, appPassword);
+                HttpSession session = req.getSession();
+                user user = (user) session.getAttribute("user");
+                if(user==null){
+                    EmailUtil.send(email, "Đặt lại mật khẩu - Pinky Cloud", body, fromEmail, appPassword);
                 String message = "Link khôi phục mật khẩu đã được gửi đến email của bạn";
                 resp.sendRedirect(req.getContextPath() + "/View/log.jsp?msg=" + URLEncoder.encode(message, StandardCharsets.UTF_8));
+                } else {
+                EmailUtil.send(email, "Đặt lại mật khẩu - Pinky Cloud", body, fromEmail, appPassword);
+                String message = "Link khôi phục mật khẩu đã được gửi đến email của bạn";
+                resp.sendRedirect(req.getContextPath() + "/View/home.jsp?msg=" + URLEncoder.encode(message, StandardCharsets.UTF_8));
+                }
             } catch (Exception e) {
                 e.printStackTrace(); // Log lỗi để debug
                 String errorMessage = "Lỗi gửi email. Vui lòng kiểm tra cấu hình email hoặc thử lại sau.";

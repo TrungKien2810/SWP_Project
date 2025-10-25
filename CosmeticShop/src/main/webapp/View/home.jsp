@@ -15,6 +15,12 @@
     <body>
         <%@ include file="/View/includes/header.jspf" %>
 
+                        <c:if test="${not empty param.msg}">
+                            <div class="container mt-3">
+                                <div class="alert alert-success">${param.msg}</div>
+                            </div>
+                        </c:if>
+
                         <!-- MODAL LOGIN -->
                         <!-- Modal Đăng Nhập -->
                         <!--<div class="modal" id="loginModal">
