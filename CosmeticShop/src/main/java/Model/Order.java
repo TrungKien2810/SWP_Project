@@ -20,6 +20,9 @@ public class Order {
     private double discountAmount;
     private String notes;
     private List<OrderDetail> details = new ArrayList<>();
+    // For UI summaries
+    private String firstProductName;
+    private String firstProductImageUrl;
 
     public int getOrderId() { return orderId; }
     public void setOrderId(int orderId) { this.orderId = orderId; }
@@ -51,6 +54,10 @@ public class Order {
     public void setNotes(String notes) { this.notes = notes; }
     public List<OrderDetail> getDetails() { return details; }
     public void setDetails(List<OrderDetail> details) { this.details = details; }
+    public String getFirstProductName() { return firstProductName; }
+    public void setFirstProductName(String firstProductName) { this.firstProductName = firstProductName; }
+    public String getFirstProductImageUrl() { return firstProductImageUrl; }
+    public void setFirstProductImageUrl(String firstProductImageUrl) { this.firstProductImageUrl = firstProductImageUrl; }
 }
 
 
