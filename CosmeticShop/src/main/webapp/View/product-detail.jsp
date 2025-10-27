@@ -63,7 +63,7 @@
                 <div class="product-details">
                     <h2><%= p.getName() %></h2>
                     <div class="price-section">
-                        <span class="price"><%= String.format("%.0f", p.getPrice()) %> VND</span>
+                        <span class="price"><%= String.format("%,.0f", p.getPrice()) %> VND</span>
                     </div>
                     <div class="product-info">
                         <p><b>Số lượng:</b> <%= p.getStock() %> sản phẩm có sẵn</p>

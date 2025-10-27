@@ -42,6 +42,20 @@ public class ShippingAddressDB {
         }
         return null;
     }
+    
+    public ShippingAddress getById(int addressId) {
+        String sql = "select address_id, user_id, full_name, phone, address, city, district, ward, is_default, created_at from ShippingAddresses where address_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, addressId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return mapRow(rs);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     public boolean create(ShippingAddress sa) {
         // If set default, unset others first

@@ -80,7 +80,7 @@
                             <input type="number" value="<%=p.getQuantity()%>" min="1" class="form-control w-25 text-center quantity-input" data-product-id="<%=p.getProduct_id()%>">
                         </div>
                         <div class="item-total ms-3">
-                            <p class="fw-bold item-total-text"><%=p.getPrice() * p.getQuantity()%>₫</p>
+                            <p class="fw-bold item-total-text"><%=String.format("%,.0f", p.getPrice() * p.getQuantity())%>₫</p>
                             <a href="${pageContext.request.contextPath}/removeFromCart?productId=<%=p.getProduct_id()%>">
                             <button class="btn btn-sm btn-outline-danger mt-2 delete-btn">Xóa</button>
                             </a>
@@ -94,7 +94,7 @@
                     <h4 class="fw-bold mb-3">Tổng cộng</h4>
                     <div class="d-flex justify-content-between mb-2">
                         <span>Tạm tính:</span>
-                        <span id="subtotalDisplay"><%=totalPrice%></span>
+                        <span id="subtotalDisplay"><%=String.format("%,.0f", totalPrice)%>₫</span>
                     </div>
                     <div class="d-flex justify-content-between mb-2">
                         <span>Phí vận chuyển:</span>
@@ -162,8 +162,8 @@
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <span class="fw-bold">Tổng thanh toán:</span>
                         <strong style="color:#f76c85;" id="totalDisplay"><%=
-                            (totalPrice - appliedDiscount) > 0 ? (totalPrice - appliedDiscount) : 0
-                        %></strong>
+                            String.format("%,.0f", (totalPrice - appliedDiscount) > 0 ? (totalPrice - appliedDiscount) : 0)
+                        %>₫</strong>
                     </div>
 
                     <a href="${pageContext.request.contextPath}/checkout" class="btn btn-danger w-100 fw-bold">THANH TOÁN NGAY</a>

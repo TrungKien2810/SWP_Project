@@ -273,9 +273,7 @@
                                                             </h5>
                                                             <p class="price">
                                                                 <%-- Định dạng giá tiền cho dễ đọc --%>
-                                                                    <fmt:formatNumber value="${product.price}"
-                                                                        type="currency" currencySymbol=""
-                                                                        maxFractionDigits="0" /> VNĐ
+                                                                    ${String.format("%,.0f", product.price)} VNĐ
                                                             </p>
                                                             <div class="action-buttons">
                                                                 <a href="${pageContext.request.contextPath}/addToCart?id=${product.productId}"

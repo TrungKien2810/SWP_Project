@@ -698,4 +698,31 @@ public class ProductDB {
         public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
         public void setImageOrder(int imageOrder) { this.imageOrder = imageOrder; }
     }
+    
+    // Giảm số lượng tồn kho
+    public boolean decreaseStock(int productId, int quantity) {
+        String sql = "UPDATE Products SET stock = stock - ? WHERE product_id = ? AND stock >= ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, quantity);
+            stmt.setInt(2, productId);
+            stmt.setInt(3, quantity); // Đảm bảo còn đủ hàng
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    // Tăng số lượng tồn kho (hoàn kho)
+    public boolean increaseStock(int productId, int quantity) {
+        String sql = "UPDATE Products SET stock = stock + ? WHERE product_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, quantity);
+            stmt.setInt(2, productId);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
