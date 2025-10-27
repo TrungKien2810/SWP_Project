@@ -1,0 +1,52 @@
+<%@ page pageEncoding="UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - PinkyCloud</title>
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    body{background:#f7f7fb;}
+    .admin-sidebar{width:260px;min-height:100vh;background:#fff;border-right:1px solid #eee;position:fixed;top:0;left:0;padding:20px 16px;}
+    .admin-sidebar .brand{display:flex;align-items:center;gap:8px;font-weight:800;color:#f76c85;margin-bottom:18px;font-size:18px;}
+    .admin-sidebar .nav{list-style:none;padding:0;margin:0;}
+    .admin-sidebar .nav a{display:flex;align-items:center;gap:10px;color:#333;text-decoration:none;padding:10px 12px;border-radius:10px;margin:4px 0;font-weight:500;}
+    .admin-sidebar .nav a .fa{width:18px;text-align:center;}
+    .admin-sidebar .nav a.active,.admin-sidebar .nav a:hover{background:#fdf1f4;color:#f76c85;}
+    .admin-topbar{height:56px;background:#ffffff;border-bottom:1px solid #eee;margin-left:260px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;}
+    .admin-content{margin-left:260px;padding:20px;}
+    .card{border-radius:12px;border-color:#f1e3e7;}
+    .btn-primary{background:#f76c85;border-color:#f76c85;}
+    .btn-outline-primary{color:#f76c85;border-color:#f76c85;}
+    .btn-outline-primary:hover{background:#f76c85;color:#fff;}
+  </style>
+</head>
+<body>
+  <div class="admin-sidebar">
+    <div class="brand"><i class="fa fa-sparkles"></i> PinkyCloud Admin</div>
+    <div class="nav">
+      <a href="${pageContext.request.contextPath}/admin?action=dashboard" class="${param.action == 'dashboard' || empty param.action ? 'active' : ''}"><i class="fa fa-gauge"></i> Tổng quan</a>
+      <a href="${pageContext.request.contextPath}/admin?action=orders" class="${param.action == 'orders' ? 'active' : ''}"><i class="fa fa-receipt"></i> Quản lý đơn hàng</a>
+      <a href="${pageContext.request.contextPath}/admin?action=products" class="${param.action == 'products' ? 'active' : ''}"><i class="fa fa-box"></i> Quản lý sản phẩm</a>
+      <a href="${pageContext.request.contextPath}/admin?action=categories" class="${param.action == 'categories' ? 'active' : ''}"><i class="fa fa-list"></i> Quản lý danh mục</a>
+      <a href="${pageContext.request.contextPath}/admin?action=users" class="${param.action == 'users' ? 'active' : ''}"><i class="fa fa-users"></i> Quản lý khách hàng</a>
+      <a href="${pageContext.request.contextPath}/admin?action=discounts" class="${param.action == 'discounts' ? 'active' : ''}"><i class="fa fa-ticket"></i> Quản lý khuyến mãi</a>
+      <a href="${pageContext.request.contextPath}/admin?action=reports" class="${param.action == 'reports' ? 'active' : ''}"><i class="fa fa-chart-line"></i> Báo cáo</a>
+      <a href="${pageContext.request.contextPath}/admin?action=settings" class="${param.action == 'settings' ? 'active' : ''}"><i class="fa fa-gear"></i> Cài đặt</a>
+    </div>
+  </div>
+  <div class="admin-topbar">
+    <div>Admin Panel</div>
+    <div>
+      <c:if test="${not empty sessionScope.user}">
+        ${sessionScope.user.username}
+        <a class="btn btn-sm btn-outline-danger ms-2" href="${pageContext.request.contextPath}/logout">Đăng xuất</a>
+      </c:if>
+    </div>
+  </div>
+  <div class="admin-content">
+
