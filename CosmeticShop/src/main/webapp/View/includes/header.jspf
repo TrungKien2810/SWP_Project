@@ -24,16 +24,11 @@
                                 <ul class="menu_list_item">
                                     <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/home.jsp">TRANG CHỦ</a></li>
                                     <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/vechungtoi.jsp">VỀ CHÚNG TÔI</a></li>
-                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/products">BỘ SƯU TẬP</a></li>
-                                        <c:if test="${empty sessionScope.user}">
-                                        <li><a class="menu_list_link" href="${pageContext.request.contextPath}/signup">
-                                                ĐĂNG NHẬP & ĐĂNG KÝ
-                                            </a></li>
-                                        </c:if>
-                                        <c:if test="${not empty sessionScope.user && sessionScope.user.role == 'ADMIN'}">
-                                        <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/products?action=manage">QUẢN LÝ SẢN PHẨM</a></li>
-                                        </c:if>
-                                    <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/lienhe.jsp">LIÊN HỆ</a></li>
+                                    <li><a class="menu_list_link" href="${pageContext.request.contextPath}/products">BỘ SƯU TẬP</a></li>
+                                    <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/lienhe.jsp">LIÊN HỆ</a></li>
+                                    <c:if test="${empty sessionScope.user}">
+                                    <li><a class="menu_list_link" href="${pageContext.request.contextPath}/signup">ĐĂNG NHẬP & ĐĂNG KÝ</a></li>
+                                    </c:if>
                                 </ul>
                                 <div class="menu_search">
                                     <div class="menu_search_input">
@@ -52,6 +47,9 @@
                                             <div class="account-dropdown">
                                                 <p class="welcome-text">Welcome, ${sessionScope.user.username}</p>
                                                 <a href="${pageContext.request.contextPath}/account-management">Account Management</a>
+                                                <c:if test="${sessionScope.user.role == 'ADMIN'}">
+                                                <a href="${pageContext.request.contextPath}/admin?action=dashboard">Admin Panel</a>
+                                                </c:if>
                                                 <a href="${pageContext.request.contextPath}/my-promos">My Vouchers</a>
                                                 <a href="${pageContext.request.contextPath}/cart">My Cart</a>
                                                 <a href="${pageContext.request.contextPath}/logout">Log Out</a>
