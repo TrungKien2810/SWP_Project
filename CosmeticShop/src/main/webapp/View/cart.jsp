@@ -107,11 +107,38 @@
                             <select class="form-select me-2" id="promoSelect" onchange="onSelectPromo(this)">
                                 <option value="">-- Chọn mã của bạn (nếu có) --</option>
                                 <c:forEach var="d" items="${requestScope.assignedDiscounts}">
-                                    <option value="${d.code}">${d.code} - ${d.name}</option>
+                                    <option value="${d.code}" ${sessionScope.appliedDiscountCode eq d.code ? 'selected' : ''}>${d.code}</option>
                                 </c:forEach>
+                                <!-- Thêm mã MANUAL đã áp dụng vào dropdown nếu không có trong assignedDiscounts -->
+                                <c:if test="${not empty sessionScope.appliedDiscountCode}">
+                                    <c:set var="foundInAssigned" value="false" />
+                                    <c:forEach var="d" items="${requestScope.assignedDiscounts}">
+                                        <c:if test="${sessionScope.appliedDiscountCode eq d.code}">
+                                            <c:set var="foundInAssigned" value="true" />
+                                        </c:if>
+                                    </c:forEach>
+                                    <c:if test="${!foundInAssigned}">
+                                        <option value="${sessionScope.appliedDiscountCode}" selected>${sessionScope.appliedDiscountCode}</option>
+                                    </c:if>
+                                </c:if>
+                                <!-- Thêm mã đã xóa gần đây để có thể áp dụng lại -->
+                                <c:if test="${not empty sessionScope.lastRemovedDiscountCode && empty sessionScope.appliedDiscountCode}">
+                                    <c:set var="foundInAssigned" value="false" />
+                                    <c:forEach var="d" items="${requestScope.assignedDiscounts}">
+                                        <c:if test="${sessionScope.lastRemovedDiscountCode eq d.code}">
+                                            <c:set var="foundInAssigned" value="true" />
+                                        </c:if>
+                                    </c:forEach>
+                                    <c:if test="${!foundInAssigned}">
+                                        <option value="${sessionScope.lastRemovedDiscountCode}">${sessionScope.lastRemovedDiscountCode}</option>
+                                    </c:if>
+                                </c:if>
                             </select>
                             <input type="text" name="promoCode" id="promoCodeInput" class="form-control me-2" placeholder="Nhập mã khuyến mãi" value="${sessionScope.appliedDiscountCode}">
-                            <button type="submit" class="btn btn-outline-danger">Áp dụng</button>
+                            <button type="submit" class="btn btn-outline-danger me-2">Áp dụng</button>
+                            <c:if test="${not empty sessionScope.appliedDiscountCode}">
+                                <button type="button" class="btn btn-outline-secondary" onclick="removeDiscount()">Xóa mã</button>
+                            </c:if>
                         </form>
                         <div class="mt-2 d-flex justify-content-between">
                             <a class="small" href="${pageContext.request.contextPath}/my-promos">My Vouchers</a>
@@ -119,6 +146,9 @@
                         </div>
                         <c:if test="${not empty sessionScope.appliedDiscountCode}">
                             <small class="text-success">Đã áp dụng: ${sessionScope.appliedDiscountCode} (-${sessionScope.appliedDiscountAmount})</small>
+                        </c:if>
+                        <c:if test="${not empty requestScope.msg}">
+                            <small class="text-success">${requestScope.msg}</small>
                         </c:if>
                         <c:if test="${not empty requestScope.error}">
                             <small class="text-danger">${requestScope.error}</small>
@@ -226,15 +256,52 @@
         var code = sel && sel.value ? sel.value : '';
         var input = document.getElementById('promoCodeInput');
         if(input){ input.value = code; }
+        
+        // Xóa lastRemovedDiscountCode khi chọn mã mới
+        if(code && code.trim() !== '') {
+            // Có thể thêm logic để clear lastRemovedDiscountCode nếu cần
+        }
+    }
+    
+    // Xóa mã giảm giá
+    function removeDiscount(){
+        var form = document.getElementById('promoForm');
+        var input = document.getElementById('promoCodeInput');
+        var select = document.getElementById('promoSelect');
+        
+        if(input) input.value = '';
+        if(select) select.selectedIndex = 0;
+        
+        // Submit form với mã rỗng để xóa mã đã áp dụng
+        if(form) {
+            var hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'removeDiscount';
+            hiddenInput.value = 'true';
+            form.appendChild(hiddenInput);
+            form.submit();
+        }
     }
 
     // Prefill và tự áp dụng mã khi điều hướng từ trang "My Vouchers"
     document.addEventListener('DOMContentLoaded', function(){
         try {
+            // Đồng bộ dropdown với input khi trang load
+            var input = document.getElementById('promoCodeInput');
+            var select = document.getElementById('promoSelect');
+            if (input && select && input.value) {
+                // Tìm option có value trùng với input
+                for (var i = 0; i < select.options.length; i++) {
+                    if (select.options[i].value === input.value) {
+                        select.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+            
             var prefill = localStorage.getItem('promoCodePrefill');
             if (prefill) {
                 localStorage.removeItem('promoCodePrefill');
-                var input = document.getElementById('promoCodeInput');
                 var form = document.getElementById('promoForm');
                 if (input) input.value = prefill;
                 if (form && input && input.value) {
