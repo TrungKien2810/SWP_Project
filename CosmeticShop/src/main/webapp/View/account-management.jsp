@@ -150,6 +150,14 @@
                     <div class="action-description">Khôi phục mật khẩu qua email</div>
                 </div>
 
+                <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/my-orders'">
+                    <div class="action-icon">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <div class="action-title">Lịch sử mua hàng</div>
+                    <div class="action-description">Xem các đơn hàng và trạng thái thanh toán</div>
+                </div>
+
                 <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/logout'">
                     <div class="action-icon">
                         <i class="fas fa-sign-out-alt"></i>
