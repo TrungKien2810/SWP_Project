@@ -24,6 +24,8 @@ public class VnPayReturnServlet extends HttpServlet {
         boolean ok = signed != null && vnp_SecureHash != null && signed.equalsIgnoreCase(vnp_SecureHash);
 
         if (ok) {
+            HttpSession session = req.getSession(false);
+            
             try {
                 int orderId = Integer.parseInt(orderIdStr);
                 OrderDB orderDB = new OrderDB();
@@ -44,10 +46,24 @@ public class VnPayReturnServlet extends HttpServlet {
                 } else {
                     // Thanh toán thành công
                     orderDB.updatePaymentStatus(orderId, paymentStatus);
+                    
+                    // Xóa cart items đã chọn sau khi thanh toán thành công
+                    if (session != null) {
+                        Object pendingCartIdObj = session.getAttribute("pendingCartId");
+                        if (pendingCartIdObj != null) {
+                            try {
+                                int cartId = (int) pendingCartIdObj;
+                                orderDB.clearSelectedCartItems(cartId);
+                                session.removeAttribute("pendingCartId");
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
                 }
-            } catch (Exception ignore) {}
-
-            HttpSession session = req.getSession(false);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             if (session != null) {
                 session.removeAttribute("cartItems");
                 session.removeAttribute("cartId");
