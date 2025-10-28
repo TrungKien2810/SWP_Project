@@ -67,21 +67,44 @@ public class AdminServlet extends HttpServlet {
                 DAO.OrderDB orderDB = new DAO.OrderDB();
                 java.util.List<Model.Order> orderList;
                 
-                // Xử lý lọc theo ngày
+                // Xử lý lọc theo ngày (ưu tiên filter ngày trước)
                 if ("today".equals(dateFilter)) {
                     java.sql.Date today = new java.sql.Date(System.currentTimeMillis());
-                    orderList = orderDB.getOrdersByDate(today);
+                    if (statusFilter != null && !statusFilter.trim().isEmpty()) {
+                        // Filter cả ngày VÀ status
+                        java.util.List<Model.Order> dateFilteredOrders = orderDB.getOrdersByDate(today);
+                        orderList = new java.util.ArrayList<>();
+                        for (Model.Order order : dateFilteredOrders) {
+                            if (order.getOrderStatus().equals(statusFilter)) {
+                                orderList.add(order);
+                            }
+                        }
+                    } else {
+                        orderList = orderDB.getOrdersByDate(today);
+                    }
                 } else if ("dateRange".equals(dateFilter) && startDateStr != null && endDateStr != null) {
                     try {
                         java.sql.Date startDate = java.sql.Date.valueOf(startDateStr);
                         java.sql.Date endDate = java.sql.Date.valueOf(endDateStr);
-                        orderList = orderDB.getOrdersByDateRange(startDate, endDate);
+                        if (statusFilter != null && !statusFilter.trim().isEmpty()) {
+                            // Filter cả khoảng ngày VÀ status
+                            java.util.List<Model.Order> dateFilteredOrders = orderDB.getOrdersByDateRange(startDate, endDate);
+                            orderList = new java.util.ArrayList<>();
+                            for (Model.Order order : dateFilteredOrders) {
+                                if (order.getOrderStatus().equals(statusFilter)) {
+                                    orderList.add(order);
+                                }
+                            }
+                        } else {
+                            orderList = orderDB.getOrdersByDateRange(startDate, endDate);
+                        }
                     } catch (Exception e) {
                         orderList = orderDB.getAllOrders();
                     }
                 } else if (statusFilter != null && !statusFilter.trim().isEmpty()) {
                     orderList = orderDB.getOrdersByStatus(statusFilter);
                 } else {
+                    // Không filter gì - lấy tất cả
                     orderList = orderDB.getAllOrders();
                 }
                 

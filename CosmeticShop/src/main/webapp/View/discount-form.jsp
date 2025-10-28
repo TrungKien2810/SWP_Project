@@ -148,7 +148,7 @@
                     </div>
                     <div class="d-flex gap-2">
                         <button class="btn btn-primary" style="background-color:#f76c85; border-color:#f76c85;" type="submit">Lưu</button>
-                        <a class="btn btn-secondary" href="${pageContext.request.contextPath}/discounts">Quay lại</a>
+                        <a class="btn btn-secondary" href="${pageContext.request.contextPath}/admin?action=discounts">Quay lại</a>
                     </div>
                 </form>
             </div>

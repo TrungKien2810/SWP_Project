@@ -182,7 +182,7 @@
             </div>
 
             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                <a href="${pageContext.request.contextPath}/products" class="btn btn-secondary me-md-2">Hủy</a>
+                <a href="${pageContext.request.contextPath}/admin?action=products" class="btn btn-secondary me-md-2">Hủy</a>
                 <button type="submit" class="btn" style="background-color: #f76c85; color: white;">Lưu lại</button>
             </div>
         </form>

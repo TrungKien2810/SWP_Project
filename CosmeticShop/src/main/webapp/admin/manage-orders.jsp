@@ -233,8 +233,8 @@ function toggleDateRange(value) {
     container.style.display = 'block';
   } else {
     container.style.display = 'none';
-    // Nếu chọn "Hôm nay" hoặc "Tất cả", submit form ngay
-    if (value === 'today') {
+    // Nếu chọn "Hôm nay" hoặc "Tất cả" (empty), submit form ngay
+    if (value === 'today' || value === '') {
       document.querySelector('form').submit();
     }
   }

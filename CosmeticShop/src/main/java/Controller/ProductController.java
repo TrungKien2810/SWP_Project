@@ -211,7 +211,7 @@ public class ProductController extends HttpServlet {
         // Xử lý ảnh phụ
         handleAdditionalImages(request, productId);
         
-        response.sendRedirect("products?action=manage");
+        response.sendRedirect(request.getContextPath() + "/admin?action=products");
     }
 
     private void updateProduct(HttpServletRequest request, HttpServletResponse response)
@@ -248,14 +248,14 @@ public class ProductController extends HttpServlet {
         // Xử lý ảnh phụ - chỉ xóa ảnh được đánh dấu xóa và thêm ảnh mới
         handleAdditionalImagesUpdate(request, id);
         
-        response.sendRedirect("products?action=manage");
+        response.sendRedirect(request.getContextPath() + "/admin?action=products");
     }
 
     private void deleteProduct(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         int id = Integer.parseInt(request.getParameter("id"));
         db().deleteProduct(id);
-        response.sendRedirect("products?action=manage");
+        response.sendRedirect(request.getContextPath() + "/admin?action=products");
     }
 
     private String handleImageUpload(HttpServletRequest request, String fallbackUrl) throws IOException, ServletException {
