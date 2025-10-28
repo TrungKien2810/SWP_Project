@@ -195,6 +195,8 @@ public class CheckoutServlet extends HttpServlet {
         session.removeAttribute("appliedDiscountAmount");
         
         if ("BANK".equalsIgnoreCase(paymentMethod)) {
+            // Lưu cartId vào session để xóa cart sau khi thanh toán thành công
+            session.setAttribute("pendingCartId", cart.getCart_id());
             String createUrl = req.getContextPath() + "/payment/vnpay/create?orderId=" + orderId;
             resp.sendRedirect(createUrl);
             return;

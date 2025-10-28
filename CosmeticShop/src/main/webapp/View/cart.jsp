@@ -237,7 +237,20 @@
             }).catch(function(){ /* ignore */ });
         });
     });
-    document.querySelectorAll('.cart-item-checkbox').forEach(cb => cb.addEventListener('change', updateTotal));
+    document.querySelectorAll('.cart-item-checkbox').forEach(cb => {
+        cb.addEventListener('change', function() {
+            updateTotal();
+            // Cập nhật trạng thái trong database
+            const productId = this.closest('.cart-item').querySelector('.quantity-input').getAttribute('data-product-id');
+            fetch('${pageContext.request.contextPath}/cart/update-selection', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'productId=' + encodeURIComponent(productId) + '&isSelected=' + this.checked
+            }).then(r => r.json()).then(function(){
+                // Status updated in database
+            }).catch(function(){ /* ignore */ });
+        });
+    });
 
     // Event nút xóa
     document.querySelectorAll('.delete-btn').forEach(btn => {

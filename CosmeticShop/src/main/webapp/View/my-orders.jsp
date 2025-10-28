@@ -45,6 +45,7 @@
                                 <th>Tổng tiền</th>
                                 <th>Trạng thái đơn</th>
                                 <th>Thanh toán</th>
+                                <th>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -79,9 +80,15 @@
                                         </div>
                                     </td>
                                     <td>${r.orderDateStr}</td>
-                                    <td><fmt:formatNumber value="${r.totalAmount}" type="currency"/></td>
+                                    <td><fmt:formatNumber value="${r.totalAmount}" type="number" maxFractionDigits="0"/> đ</td>
                                     <td><span class="status-badge status-${r.orderStatus}">${r.orderStatus}</span></td>
                                     <td><span class="status-badge pay-${r.paymentStatus}">${r.paymentStatus}</span></td>
+                                    <td>
+                                        <a href="${pageContext.request.contextPath}/order-detail?orderId=${r.orderId}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i> Chi tiết
+                                        </a>
+                                    </td>
                                 </tr>
                             </c:forEach>
                         </tbody>
