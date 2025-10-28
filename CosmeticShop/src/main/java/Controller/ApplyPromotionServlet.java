@@ -43,6 +43,14 @@ public class ApplyPromotionServlet extends HttpServlet {
             return;
         }
 
+        // Lấy thông tin user từ session
+        Model.user currentUser = (Model.user) session.getAttribute("user");
+        if (currentUser == null) {
+            request.setAttribute("error", "Vui lòng đăng nhập để sử dụng mã giảm giá.");
+            request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
+            return;
+        }
+
         DiscountDB discountDB = new DiscountDB();
         Discount discount = discountDB.validateAndGetDiscount(code);
         CartDB cartDB = new CartDB();
@@ -52,6 +60,15 @@ public class ApplyPromotionServlet extends HttpServlet {
             session.removeAttribute("appliedDiscountCode");
             session.removeAttribute("appliedDiscountAmount");
             request.setAttribute("error", "Mã giảm giá không hợp lệ hoặc đã hết hạn.");
+            request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
+            return;
+        }
+
+        // Kiểm tra user có quyền sử dụng voucher này không
+        if (!discountDB.canUserUseDiscount(currentUser.getUser_id(), discount.getDiscountId())) {
+            session.removeAttribute("appliedDiscountCode");
+            session.removeAttribute("appliedDiscountAmount");
+            request.setAttribute("error", "Bạn không có quyền sử dụng mã giảm giá này.");
             request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
             return;
         }
