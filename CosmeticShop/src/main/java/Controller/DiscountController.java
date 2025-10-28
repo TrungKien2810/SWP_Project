@@ -77,7 +77,7 @@ public class DiscountController extends HttpServlet {
                 break;
             case "delete":
                 try { db().delete(Integer.parseInt(request.getParameter("id"))); } catch (NumberFormatException ignored) {}
-                response.sendRedirect("discounts");
+                response.sendRedirect(request.getContextPath() + "/admin?action=discounts");
                 break;
             default:
                 response.sendRedirect("discounts");

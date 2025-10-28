@@ -181,12 +181,17 @@ public class CheckoutServlet extends HttpServlet {
             return;
         }
         
-        // // Nếu có discount được áp dụng, đánh dấu đã sử dụng
+        // Nếu có discount được áp dụng, đánh dấu đã sử dụng
         if (appliedDiscountCode != null && appliedDiscountAmount > 0) {
             DiscountDB discountDB = new DiscountDB();
             Model.Discount discount = discountDB.validateAndGetDiscount(appliedDiscountCode);
             if (discount != null) {
-                discountDB.decrementAssignedDiscountUse(currentUser.getUser_id(), discount.getDiscountId());
+                // Kiểm tra user có quyền sử dụng voucher này không
+                if (discountDB.canUserUseDiscount(currentUser.getUser_id(), discount.getDiscountId())) {
+                    discountDB.decrementAssignedDiscountUse(currentUser.getUser_id(), discount.getDiscountId());
+                } else {
+                    System.out.println("[CheckoutServlet] User " + currentUser.getUser_id() + " không có quyền sử dụng discount " + discount.getDiscountId());
+                }
             }
         }
         
