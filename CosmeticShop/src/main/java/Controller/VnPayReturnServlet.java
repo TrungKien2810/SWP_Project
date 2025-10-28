@@ -5,6 +5,7 @@ import DAO.OrderDB;
 import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.util.*;
+import java.util.List;
 
 public class VnPayReturnServlet extends HttpServlet {
     @Override
@@ -25,7 +26,25 @@ public class VnPayReturnServlet extends HttpServlet {
         if (ok) {
             try {
                 int orderId = Integer.parseInt(orderIdStr);
-                new OrderDB().updatePaymentStatus(orderId, VnPayConfig.statusForResponseCode(rsp));
+                OrderDB orderDB = new OrderDB();
+                String paymentStatus = VnPayConfig.statusForResponseCode(rsp);
+                
+                // Nếu thanh toán THẤT BẠI (FAILED hoặc khách hủy giao dịch)
+                if ("FAILED".equals(paymentStatus) || "24".equals(rsp)) {
+                    // Hủy đơn và hoàn kho
+                    orderDB.updateOrderStatus(orderId, "CANCELLED");
+                    orderDB.updatePaymentStatus(orderId, "FAILED");
+                    
+                    // Hoàn lại tồn kho
+                    DAO.ProductDB productDB = new DAO.ProductDB();
+                    List<DAO.OrderDB.OrderItemQuantity> items = orderDB.getOrderItemQuantities(orderId);
+                    for (DAO.OrderDB.OrderItemQuantity item : items) {
+                        productDB.increaseStock(item.getProductId(), item.getQuantity());
+                    }
+                } else {
+                    // Thanh toán thành công
+                    orderDB.updatePaymentStatus(orderId, paymentStatus);
+                }
             } catch (Exception ignore) {}
 
             HttpSession session = req.getSession(false);

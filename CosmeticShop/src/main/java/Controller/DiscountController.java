@@ -67,12 +67,12 @@ public class DiscountController extends HttpServlet {
         switch (action) {
             case "create":
                 if (handleUpsert(request, response, false)) {
-                    response.sendRedirect("discounts");
+                    response.sendRedirect(request.getContextPath() + "/admin?action=discounts");
                 }
                 break;
             case "update":
                 if (handleUpsert(request, response, true)) {
-                    response.sendRedirect("discounts");
+                    response.sendRedirect(request.getContextPath() + "/admin?action=discounts");
                 }
                 break;
             case "delete":

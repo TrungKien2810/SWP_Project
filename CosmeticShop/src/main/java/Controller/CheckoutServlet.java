@@ -152,13 +152,31 @@ public class CheckoutServlet extends HttpServlet {
             details.add(d);
         }
 
+        // TRỪ KHO NGAY KHI TẠO ĐƠN HÀNG (PENDING)
+        DAO.ProductDB productDB = new DAO.ProductDB();
+        for (OrderDetail d : details) {
+            boolean stockOk = productDB.decreaseStock(d.getProductId(), d.getQuantity());
+            if (!stockOk) {
+                resp.sendRedirect(req.getContextPath() + "/checkout?error=out_of_stock");
+                return;
+            }
+        }
+        
         Integer orderId = orderDB.createOrder(order);
         if (orderId == null) {
+            // Nếu tạo đơn thất bại, phải hoàn lại kho
+            for (OrderDetail d : details) {
+                productDB.increaseStock(d.getProductId(), d.getQuantity());
+            }
             resp.sendRedirect(req.getContextPath() + "/checkout?error=order");
             return;
         }
         boolean detailsOk = orderDB.addOrderDetails(orderId, details);
         if (!detailsOk) {
+            // Nếu add details thất bại, phải hoàn lại kho
+            for (OrderDetail d : details) {
+                productDB.increaseStock(d.getProductId(), d.getQuantity());
+            }
             resp.sendRedirect(req.getContextPath() + "/checkout?error=details");
             return;
         }

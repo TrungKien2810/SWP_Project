@@ -59,7 +59,114 @@ public class AdminServlet extends HttpServlet {
                 request.getRequestDispatcher("/admin/manage-products.jsp").forward(request, response);
                 break;
             case "orders":
+                String statusFilter = request.getParameter("status");
+                String dateFilter = request.getParameter("dateFilter");
+                String startDateStr = request.getParameter("startDate");
+                String endDateStr = request.getParameter("endDate");
+                
+                DAO.OrderDB orderDB = new DAO.OrderDB();
+                java.util.List<Model.Order> orderList;
+                
+                // Xử lý lọc theo ngày (ưu tiên filter ngày trước)
+                if ("today".equals(dateFilter)) {
+                    java.sql.Date today = new java.sql.Date(System.currentTimeMillis());
+                    if (statusFilter != null && !statusFilter.trim().isEmpty()) {
+                        // Filter cả ngày VÀ status
+                        java.util.List<Model.Order> dateFilteredOrders = orderDB.getOrdersByDate(today);
+                        orderList = new java.util.ArrayList<>();
+                        for (Model.Order order : dateFilteredOrders) {
+                            if (order.getOrderStatus().equals(statusFilter)) {
+                                orderList.add(order);
+                            }
+                        }
+                    } else {
+                        orderList = orderDB.getOrdersByDate(today);
+                    }
+                } else if ("dateRange".equals(dateFilter) && startDateStr != null && endDateStr != null) {
+                    try {
+                        java.sql.Date startDate = java.sql.Date.valueOf(startDateStr);
+                        java.sql.Date endDate = java.sql.Date.valueOf(endDateStr);
+                        if (statusFilter != null && !statusFilter.trim().isEmpty()) {
+                            // Filter cả khoảng ngày VÀ status
+                            java.util.List<Model.Order> dateFilteredOrders = orderDB.getOrdersByDateRange(startDate, endDate);
+                            orderList = new java.util.ArrayList<>();
+                            for (Model.Order order : dateFilteredOrders) {
+                                if (order.getOrderStatus().equals(statusFilter)) {
+                                    orderList.add(order);
+                                }
+                            }
+                        } else {
+                            orderList = orderDB.getOrdersByDateRange(startDate, endDate);
+                        }
+                    } catch (Exception e) {
+                        orderList = orderDB.getAllOrders();
+                    }
+                } else if (statusFilter != null && !statusFilter.trim().isEmpty()) {
+                    orderList = orderDB.getOrdersByStatus(statusFilter);
+                } else {
+                    // Không filter gì - lấy tất cả
+                    orderList = orderDB.getAllOrders();
+                }
+                
+                // Get customer names for orders
+                DAO.UserDB userDB = new DAO.UserDB();
+                java.util.Map<Integer, String> customerNames = new java.util.HashMap<>();
+                for (Model.Order order : orderList) {
+                    Model.user customer = userDB.getUserById(order.getUserId());
+                    if (customer != null) {
+                        customerNames.put(order.getOrderId(), customer.getUsername());
+                    }
+                }
+                
+                request.setAttribute("orders", orderList);
+                request.setAttribute("customerNames", customerNames);
+                request.setAttribute("selectedStatus", statusFilter);
+                request.setAttribute("selectedDateFilter", dateFilter);
+                request.setAttribute("selectedStartDate", startDateStr);
+                request.setAttribute("selectedEndDate", endDateStr);
                 request.getRequestDispatcher("/admin/manage-orders.jsp").forward(request, response);
+                break;
+            case "orderDetail":
+                String orderIdStr = request.getParameter("orderId");
+                if (orderIdStr != null) {
+                    try {
+                        int orderId = Integer.parseInt(orderIdStr);
+                        DAO.OrderDB odb = new DAO.OrderDB();
+                        Model.Order order = odb.getFullOrderDetails(orderId);
+                        
+                        if (order != null) {
+                            // Get customer info
+                            DAO.UserDB udb = new DAO.UserDB();
+                            Model.user customer = udb.getUserById(order.getUserId());
+                            request.setAttribute("customer", customer);
+                            
+                            // Get shipping address
+                            if (order.getShippingAddressId() != null) {
+                                DAO.ShippingAddressDB addressDB = new DAO.ShippingAddressDB();
+                                Model.ShippingAddress address = addressDB.getById(order.getShippingAddressId());
+                                request.setAttribute("shippingAddress", address);
+                            }
+                            
+                            // Get shipping method
+                            if (order.getShippingMethodId() != null) {
+                                DAO.ShippingMethodDB methodDB = new DAO.ShippingMethodDB();
+                                DAO.ShippingMethodDB.ShippingMethod method = methodDB.getById(order.getShippingMethodId());
+                                request.setAttribute("shippingMethod", method);
+                            }
+                            
+                            // Get order items
+                            java.util.List<DAO.OrderDB.OrderDetailInfo> items = odb.getOrderDetailItems(orderId);
+                            request.setAttribute("orderItems", items);
+                            
+                            request.setAttribute("order", order);
+                            request.getRequestDispatcher("/admin/order-detail.jsp").forward(request, response);
+                            return;
+                        }
+                    } catch (NumberFormatException e) {
+                        // Invalid order ID
+                    }
+                }
+                response.sendRedirect(request.getContextPath() + "/admin?action=orders");
                 break;
             case "users":
                 request.getRequestDispatcher("/admin/manage-users.jsp").forward(request, response);

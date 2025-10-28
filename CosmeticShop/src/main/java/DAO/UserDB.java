@@ -42,6 +42,30 @@ public class UserDB {
         }
         return null;
     }
+    
+    public user getUserById(int userId) {
+        String sql = "select user_id, full_name as username, email, phone, password, role, date_create from Users where user_id = ?";
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return new user(
+                    rs.getInt("user_id"),
+                    rs.getString("username"),
+                    rs.getString("email"),
+                    rs.getString("phone"),
+                    rs.getString("password"),
+                    rs.getString("role"),
+                    rs.getTimestamp("date_create").toLocalDateTime()
+                );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return null;
+    }
 
     public boolean signup(String username, String email, String password) {
         String sql = "insert into Users(full_name, email, password, role) values (?, ?, ?, ?)";
