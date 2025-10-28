@@ -40,11 +40,18 @@
     </div>
   </div>
   <div class="admin-topbar">
-    <div>Admin Panel</div>
+    <div>
+      <a href="${pageContext.request.contextPath}/View/home.jsp" class="btn btn-sm btn-primary" style="margin-right: 10px;">
+        <i class="fa fa-home"></i> Trang chủ
+      </a>
+      <span class="text-muted">Admin Panel</span>
+    </div>
     <div>
       <c:if test="${not empty sessionScope.user}">
-        ${sessionScope.user.username}
-        <a class="btn btn-sm btn-outline-danger ms-2" href="${pageContext.request.contextPath}/logout">Đăng xuất</a>
+        <span class="text-muted me-2">Xin chào, <strong>${sessionScope.user.username}</strong></span>
+        <a class="btn btn-sm btn-outline-danger" href="${pageContext.request.contextPath}/logout">
+          <i class="fa fa-sign-out-alt"></i> Đăng xuất
+        </a>
       </c:if>
     </div>
   </div>
