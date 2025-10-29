@@ -94,6 +94,27 @@
             color: #666;
             font-size: 0.9rem;
         }
+        /* Theme alignment */
+        .btn-primary {
+            background-color: #f76c85;
+            border-color: #f76c85;
+        }
+        .btn-primary:hover {
+            background-color: #e85c76;
+            border-color: #e85c76;
+        }
+        .modal-header {
+            background-color: #f76c85;
+            color: #fff;
+        }
+        .modal-header .btn-close {
+            filter: invert(1) grayscale(100%);
+            opacity: 0.9;
+        }
+        .account-avatar:hover img#avatarDisplay {
+            box-shadow: 0 0 0 3px rgba(247,108,133,0.35);
+            transition: box-shadow 0.2s ease;
+        }
     </style>
 </head>
 <body>
@@ -107,47 +128,39 @@
             </div>
 
             <div class="account-info">
-                <div class="account-avatar">
-                    <i class="fas fa-user"></i>
+                <div class="account-avatar" style="overflow:hidden; position:relative; cursor:pointer;" onclick="openEditProfileModal();">
+                    <c:choose>
+                        <c:when test="${not empty sessionScope.user.avatarUrl}">
+                            <img id="avatarDisplay" src="${pageContext.request.contextPath}${sessionScope.user.avatarUrl}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/>
+                        </c:when>
+                        <c:otherwise>
+                            <img id="avatarDisplay" src="${pageContext.request.contextPath}/IMG/default-avatar.png" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
-                <div class="account-details">
+                <div class="account-details flex-grow-1">
                     <h4>${sessionScope.user.username}</h4>
                     <p>${sessionScope.user.email}</p>
                     <p>Vai trò: ${sessionScope.user.role}</p>
+                    
                 </div>
             </div>
 
             <div class="account-actions">
+                <div class="action-card" onclick="openEditProfileModal();">
+                    <div class="action-icon">
+                        <i class="fas fa-user-pen"></i>
+                    </div>
+                    <div class="action-title">Chỉnh sửa tài khoản</div>
+                    <div class="action-description">Đổi tên hiển thị và ảnh đại diện</div>
+                </div>
+
                 <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/change-password'">
                     <div class="action-icon">
                         <i class="fas fa-key"></i>
                     </div>
                     <div class="action-title">Đổi mật khẩu</div>
                     <div class="action-description">Thay đổi mật khẩu tài khoản của bạn</div>
-                </div>
-
-                <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/cart'">
-                    <div class="action-icon">
-                        <i class="fas fa-shopping-cart"></i>
-                    </div>
-                    <div class="action-title">Giỏ hàng</div>
-                    <div class="action-description">Xem và quản lý giỏ hàng của bạn</div>
-                </div>
-
-                <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/shipping-address'">
-                    <div class="action-icon">
-                        <i class="fas fa-location-dot"></i>
-                    </div>
-                    <div class="action-title">Địa chỉ giao hàng</div>
-                    <div class="action-description">Quản lý địa chỉ nhận hàng của bạn</div>
-                </div>
-
-                <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/View/forgot-password.jsp'">
-                    <div class="action-icon">
-                        <i class="fas fa-lock"></i>
-                    </div>
-                    <div class="action-title">Quên mật khẩu</div>
-                    <div class="action-description">Khôi phục mật khẩu qua email</div>
                 </div>
 
                 <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/my-orders'">
@@ -165,6 +178,40 @@
                     <div class="action-title">Đăng xuất</div>
                     <div class="action-description">Thoát khỏi tài khoản hiện tại</div>
                 </div>
+            </div>
+
+            
+            <!-- Modal ẩn để chỉnh sửa tài khoản -->
+            <div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title">Chỉnh sửa tài khoản</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <form action="${pageContext.request.contextPath}/account/avatar" method="post" enctype="multipart/form-data">
+                    <div class="modal-body">
+                      <div class="mb-3">
+                        <label class="form-label">Tên hiển thị</label>
+                        <input class="form-control" type="text" name="username" value="${sessionScope.user.username}" required>
+                      </div>
+                      <div class="mb-2">Ảnh đại diện</div>
+                      <div class="d-flex align-items-center gap-3 mb-2">
+                        <img id="avatarPreview" src="${pageContext.request.contextPath}${empty sessionScope.user.avatarUrl ? '/IMG/default-avatar.png' : sessionScope.user.avatarUrl}" alt="Preview" style="width:72px;height:72px;border-radius:50%;object-fit:cover;">
+                        <label class="btn btn-outline-secondary mb-0">
+                          <i class="fas fa-image me-1"></i> Chọn ảnh
+                          <input id="avatarFileModal" type="file" name="avatar" accept="image/*" onchange="previewAvatar(event)" style="display:none;">
+                        </label>
+                      </div>
+                      <small class="text-muted">Ảnh sẽ hiển thị dạng tròn. Nên dùng JPG/PNG/WEBP &lt; 2MB.</small>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                      <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Lưu thay đổi</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
             </div>
         </div>
     </div>
@@ -223,6 +270,25 @@
 
     <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
     <script src="${pageContext.request.contextPath}/Js/home.js"></script>
+    <script>
+    function previewAvatar(e){
+        const file = e.target.files && e.target.files[0];
+        if(!file) return;
+        const url = URL.createObjectURL(file);
+        const img = document.getElementById('avatarPreview');
+        if(img) img.src = url;
+    }
+    function previewAvatarInline(e){
+        const file = e.target.files && e.target.files[0];
+        if(!file) return;
+        const url = URL.createObjectURL(file);
+        const img = document.getElementById('avatarDisplay');
+        if(img) img.src = url;
+    }
+    function openEditProfileModal(){
+        try { new bootstrap.Modal(document.getElementById('editProfileModal')).show(); } catch(e) {}
+    }
+    </script>
 
 </body>
 </html>

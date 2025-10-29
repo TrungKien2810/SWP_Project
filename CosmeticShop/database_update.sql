@@ -2,6 +2,7 @@
 IF COL_LENGTH('Users', 'google_id') IS NULL ALTER TABLE Users ADD google_id VARCHAR(64) NULL;
 IF COL_LENGTH('Users', 'reset_token') IS NULL ALTER TABLE Users ADD reset_token VARCHAR(128) NULL;
 IF COL_LENGTH('Users', 'reset_token_expiry') IS NULL ALTER TABLE Users ADD reset_token_expiry DATETIME NULL;
+IF COL_LENGTH('Users', 'avatar_url') IS NULL ALTER TABLE Users ADD avatar_url NVARCHAR(255) NULL;
 
 -- TEST DATA: create a user, an order > 100000, and a conditional discount, then assign via proc
 IF NOT EXISTS (SELECT 1 FROM Users WHERE email = 'testuser@example.com')
