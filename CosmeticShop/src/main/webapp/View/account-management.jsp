@@ -94,6 +94,27 @@
             color: #666;
             font-size: 0.9rem;
         }
+        /* Theme alignment */
+        .btn-primary {
+            background-color: #f76c85;
+            border-color: #f76c85;
+        }
+        .btn-primary:hover {
+            background-color: #e85c76;
+            border-color: #e85c76;
+        }
+        .modal-header {
+            background-color: #f76c85;
+            color: #fff;
+        }
+        .modal-header .btn-close {
+            filter: invert(1) grayscale(100%);
+            opacity: 0.9;
+        }
+        .account-avatar:hover img#avatarDisplay {
+            box-shadow: 0 0 0 3px rgba(247,108,133,0.35);
+            transition: box-shadow 0.2s ease;
+        }
     </style>
 </head>
 <body>
