@@ -49,7 +49,15 @@
                                     <!-- Tài khoản -->
                                     <c:if test="${!empty sessionScope.user}">
                                         <div class="account-menu">
-                                        <i class="fas fa-user-circle account-icon"></i>
+                                        <c:choose>
+                                            <c:when test="${not empty sessionScope.user.avatarUrl}">
+                                                <img src="${pageContext.request.contextPath}${sessionScope.user.avatarUrl}" alt="Avatar"
+                                                     class="account-icon" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
+                                            </c:when>
+                                            <c:otherwise>
+                                                <i class="fas fa-user-circle account-icon"></i>
+                                            </c:otherwise>
+                                        </c:choose>
                                             <div class="account-dropdown">
                                                 <p class="welcome-text">Welcome, ${sessionScope.user.username}</p>
                                                 <a href="${pageContext.request.contextPath}/account-management">Account Management</a>

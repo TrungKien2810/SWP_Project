@@ -20,13 +20,13 @@ public class UserDB {
     Connection conn = db.conn;
 
     public user getUserByEmail(String email) {
-        String sql = "select user_id, full_name as username, email, phone, password, role, date_create from Users where email = ?";
+        String sql = "select user_id, full_name as username, email, phone, password, role, date_create, avatar_url from Users where email = ?";
         try {
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, email);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                return new user(
+                user u = new user(
                     rs.getInt("user_id"),
                     rs.getString("username"),
                     rs.getString("email"),
@@ -35,6 +35,8 @@ public class UserDB {
                     rs.getString("role"),
                     rs.getTimestamp("date_create").toLocalDateTime()
                 );
+                try { u.setAvatarUrl(rs.getString("avatar_url")); } catch (Exception ignore) {}
+                return u;
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -44,13 +46,13 @@ public class UserDB {
     }
     
     public user getUserById(int userId) {
-        String sql = "select user_id, full_name as username, email, phone, password, role, date_create from Users where user_id = ?";
+        String sql = "select user_id, full_name as username, email, phone, password, role, date_create, avatar_url from Users where user_id = ?";
         try {
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, userId);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                return new user(
+                user u = new user(
                     rs.getInt("user_id"),
                     rs.getString("username"),
                     rs.getString("email"),
@@ -59,6 +61,8 @@ public class UserDB {
                     rs.getString("role"),
                     rs.getTimestamp("date_create").toLocalDateTime()
                 );
+                try { u.setAvatarUrl(rs.getString("avatar_url")); } catch (Exception ignore) {}
+                return u;
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -122,13 +126,13 @@ public class UserDB {
     }
 
     public user getUserByResetToken(String token) {
-        String sql = "select user_id, full_name as username, email, phone, password, role, date_create from Users where reset_token = ? and reset_token_expiry > GETDATE()";
+        String sql = "select user_id, full_name as username, email, phone, password, role, date_create, avatar_url from Users where reset_token = ? and reset_token_expiry > GETDATE()";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, token);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return new user(
+                user u = new user(
                     rs.getInt("user_id"),
                     rs.getString("username"),
                     rs.getString("email"),
@@ -137,6 +141,8 @@ public class UserDB {
                     rs.getString("role"),
                     rs.getTimestamp("date_create").toLocalDateTime()
                 );
+                try { u.setAvatarUrl(rs.getString("avatar_url")); } catch (Exception ignore) {}
+                return u;
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -163,6 +169,32 @@ public class UserDB {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, newPassword);
             ps.setString(2, email);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updateAvatarUrl(int userId, String avatarUrl) {
+        String sql = "update Users set avatar_url = ? where user_id = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, avatarUrl);
+            ps.setInt(2, userId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updateFullName(int userId, String fullName) {
+        String sql = "update Users set full_name = ? where user_id = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, fullName);
+            ps.setInt(2, userId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();

@@ -19,6 +19,7 @@ public class user {
     private String password;
     private String role;
     private LocalDateTime date_create;
+    private String avatarUrl;
     public user() {
     }
 
@@ -94,4 +95,11 @@ public class user {
         this.role = role;
     }
 
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+    }
 }
