@@ -63,7 +63,7 @@
                 <div class="product-details">
                     <h2><%= p.getName() %></h2>
                     <div class="price-section">
-                        <span class="price"><%= String.format("%.0f", p.getPrice()) %> VND</span>
+                        <span class="price"><%= String.format("%,.0f", p.getPrice()) %> VND</span>
                     </div>
                     <div class="product-info">
                         <p><b>Số lượng:</b> <%= p.getStock() %> sản phẩm có sẵn</p>
@@ -96,11 +96,48 @@
                             <%= p.getStock() > 0 ? ("Chọn số lượng (tối đa " + p.getStock() + ")") : "Hết hàng" %>
                         </small>
                     </div>
-                    
-                    <div class="description-section">
-                        <h4>Mô tả sản phẩm</h4>
-                        <div class="description-content">
-                            <%= p.getDescription() != null ? p.getDescription().replace("\n", "<br>") : "Chưa có mô tả" %>
+                </div>
+            </div>
+            
+            <!-- Product Description Section - Tách riêng để phân bố đều -->
+            <div class="product-description-section">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="description-section">
+                                <h4 class="description-main-title">Mô tả sản phẩm</h4>
+                                <div class="description-content">
+                                    <%
+                                        String description = p.getDescription();
+                                        if (description != null && !description.trim().isEmpty()) {
+                                            // Phân tích mô tả thành các mục
+                                            String[] sections = description.split("------------------");
+                                            for (int i = 0; i < sections.length; i++) {
+                                                String section = sections[i].trim();
+                                                if (!section.isEmpty()) {
+                                                    String[] lines = section.split("\n", 2);
+                                                    if (lines.length >= 2) {
+                                                        String title = lines[0].trim();
+                                                        String content = lines[1].trim();
+                                                        if (!title.isEmpty() && !content.isEmpty()) {
+                                    %>
+                                            <div class="description-item">
+                                                <h5 class="description-item-title"><%= title %></h5>
+                                                <div class="description-item-content"><%= content.replace("\n", "<br>") %></div>
+                                            </div>
+                                    <%
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        } else {
+                                    %>
+                                        <div class="no-description">Chưa có mô tả</div>
+                                    <%
+                                        }
+                                    %>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

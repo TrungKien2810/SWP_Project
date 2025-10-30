@@ -160,10 +160,14 @@ public class ProductController extends HttpServlet {
         // Lấy danh sách ảnh phụ hiện có
         List<ProductDB.ImageInfo> existingImages = db().getProductImagesWithDetails(id);
         
+        // Phân tích mô tả thành các mục
+        List<DescriptionSection> productDescriptionSections = parseDescriptionSections(existingProduct.getDescription());
+        
         request.setAttribute("product", existingProduct);
         request.setAttribute("categories", categories);
         request.setAttribute("currentCategoryName", currentCategoryName);
         request.setAttribute("existingImages", existingImages);
+        request.setAttribute("productDescriptionSections", productDescriptionSections);
         request.getRequestDispatcher("/View/product-form.jsp").forward(request, response);
     }
 
@@ -181,7 +185,10 @@ public class ProductController extends HttpServlet {
         String name = request.getParameter("name");
         double price = Double.parseDouble(request.getParameter("price"));
         int stock = Integer.parseInt(request.getParameter("stock"));
-        String description = request.getParameter("description");
+        
+        // Xử lý mô tả nhiều mục
+        String description = buildDescriptionFromSections(request);
+        
         // Resolve category by name, fallback to numeric legacy field or NULL
         String categoryName = request.getParameter("categoryName");
         Integer categoryIdObj = db().getCategoryIdByName(categoryName);
@@ -211,7 +218,7 @@ public class ProductController extends HttpServlet {
         // Xử lý ảnh phụ
         handleAdditionalImages(request, productId);
         
-        response.sendRedirect("products?action=manage");
+        response.sendRedirect(request.getContextPath() + "/admin?action=products");
     }
 
     private void updateProduct(HttpServletRequest request, HttpServletResponse response)
@@ -220,7 +227,10 @@ public class ProductController extends HttpServlet {
         String name = request.getParameter("name");
         double price = Double.parseDouble(request.getParameter("price"));
         int stock = Integer.parseInt(request.getParameter("stock"));
-        String description = request.getParameter("description");
+        
+        // Xử lý mô tả nhiều mục
+        String description = buildDescriptionFromSections(request);
+        
         // Resolve category by name, fallback to current or legacy numeric
         String categoryName = request.getParameter("categoryName");
         Integer categoryIdObj = db().getCategoryIdByName(categoryName);
@@ -248,14 +258,14 @@ public class ProductController extends HttpServlet {
         // Xử lý ảnh phụ - chỉ xóa ảnh được đánh dấu xóa và thêm ảnh mới
         handleAdditionalImagesUpdate(request, id);
         
-        response.sendRedirect("products?action=manage");
+        response.sendRedirect(request.getContextPath() + "/admin?action=products");
     }
 
     private void deleteProduct(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         int id = Integer.parseInt(request.getParameter("id"));
         db().deleteProduct(id);
-        response.sendRedirect("products?action=manage");
+        response.sendRedirect(request.getContextPath() + "/admin?action=products");
     }
 
     private String handleImageUpload(HttpServletRequest request, String fallbackUrl) throws IOException, ServletException {
@@ -395,6 +405,94 @@ public class ProductController extends HttpServlet {
         // Trả về đường dẫn tương đối để hiển thị ảnh
         String contextRelativeUrl = "/uploads/" + newFileName;
         return contextRelativeUrl.replace("\\", "/");
+    }
+    
+    /**
+     * Xây dựng mô tả từ các mục mô tả được gửi từ form
+     */
+    private String buildDescriptionFromSections(HttpServletRequest request) {
+        String[] titles = request.getParameterValues("descriptionSectionTitles[]");
+        String[] contents = request.getParameterValues("descriptionSectionContents[]");
+        
+        if (titles == null || contents == null || titles.length == 0 || contents.length == 0) {
+            return "";
+        }
+        
+        StringBuilder description = new StringBuilder();
+        int maxLength = Math.min(titles.length, contents.length);
+        
+        for (int i = 0; i < maxLength; i++) {
+            String title = titles[i] != null ? titles[i].trim() : "";
+            String content = contents[i] != null ? contents[i].trim() : "";
+            
+            // Chỉ thêm mục nếu có cả tên và nội dung
+            if (!title.isEmpty() && !content.isEmpty()) {
+                if (description.length() > 0) {
+                    description.append("\n------------------\n");
+                }
+                description.append(title).append("\n").append(content);
+            }
+        }
+        
+        return description.toString();
+    }
+    
+    /**
+     * Phân tích mô tả thành các mục để hiển thị trong form chỉnh sửa
+     */
+    private List<DescriptionSection> parseDescriptionSections(String description) {
+        List<DescriptionSection> sections = new ArrayList<>();
+        
+        if (description == null || description.trim().isEmpty()) {
+            return sections;
+        }
+        
+        String[] parts = description.split("------------------");
+        
+        for (String part : parts) {
+            part = part.trim();
+            if (part.isEmpty()) continue;
+            
+            String[] lines = part.split("\n", 2);
+            if (lines.length >= 2) {
+                String title = lines[0].trim();
+                String content = lines[1].trim();
+                if (!title.isEmpty() && !content.isEmpty()) {
+                    sections.add(new DescriptionSection(title, content));
+                }
+            }
+        }
+        
+        return sections;
+    }
+    
+    /**
+     * Lớp nội bộ để lưu trữ thông tin mục mô tả
+     */
+    public static class DescriptionSection {
+        private String title;
+        private String content;
+        
+        public DescriptionSection(String title, String content) {
+            this.title = title;
+            this.content = content;
+        }
+        
+        public String getTitle() {
+            return title;
+        }
+        
+        public void setTitle(String title) {
+            this.title = title;
+        }
+        
+        public String getContent() {
+            return content;
+        }
+        
+        public void setContent(String content) {
+            this.content = content;
+        }
     }
 }
 //test pull rq

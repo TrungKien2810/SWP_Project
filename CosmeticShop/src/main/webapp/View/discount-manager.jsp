@@ -79,11 +79,11 @@
                                                 </c:choose>
                                             </td>
                                             <td class="text-end">
-                                                <div class="d-inline-flex gap-2">
+                                                <div class="d-inline-flex gap-2 align-items-center justify-content-end">
                                                     <a class="btn btn-sm btn-outline-secondary" href="${pageContext.request.contextPath}/discounts?action=edit&id=${d.discountId}">
                                                         <i class="fa-solid fa-pen"></i> Sửa
                                                     </a>
-                                                    <form action="${pageContext.request.contextPath}/discounts" method="post" onsubmit="return confirm('Xóa mã này?');">
+                                                    <form action="${pageContext.request.contextPath}/discounts" method="post" onsubmit="return confirm('Xóa mã này?');" style="margin:0;">
                                                         <input type="hidden" name="action" value="delete" />
                                                         <input type="hidden" name="id" value="${d.discountId}" />
                                                         <button class="btn btn-sm btn-outline-danger" type="submit">

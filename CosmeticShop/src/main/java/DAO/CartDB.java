@@ -201,4 +201,18 @@ public class CartDB {
             return false;
         }
     }
+
+    public boolean updateSelectionStatus(int cartId, int productId, boolean isSelected) {
+        String sql = "UPDATE CartItems SET is_selected = ? WHERE cart_id = ? AND product_id = ?";
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setBoolean(1, isSelected);
+            stmt.setInt(2, cartId);
+            stmt.setInt(3, productId);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

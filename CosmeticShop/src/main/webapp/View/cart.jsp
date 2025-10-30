@@ -77,10 +77,10 @@
                         <div class="item-info flex-grow-1">
                             <h5><%=product.getName()%></h5>
                             <p class="item-price"><%=p.getPrice()%>₫ x <span class="item-qty"><%=p.getQuantity()%></span></p>
-                            <input type="number" value="<%=p.getQuantity()%>" min="1" class="form-control w-25 text-center quantity-input">
+                            <input type="number" value="<%=p.getQuantity()%>" min="1" class="form-control w-25 text-center quantity-input" data-product-id="<%=p.getProduct_id()%>">
                         </div>
                         <div class="item-total ms-3">
-                            <p class="fw-bold item-total-text"><%=p.getPrice() * p.getQuantity()%>₫</p>
+                            <p class="fw-bold item-total-text"><%=String.format("%,.0f", p.getPrice() * p.getQuantity())%>₫</p>
                             <a href="${pageContext.request.contextPath}/removeFromCart?productId=<%=p.getProduct_id()%>">
                             <button class="btn btn-sm btn-outline-danger mt-2 delete-btn">Xóa</button>
                             </a>
@@ -94,7 +94,7 @@
                     <h4 class="fw-bold mb-3">Tổng cộng</h4>
                     <div class="d-flex justify-content-between mb-2">
                         <span>Tạm tính:</span>
-                        <span id="subtotalDisplay"><%=totalPrice%></span>
+                        <span id="subtotalDisplay"><%=String.format("%,.0f", totalPrice)%>₫</span>
                     </div>
                     <div class="d-flex justify-content-between mb-2">
                         <span>Phí vận chuyển:</span>
@@ -107,11 +107,38 @@
                             <select class="form-select me-2" id="promoSelect" onchange="onSelectPromo(this)">
                                 <option value="">-- Chọn mã của bạn (nếu có) --</option>
                                 <c:forEach var="d" items="${requestScope.assignedDiscounts}">
-                                    <option value="${d.code}">${d.code} - ${d.name}</option>
+                                    <option value="${d.code}" ${sessionScope.appliedDiscountCode eq d.code ? 'selected' : ''}>${d.code}</option>
                                 </c:forEach>
+                                <!-- Thêm mã MANUAL đã áp dụng vào dropdown nếu không có trong assignedDiscounts -->
+                                <c:if test="${not empty sessionScope.appliedDiscountCode}">
+                                    <c:set var="foundInAssigned" value="false" />
+                                    <c:forEach var="d" items="${requestScope.assignedDiscounts}">
+                                        <c:if test="${sessionScope.appliedDiscountCode eq d.code}">
+                                            <c:set var="foundInAssigned" value="true" />
+                                        </c:if>
+                                    </c:forEach>
+                                    <c:if test="${!foundInAssigned}">
+                                        <option value="${sessionScope.appliedDiscountCode}" selected>${sessionScope.appliedDiscountCode}</option>
+                                    </c:if>
+                                </c:if>
+                                <!-- Thêm mã đã xóa gần đây để có thể áp dụng lại -->
+                                <c:if test="${not empty sessionScope.lastRemovedDiscountCode && empty sessionScope.appliedDiscountCode}">
+                                    <c:set var="foundInAssigned" value="false" />
+                                    <c:forEach var="d" items="${requestScope.assignedDiscounts}">
+                                        <c:if test="${sessionScope.lastRemovedDiscountCode eq d.code}">
+                                            <c:set var="foundInAssigned" value="true" />
+                                        </c:if>
+                                    </c:forEach>
+                                    <c:if test="${!foundInAssigned}">
+                                        <option value="${sessionScope.lastRemovedDiscountCode}">${sessionScope.lastRemovedDiscountCode}</option>
+                                    </c:if>
+                                </c:if>
                             </select>
                             <input type="text" name="promoCode" id="promoCodeInput" class="form-control me-2" placeholder="Nhập mã khuyến mãi" value="${sessionScope.appliedDiscountCode}">
-                            <button type="submit" class="btn btn-outline-danger">Áp dụng</button>
+                            <button type="submit" class="btn btn-outline-danger me-2">Áp dụng</button>
+                            <c:if test="${not empty sessionScope.appliedDiscountCode}">
+                                <button type="button" class="btn btn-outline-secondary" onclick="removeDiscount()">Xóa mã</button>
+                            </c:if>
                         </form>
                         <div class="mt-2 d-flex justify-content-between">
                             <a class="small" href="${pageContext.request.contextPath}/my-promos">My Vouchers</a>
@@ -119,6 +146,9 @@
                         </div>
                         <c:if test="${not empty sessionScope.appliedDiscountCode}">
                             <small class="text-success">Đã áp dụng: ${sessionScope.appliedDiscountCode} (-${sessionScope.appliedDiscountAmount})</small>
+                        </c:if>
+                        <c:if test="${not empty requestScope.msg}">
+                            <small class="text-success">${requestScope.msg}</small>
                         </c:if>
                         <c:if test="${not empty requestScope.error}">
                             <small class="text-danger">${requestScope.error}</small>
@@ -132,8 +162,8 @@
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <span class="fw-bold">Tổng thanh toán:</span>
                         <strong style="color:#f76c85;" id="totalDisplay"><%=
-                            (totalPrice - appliedDiscount) > 0 ? (totalPrice - appliedDiscount) : 0
-                        %></strong>
+                            String.format("%,.0f", (totalPrice - appliedDiscount) > 0 ? (totalPrice - appliedDiscount) : 0)
+                        %>₫</strong>
                     </div>
 
                     <a href="${pageContext.request.contextPath}/checkout" class="btn btn-danger w-100 fw-bold">THANH TOÁN NGAY</a>
@@ -192,8 +222,35 @@
     }
 
     // Event checkbox & quantity input
-    document.querySelectorAll('.quantity-input').forEach(input => input.addEventListener('input', updateTotal));
-    document.querySelectorAll('.cart-item-checkbox').forEach(cb => cb.addEventListener('change', updateTotal));
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('input', updateTotal);
+        input.addEventListener('change', function(){
+            var qty = parseInt(this.value);
+            if (!qty || qty < 1) { qty = 1; this.value = 1; }
+            var productId = this.getAttribute('data-product-id');
+            fetch('${pageContext.request.contextPath}/cart/update-quantity', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'productId=' + encodeURIComponent(productId) + '&quantity=' + encodeURIComponent(qty)
+            }).then(r => r.json()).then(function(){
+                // server refreshed session cart; totals already updated client-side
+            }).catch(function(){ /* ignore */ });
+        });
+    });
+    document.querySelectorAll('.cart-item-checkbox').forEach(cb => {
+        cb.addEventListener('change', function() {
+            updateTotal();
+            // Cập nhật trạng thái trong database
+            const productId = this.closest('.cart-item').querySelector('.quantity-input').getAttribute('data-product-id');
+            fetch('${pageContext.request.contextPath}/cart/update-selection', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'productId=' + encodeURIComponent(productId) + '&isSelected=' + this.checked
+            }).then(r => r.json()).then(function(){
+                // Status updated in database
+            }).catch(function(){ /* ignore */ });
+        });
+    });
 
     // Event nút xóa
     document.querySelectorAll('.delete-btn').forEach(btn => {
@@ -212,15 +269,52 @@
         var code = sel && sel.value ? sel.value : '';
         var input = document.getElementById('promoCodeInput');
         if(input){ input.value = code; }
+        
+        // Xóa lastRemovedDiscountCode khi chọn mã mới
+        if(code && code.trim() !== '') {
+            // Có thể thêm logic để clear lastRemovedDiscountCode nếu cần
+        }
+    }
+    
+    // Xóa mã giảm giá
+    function removeDiscount(){
+        var form = document.getElementById('promoForm');
+        var input = document.getElementById('promoCodeInput');
+        var select = document.getElementById('promoSelect');
+        
+        if(input) input.value = '';
+        if(select) select.selectedIndex = 0;
+        
+        // Submit form với mã rỗng để xóa mã đã áp dụng
+        if(form) {
+            var hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'removeDiscount';
+            hiddenInput.value = 'true';
+            form.appendChild(hiddenInput);
+            form.submit();
+        }
     }
 
     // Prefill và tự áp dụng mã khi điều hướng từ trang "My Vouchers"
     document.addEventListener('DOMContentLoaded', function(){
         try {
+            // Đồng bộ dropdown với input khi trang load
+            var input = document.getElementById('promoCodeInput');
+            var select = document.getElementById('promoSelect');
+            if (input && select && input.value) {
+                // Tìm option có value trùng với input
+                for (var i = 0; i < select.options.length; i++) {
+                    if (select.options[i].value === input.value) {
+                        select.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+            
             var prefill = localStorage.getItem('promoCodePrefill');
             if (prefill) {
                 localStorage.removeItem('promoCodePrefill');
-                var input = document.getElementById('promoCodeInput');
                 var form = document.getElementById('promoForm');
                 if (input) input.value = prefill;
                 if (form && input && input.value) {

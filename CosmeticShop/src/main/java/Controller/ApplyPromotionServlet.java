@@ -18,10 +18,35 @@ public class ApplyPromotionServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
         String code = request.getParameter("promoCode");
+        String removeDiscount = request.getParameter("removeDiscount");
         Integer cartId = (Integer) session.getAttribute("cartId");
+
+        // Xử lý xóa mã giảm giá
+        if ("true".equals(removeDiscount)) {
+            String removedCode = (String) session.getAttribute("appliedDiscountCode");
+            session.removeAttribute("appliedDiscountCode");
+            session.removeAttribute("appliedDiscountAmount");
+            
+            // Lưu mã đã xóa vào session để có thể áp dụng lại
+            if (removedCode != null && !removedCode.trim().isEmpty()) {
+                session.setAttribute("lastRemovedDiscountCode", removedCode);
+            }
+            
+            request.setAttribute("msg", "Đã xóa mã giảm giá: " + (removedCode != null ? removedCode : ""));
+            request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
+            return;
+        }
 
         if (cartId == null) {
             request.setAttribute("error", "Không tìm thấy giỏ hàng.");
+            request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
+            return;
+        }
+
+        // Lấy thông tin user từ session
+        Model.user currentUser = (Model.user) session.getAttribute("user");
+        if (currentUser == null) {
+            request.setAttribute("error", "Vui lòng đăng nhập để sử dụng mã giảm giá.");
             request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
             return;
         }
@@ -35,6 +60,15 @@ public class ApplyPromotionServlet extends HttpServlet {
             session.removeAttribute("appliedDiscountCode");
             session.removeAttribute("appliedDiscountAmount");
             request.setAttribute("error", "Mã giảm giá không hợp lệ hoặc đã hết hạn.");
+            request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
+            return;
+        }
+
+        // Kiểm tra user có quyền sử dụng voucher này không
+        if (!discountDB.canUserUseDiscount(currentUser.getUser_id(), discount.getDiscountId())) {
+            session.removeAttribute("appliedDiscountCode");
+            session.removeAttribute("appliedDiscountAmount");
+            request.setAttribute("error", "Bạn không có quyền sử dụng mã giảm giá này.");
             request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
             return;
         }
@@ -59,6 +93,8 @@ public class ApplyPromotionServlet extends HttpServlet {
 
         session.setAttribute("appliedDiscountCode", discount.getCode());
         session.setAttribute("appliedDiscountAmount", discountAmount);
+        // Xóa lastRemovedDiscountCode khi áp dụng mã mới
+        session.removeAttribute("lastRemovedDiscountCode");
         // KHÔNG trừ lượt dùng khi mới áp dụng trong giỏ hàng. Chỉ trừ khi đơn hàng hoàn tất.
         request.setAttribute("msg", "Áp dụng mã thành công: " + discount.getCode());
         request.getRequestDispatcher("/View/cart.jsp").forward(request, response);

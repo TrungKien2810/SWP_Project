@@ -81,7 +81,12 @@ public class CheckoutServlet extends HttpServlet {
             return;
         }
 
-        int addressId = Integer.parseInt(req.getParameter("shipping_address_id"));
+        String addressIdStr = req.getParameter("shipping_address_id");
+        if (addressIdStr == null || addressIdStr.isEmpty()) {
+            resp.sendRedirect(req.getContextPath() + "/checkout?error=no_address");
+            return;
+        }
+        int addressId = Integer.parseInt(addressIdStr);
         int methodId = Integer.parseInt(req.getParameter("shipping_method_id"));
         String paymentMethod = req.getParameter("payment_method");
         // bank_code UI removed; always redirect to VNPAY when BANK is selected
@@ -147,31 +152,56 @@ public class CheckoutServlet extends HttpServlet {
             details.add(d);
         }
 
+        // TRỪ KHO NGAY KHI TẠO ĐƠN HÀNG (PENDING)
+        DAO.ProductDB productDB = new DAO.ProductDB();
+        for (OrderDetail d : details) {
+            boolean stockOk = productDB.decreaseStock(d.getProductId(), d.getQuantity());
+            if (!stockOk) {
+                resp.sendRedirect(req.getContextPath() + "/checkout?error=out_of_stock");
+                return;
+            }
+        }
+        
         Integer orderId = orderDB.createOrder(order);
         if (orderId == null) {
+            // Nếu tạo đơn thất bại, phải hoàn lại kho
+            for (OrderDetail d : details) {
+                productDB.increaseStock(d.getProductId(), d.getQuantity());
+            }
             resp.sendRedirect(req.getContextPath() + "/checkout?error=order");
             return;
         }
         boolean detailsOk = orderDB.addOrderDetails(orderId, details);
         if (!detailsOk) {
+            // Nếu add details thất bại, phải hoàn lại kho
+            for (OrderDetail d : details) {
+                productDB.increaseStock(d.getProductId(), d.getQuantity());
+            }
             resp.sendRedirect(req.getContextPath() + "/checkout?error=details");
             return;
         }
         
-        // // Nếu có discount được áp dụng, đánh dấu đã sử dụng
-        // if (appliedDiscountCode != null && appliedDiscountAmount > 0) {
-        //     DiscountDB discountDB = new DiscountDB();
-        //     Model.Discount discount = discountDB.validateAndGetDiscount(appliedDiscountCode);
-        //     if (discount != null) {
-        //         discountDB.decrementAssignedDiscountUse(currentUser.getUser_id(), discount.getDiscountId());
-        //     }
-        // }
+        // Nếu có discount được áp dụng, đánh dấu đã sử dụng
+        if (appliedDiscountCode != null && appliedDiscountAmount > 0) {
+            DiscountDB discountDB = new DiscountDB();
+            Model.Discount discount = discountDB.validateAndGetDiscount(appliedDiscountCode);
+            if (discount != null) {
+                // Kiểm tra user có quyền sử dụng voucher này không
+                if (discountDB.canUserUseDiscount(currentUser.getUser_id(), discount.getDiscountId())) {
+                    discountDB.decrementAssignedDiscountUse(currentUser.getUser_id(), discount.getDiscountId());
+                } else {
+                    System.out.println("[CheckoutServlet] User " + currentUser.getUser_id() + " không có quyền sử dụng discount " + discount.getDiscountId());
+                }
+            }
+        }
         
         // Xóa discount khỏi session sau khi đặt hàng thành công
         session.removeAttribute("appliedDiscountCode");
         session.removeAttribute("appliedDiscountAmount");
         
         if ("BANK".equalsIgnoreCase(paymentMethod)) {
+            // Lưu cartId vào session để xóa cart sau khi thanh toán thành công
+            session.setAttribute("pendingCartId", cart.getCart_id());
             String createUrl = req.getContextPath() + "/payment/vnpay/create?orderId=" + orderId;
             resp.sendRedirect(createUrl);
             return;
