@@ -7,28 +7,45 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.IOException;
 
-@WebServlet("/lienheServlet")
+@WebServlet(name = "lienheServlet", urlPatterns = {"/lienheServlet"})
 public class lienheServlet extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
+        // Đảm bảo UTF-8 để nhận tiếng Việt
 
-        String name = request.getParameter("name");
-        String phone = request.getParameter("phone");
-        String address = request.getParameter("address");
-        String email = request.getParameter("email");
-        String subject = request.getParameter("subject");
-        String message = request.getParameter("message");
+        try {
+            // Lấy dữ liệu từ form
+            String name = request.getParameter("name");
+            String phone = request.getParameter("phone");
+            String address = request.getParameter("address");
+            String email = request.getParameter("email");
+            String subject = request.getParameter("subject");
+            String message = request.getParameter("message");
 
-        lienhe contact = new lienhe(name, phone, address, email, subject, message);
-        lienheDAO dao = new lienheDAO();
+            // Tạo đối tượng liên hệ
+            lienhe contact = new lienhe(name, phone, address, email, subject, message);
 
-        boolean result = dao.insertContact(contact);
-        if (result) {
-            response.sendRedirect("View/lienhe.jsp?msg=Gửi thành công! Cảm ơn bạn đã góp ý 💌");
-        } else {
-            response.sendRedirect("View/lienhe.jsp?msg=Gửi thất bại. Vui lòng thử lại ❌");
+            // Gọi DAO để lưu vào DB
+            lienheDAO dao = new lienheDAO();
+            boolean result = dao.insertContact(contact);
+
+            // Điều hướng kết quả
+            if (result) {
+                // ✅ Gửi thành công → điều hướng về lại trang liên hệ + thông báo
+                // response.sendRedirect(request.getContextPath() + "/View/lienhe.jsp?msg=Gửi thành công! Cảm ơn bạn đã góp ý 💌");
+                request.getRequestDispatcher("/View/lienhe.jsp?msg=Gửi thành công! Cảm ơn bạn đã góp ý 💌").forward(request, response);
+            } else {
+                // ❌ Gửi thất bại
+                // response.sendRedirect(request.getContextPath() + "/View/lienhe.jsp?msg=Gửi thất bại. Vui lòng thử lại ❌");
+                request.getRequestDispatcher("/View/lienhe.jsp?msg=Gửi thất bại. Vui lòng thử lại ❌").forward(request, response);
+
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Luôn có phản hồi để tránh load mãi
+            response.sendRedirect(request.getContextPath() + "/View/lienhe.jsp?msg=Lỗi máy chủ! Không gửi được phản hồi ⚠️");
         }
     }
 
@@ -41,6 +58,7 @@ public class lienheServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        // Chỉ nên cho GET hiển thị trang, không xử lý gửi
+        response.sendRedirect(request.getContextPath() + "/View/lienhe.jsp");
     }
 }
