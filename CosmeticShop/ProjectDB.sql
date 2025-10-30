@@ -26,7 +26,7 @@ CREATE TABLE Products (
     name NVARCHAR(200) NOT NULL,
     price DECIMAL(10,2) NOT NULL,
     stock INT DEFAULT 0,
-    description NVARCHAR(1000),
+    description NVARCHAR(MAX),
     image_url NVARCHAR(500),
     category_id INT,
     FOREIGN KEY (category_id) REFERENCES Categories(category_id)
