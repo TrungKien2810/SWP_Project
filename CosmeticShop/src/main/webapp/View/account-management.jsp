@@ -163,6 +163,30 @@
                     <div class="action-description">Thay đổi mật khẩu tài khoản của bạn</div>
                 </div>
 
+                <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/cart'">
+                    <div class="action-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="action-title">Giỏ hàng</div>
+                    <div class="action-description">Xem và quản lý giỏ hàng của bạn</div>
+                </div>
+
+                <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/shipping-address'">
+                    <div class="action-icon">
+                        <i class="fas fa-location-dot"></i>
+                    </div>
+                    <div class="action-title">Địa chỉ giao hàng</div>
+                    <div class="action-description">Quản lý địa chỉ nhận hàng của bạn</div>
+                </div>
+
+                <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/View/forgot-password.jsp'">
+                    <div class="action-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="action-title">Quên mật khẩu</div>
+                    <div class="action-description">Khôi phục mật khẩu qua email</div>
+                </div>
+
                 <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/my-orders'">
                     <div class="action-icon">
                         <i class="fas fa-receipt"></i>
@@ -203,7 +227,7 @@
                           <input id="avatarFileModal" type="file" name="avatar" accept="image/*" onchange="previewAvatar(event)" style="display:none;">
                         </label>
                       </div>
-                      <small class="text-muted">Ảnh sẽ hiển thị dạng tròn. Nên dùng JPG/PNG/WEBP &lt; 2MB.</small>
+                      
                     </div>
                     <div class="modal-footer">
                       <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
