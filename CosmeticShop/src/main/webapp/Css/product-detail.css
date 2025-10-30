@@ -192,8 +192,21 @@ body {
     display: inline-block;
 }
 
+/* Product Description Section */
+.product-description-section {
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+
+.product-description-section .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
 .description-section {
-    margin-bottom: 25px;
+    margin-bottom: 0;
+    padding: 0;
 }
 
 .description-section * {
@@ -201,49 +214,66 @@ body {
     background: none !important;
 }
 
-.description-section h4 {
-    color: #2c3e50;
-    font-size: 20px;
-    margin-bottom: 10px;
-    font-weight: 600;
-}
-
-.description-section p {
-    color: #666;
-    font-size: 16px;
-    line-height: 1.8;
+/* Tiêu đề chính "Mô tả sản phẩm" */
+.description-main-title {
+    color: #f76c85 !important;
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    margin-bottom: 30px !important;
     text-align: left;
-    white-space: pre-line;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    hyphens: auto;
-    margin-bottom: 15px;
-    width: 100%;
-    display: block;
-    text-indent: 0;
     padding: 0;
+    border: none;
 }
 
+/* Container cho nội dung mô tả */
 .description-content {
-    color: #666 !important;
-    font-size: 16px;
-    line-height: 1.8;
+    margin-top: 0;
+    padding: 0;
+}
+
+/* Mỗi mục mô tả */
+.description-item {
+    margin-bottom: 30px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+/* Tiêu đề của từng mục */
+.description-item-title {
+    color: #f76c85 !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    margin-bottom: 15px !important;
+    margin-top: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    display: block;
+}
+
+/* Nội dung của từng mục */
+.description-item-content {
+    color: #555 !important;
+    font-size: 16px !important;
+    line-height: 1.7 !important;
     text-align: left;
     word-wrap: break-word;
     overflow-wrap: break-word;
-    hyphens: auto;
-    margin-bottom: 15px;
-    white-space: Normal;
-    font-family: inherit;
-    background-color: transparent !important;
-    background: none !important;
-    width: 100%;
-    display: block;
-    text-indent: 0;
-    padding: 0;
-    margin-top: 20px;
-    position: relative;
-    top: 30px;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    white-space: normal;
+}
+
+/* Khi không có mô tả */
+.no-description {
+    color: #999;
+    font-style: italic;
+    text-align: left;
+    padding: 20px 0;
+    background: transparent;
+    border: none;
 }
 
 /* Action Buttons */
@@ -492,5 +522,28 @@ body {
     .description-content {
         font-size: 14px;
         line-height: 1.6;
+    }
+    
+    .product-description-section .container {
+        padding: 0 10px;
+    }
+    
+    .description-main-title {
+        font-size: 20px !important;
+        margin-bottom: 20px !important;
+    }
+    
+    .description-item-title {
+        font-size: 16px !important;
+        margin-bottom: 10px !important;
+    }
+    
+    .description-item-content {
+        font-size: 14px !important;
+        line-height: 1.6 !important;
+    }
+    
+    .description-item {
+        margin-bottom: 20px;
     }
 }

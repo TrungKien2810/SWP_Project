@@ -74,9 +74,68 @@
                 <input type="number" class="form-control" name="stock" id="stock" value="${product.stock}" required>
             </div>
 
-            <div class="mb-3">
-                <label for="description" class="form-label">Mô tả</label>
-                <textarea class="form-control" name="description" id="description" rows="4">${product.description}</textarea>
+            <!-- Mô tả sản phẩm nhiều mục -->
+            <div class="mb-4">
+                <label class="form-label" style="color: #f76c85; font-weight: 600; font-size: 16px; margin-bottom: 15px;">
+                    <i class="fas fa-edit me-2"></i>Mô tả sản phẩm
+                </label>
+                <div id="descriptionSectionsContainer">
+                    <c:choose>
+                        <c:when test="${product != null && not empty productDescriptionSections}">
+                            <!-- Hiển thị các mục mô tả hiện có khi chỉnh sửa -->
+                            <c:forEach var="section" items="${productDescriptionSections}" varStatus="loop">
+                                <div class="description-section-item">
+                                    <div class="row">
+                                        <div class="col-md-10">
+                                            <label class="form-label">Tên mục ${loop.index + 1}</label>
+                                            <input type="text" class="form-control" name="descriptionSectionTitles[]" 
+                                                   value="${section.title}" placeholder="Ví dụ: Thành phần, Cách sử dụng, Lưu ý...">
+                                            
+                                            <label class="form-label mt-3">Nội dung mục ${loop.index + 1}</label>
+                                            <textarea class="form-control" name="descriptionSectionContents[]" 
+                                                      placeholder="Nhập nội dung chi tiết...">${section.content}</textarea>
+                                        </div>
+                                        <div class="col-md-2 d-flex justify-content-center align-items-start">
+                                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeDescriptionSection(this)">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </c:forEach>
+                        </c:when>
+                        <c:otherwise>
+                            <!-- Hiển thị mục mô tả mặc định khi thêm mới -->
+                            <div class="description-section-item">
+                                <div class="row">
+                                    <div class="col-md-10">
+                                        <label class="form-label">Tên mục 1</label>
+                                        <input type="text" class="form-control" name="descriptionSectionTitles[]" 
+                                               placeholder="Ví dụ: Thành phần, Cách sử dụng, Lưu ý...">
+                                        
+                                        <label class="form-label mt-3">Nội dung mục 1</label>
+                                        <textarea class="form-control" name="descriptionSectionContents[]" 
+                                                  placeholder="Nhập nội dung chi tiết..."></textarea>
+                                    </div>
+                                    <div class="col-md-2 d-flex justify-content-center align-items-start">
+                                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeDescriptionSection(this)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+                <div class="text-center mt-3">
+                    <button type="button" class="btn btn-outline-primary" onclick="addDescriptionSection()">
+                        <i class="fas fa-plus me-2"></i>Thêm mục mô tả mới
+                    </button>
+                    <small class="text-muted d-block mt-2">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Thêm các mục mô tả khác nhau cho sản phẩm (ví dụ: Thành phần, Cách sử dụng, Lưu ý, v.v.)
+                    </small>
+                </div>
             </div>
 
             <div class="mb-3">
@@ -193,6 +252,7 @@
     
     <script>
         let imageItemCount = 1;
+        let descriptionSectionCount = 1;
         
         function addImageItem() {
             imageItemCount++;
@@ -223,6 +283,69 @@
             }
         }
         
+        function addDescriptionSection() {
+            const addButton = document.querySelector('button[onclick="addDescriptionSection()"]');
+            addButton.classList.add('loading');
+            
+            setTimeout(() => {
+                descriptionSectionCount++;
+                const container = document.getElementById('descriptionSectionsContainer');
+                const newItem = document.createElement('div');
+                newItem.className = 'description-section-item';
+                newItem.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-10">
+                            <label class="form-label">Tên mục ${descriptionSectionCount}</label>
+                            <input type="text" class="form-control" name="descriptionSectionTitles[]" 
+                                   placeholder="Ví dụ: Thành phần, Cách sử dụng, Lưu ý...">
+                            
+                            <label class="form-label mt-3">Nội dung mục ${descriptionSectionCount}</label>
+                            <textarea class="form-control" name="descriptionSectionContents[]" 
+                                      placeholder="Nhập nội dung chi tiết..."></textarea>
+                        </div>
+                        <div class="col-md-2 d-flex justify-content-center align-items-start">
+                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeDescriptionSection(this)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(newItem);
+                
+                // Focus vào input đầu tiên của mục mới
+                const newInput = newItem.querySelector('input[type="text"]');
+                if (newInput) {
+                    newInput.focus();
+                }
+                
+                // Auto-resize cho textarea mới
+                const newTextarea = newItem.querySelector('textarea');
+                if (newTextarea) {
+                    autoResizeTextarea(newTextarea);
+                    newTextarea.addEventListener('input', function() {
+                        autoResizeTextarea(this);
+                    });
+                }
+                
+                addButton.classList.remove('loading');
+            }, 300);
+        }
+        
+        function removeDescriptionSection(button) {
+            const container = document.getElementById('descriptionSectionsContainer');
+            if (container.children.length > 1) {
+                button.closest('.description-section-item').remove();
+            } else {
+                alert('Phải có ít nhất một mục mô tả!');
+            }
+        }
+        
+        // Auto-resize textarea function
+        function autoResizeTextarea(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        }
+        
         // Load existing additional images when editing
         document.addEventListener('DOMContentLoaded', function() {
             // Update imageItemCount based on existing images
@@ -230,6 +353,21 @@
             if (existingItems.length > 0) {
                 imageItemCount = existingItems.length;
             }
+            
+            // Update descriptionSectionCount based on existing sections
+            const existingDescriptionItems = document.querySelectorAll('#descriptionSectionsContainer .description-section-item');
+            if (existingDescriptionItems.length > 0) {
+                descriptionSectionCount = existingDescriptionItems.length;
+            }
+            
+            // Auto-resize existing textareas
+            const textareas = document.querySelectorAll('.description-section-item textarea');
+            textareas.forEach(textarea => {
+                autoResizeTextarea(textarea);
+                textarea.addEventListener('input', function() {
+                    autoResizeTextarea(this);
+                });
+            });
         });
     </script>
     
@@ -269,6 +407,203 @@
         .additional-image-item input[type="number"]:focus {
             border-color: #f76c85;
             box-shadow: 0 0 0 0.2rem rgba(247, 108, 133, 0.25);
+        }
+        
+        .description-section-item {
+            border: 2px solid #f0f0f0;
+            border-radius: 12px;
+            padding: 20px;
+            background: linear-gradient(135deg, #fff 0%, #fafafa 100%);
+            transition: all 0.3s ease;
+            position: relative;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .description-section-item:hover {
+            border-color: #f76c85;
+            background: linear-gradient(135deg, #fff 0%, #fff5f7 100%);
+            box-shadow: 0 4px 20px rgba(247, 108, 133, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .description-section-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #f76c85, #ff9eb5, #f76c85);
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .description-section-item .row {
+            margin: 0;
+        }
+        
+        .description-section-item .col-md-10 {
+            padding: 0 10px;
+        }
+        
+        .description-section-item .col-md-2 {
+            padding: 0 10px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 30px;
+        }
+        
+        .description-section-item .form-label {
+            color: #f76c85 !important;
+            font-weight: 600 !important;
+            font-size: 14px !important;
+            margin-bottom: 8px !important;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .description-section-item input[type="text"] {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px 15px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: #fff;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        .description-section-item input[type="text"]:focus {
+            border-color: #f76c85;
+            box-shadow: 0 0 0 3px rgba(247, 108, 133, 0.1), inset 0 1px 3px rgba(0, 0, 0, 0.05);
+            outline: none;
+        }
+        
+        .description-section-item textarea {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px 15px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: #fff;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+            resize: none;
+            min-height: 80px;
+            height: auto;
+            overflow-y: hidden;
+        }
+        
+        .description-section-item textarea:focus {
+            border-color: #f76c85;
+            box-shadow: 0 0 0 3px rgba(247, 108, 133, 0.1), inset 0 1px 3px rgba(0, 0, 0, 0.05);
+            outline: none;
+        }
+        
+        .description-section-item .btn {
+            width: 100%;
+            height: 40px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        .description-section-item .btn-outline-danger {
+            border-color: #dc3545;
+            color: #dc3545;
+            background: #fff;
+        }
+        
+        .description-section-item .btn-outline-danger:hover {
+            background: #dc3545;
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+        
+        .description-section-item .btn-outline-primary {
+            background: linear-gradient(135deg, #f76c85, #ff9eb5);
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(247, 108, 133, 0.3);
+        }
+        
+        .description-section-item .btn-outline-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(247, 108, 133, 0.4);
+            background: linear-gradient(135deg, #e55a7a, #ff8db0);
+        }
+        
+        .description-section-item .btn-outline-primary:focus {
+            box-shadow: 0 0 0 3px rgba(247, 108, 133, 0.25);
+        }
+        
+        /* Animation cho việc thêm/xóa mục */
+        .description-section-item {
+            animation: slideInUp 0.3s ease-out;
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .description-section-item .col-md-10,
+            .description-section-item .col-md-2 {
+                margin-bottom: 15px;
+            }
+            
+            .description-section-item .col-md-2 {
+                justify-content: center;
+                padding-top: 15px;
+            }
+            
+            .description-section-item .btn {
+                height: 45px;
+                font-size: 14px;
+            }
+        }
+        
+        /* Hiệu ứng loading cho nút thêm */
+        .btn-outline-primary.loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        
+        .btn-outline-primary.loading::after {
+            content: '';
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-left: 8px;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
     </style>
     <script src="${pageContext.request.contextPath}/Js/home.js"></script>
