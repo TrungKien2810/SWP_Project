@@ -3,18 +3,25 @@ package Controller;
 import DAO.DiscountDB;
 import DAO.ProductDB;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 @WebServlet(name = "AdminServlet", urlPatterns = {"/admin"})
+@MultipartConfig
 public class AdminServlet extends HttpServlet {
 
     private DiscountDB discountDB;
     private ProductDB productDB;
     private DAO.CategoryDB categoryDB;
+    private DAO.BannerDB bannerDB;
 
     private DiscountDB discountDb() {
         if (discountDB == null) discountDB = new DiscountDB();
@@ -29,6 +36,11 @@ public class AdminServlet extends HttpServlet {
     private DAO.CategoryDB categoryDb() {
         if (categoryDB == null) categoryDB = new DAO.CategoryDB();
         return categoryDB;
+    }
+
+    private DAO.BannerDB bannerDb() {
+        if (bannerDB == null) bannerDB = new DAO.BannerDB();
+        return bannerDB;
     }
 
     @Override
@@ -179,6 +191,18 @@ public class AdminServlet extends HttpServlet {
                 request.setAttribute("discounts", discountDb().listAll());
                 request.getRequestDispatcher("/admin/manage-discounts.jsp").forward(request, response);
                 break;
+            case "banners":
+                String opView = request.getParameter("op");
+                if ("edit".equals(opView)) {
+                    try {
+                        int id = Integer.parseInt(request.getParameter("id"));
+                        Model.Banner banner = bannerDb().getById(id);
+                        request.setAttribute("editBanner", banner);
+                    } catch (Exception ignored) {}
+                }
+                request.setAttribute("banners", bannerDb().listAll());
+                request.getRequestDispatcher("/admin/manage-banners.jsp").forward(request, response);
+                break;
             case "reports":
                 request.getRequestDispatcher("/admin/reports.jsp").forward(request, response);
                 break;
@@ -193,6 +217,47 @@ public class AdminServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
+        if ("banners".equals(action)) {
+            String op = request.getParameter("op");
+            if ("delete".equals(op)) {
+                try {
+                    int id = Integer.parseInt(request.getParameter("id"));
+                    bannerDb().delete(id);
+                } catch (Exception ignored) {}
+                response.sendRedirect(request.getContextPath() + "/admin?action=banners");
+                return;
+            }
+
+            String idStr = request.getParameter("id");
+            Part imagePart = request.getPart("bannerImage");
+            String targetUrl = request.getParameter("targetUrl");
+            String displayOrderStr = request.getParameter("displayOrder");
+            String isActiveStr = request.getParameter("isActive");
+
+            int displayOrder = 0;
+            try { displayOrder = Integer.parseInt(displayOrderStr); } catch (Exception ignored) {}
+            boolean isActive = (isActiveStr != null);
+
+            if (idStr != null && !idStr.isBlank()) {
+                // update
+                int id = Integer.parseInt(idStr);
+                if (imagePart != null && imagePart.getSize() > 0) {
+                    String imagePath = saveBannerImage(imagePart);
+                    bannerDb().updateWithImage(id, imagePath, targetUrl, displayOrder, isActive);
+                } else {
+                    bannerDb().updateWithoutImage(id, targetUrl, displayOrder, isActive);
+                }
+            } else {
+                // create
+                if (imagePart != null && imagePart.getSize() > 0) {
+                    String imagePath = saveBannerImage(imagePart);
+                    bannerDb().insert(imagePath, targetUrl, displayOrder, isActive);
+                }
+            }
+
+            response.sendRedirect(request.getContextPath() + "/admin?action=banners");
+            return;
+        }
         if ("categories".equals(action)) {
             String op = request.getParameter("op");
             if ("create".equals(op)) {
@@ -226,6 +291,43 @@ public class AdminServlet extends HttpServlet {
             }
         }
         response.sendRedirect(request.getContextPath() + "/admin?action=dashboard");
+    }
+
+    private String getFileName(Part part) {
+        String contentDisp = part.getHeader("content-disposition");
+        if (contentDisp != null) {
+            for (String cd : contentDisp.split(";")) {
+                String s = cd.trim();
+                if (s.startsWith("filename")) {
+                    String name = s.substring(s.indexOf('=') + 1).trim().replace("\"", "");
+                    return new java.io.File(name).getName();
+                }
+            }
+        }
+        return "file";
+    }
+
+    private String saveBannerImage(Part imagePart) throws IOException {
+        String submittedFileName = getFileName(imagePart);
+        String safeName = System.currentTimeMillis() + "_" + submittedFileName.replaceAll("[^a-zA-Z0-9.\\-_]", "_");
+
+        final String UPLOAD_BASE = "C:\\CosmeticShop\\uploads";
+        final String BANNERS_DIR = "banners";
+
+        File dir = new File(UPLOAD_BASE, BANNERS_DIR);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        File saved = new File(dir, safeName);
+        try (InputStream in = imagePart.getInputStream(); FileOutputStream out = new FileOutputStream(saved)) {
+            byte[] buf = new byte[8192];
+            int len;
+            while ((len = in.read(buf)) != -1) {
+                out.write(buf, 0, len);
+            }
+        }
+        return "/uploads/" + BANNERS_DIR + "/" + safeName;
     }
 }
 

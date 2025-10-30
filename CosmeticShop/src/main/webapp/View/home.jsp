@@ -1,5 +1,7 @@
 <%@page import="Model.user"%>
+<%@page import="DAO.BannerDB, java.util.List, Model.Banner" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -13,6 +15,13 @@
     </head>
     <body>
         <%@ include file="/View/includes/header.jspf" %>
+
+                        <%
+                            if (request.getAttribute("bannerList") == null) {
+                                DAO.BannerDB _bdb = new DAO.BannerDB();
+                                request.setAttribute("bannerList", _bdb.listActiveOrdered());
+                            }
+                        %>
 
                         <c:if test="${not empty param.msg}">
                             <div class="container mt-3">
@@ -67,30 +76,46 @@
                     
                         <div id="carouselExample" class="carousel slide mt-3" data-bs-ride="carousel" data-bs-interval="2000">
                             <div class="carousel-inner">
-                                <div class="carousel-item active">
-                                    <img src="${pageContext.request.contextPath}/IMG/hinhnen1.png"
-                                         class="d-block w-100"
-                                         alt="Slide 1"
-                                         style="max-height: 550px; object-fit: cover;">
-                                </div>
-                                <div class="carousel-item">
-                                    <img src="${pageContext.request.contextPath}/IMG/hinhnen2.png"
-                                         class="d-block w-100"
-                                         alt="Slide 2"
-                                         style="max-height: 550px; object-fit: cover;">
-                                </div>
-                                <div class="carousel-item">
-                                    <img src="${pageContext.request.contextPath}/IMG/hinhnen3.png"
-                                         class="d-block w-100"
-                                         alt="Slide 3"
-                                         style="max-height: 550px; object-fit: cover;">
-                                </div> 
-                                <div class="carousel-item">
-                                    <img src="${pageContext.request.contextPath}/IMG/hinhnen4.png"
-                                         class="d-block w-100"
-                                         alt="Slide 4"
-                                         style="max-height: 550px; object-fit: cover;">
-                                </div>
+                                <c:if test="${empty bannerList}">
+                                    <div class="carousel-item active">
+                                        <img src="${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png"
+                                             class="d-block w-100"
+                                             alt="Banner"
+                                             style="max-height: 550px; object-fit: contain;">
+                                    </div>
+                                </c:if>
+                                <c:forEach var="banner" items="${bannerList}" varStatus="loop">
+                                    <div class="carousel-item ${loop.index == 0 ? 'active' : ''}">
+                                        <c:choose>
+                                            <c:when test="${not empty banner.targetUrl}">
+                                                <c:choose>
+                                                    <c:when test="${fn:startsWith(banner.targetUrl, 'http://') || fn:startsWith(banner.targetUrl, 'https://')}">
+                                                        <a href="${banner.targetUrl}" target="_blank" rel="noopener noreferrer">
+                                                            <img src="${pageContext.request.contextPath}${banner.imagePath}"
+                                                                 class="d-block w-100"
+                                                                 alt="Banner"
+                                                                 style="max-height: 550px; object-fit: contain;">
+                                                        </a>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <a href="${pageContext.request.contextPath}${banner.targetUrl}" target="_blank" rel="noopener noreferrer">
+                                                            <img src="${pageContext.request.contextPath}${banner.imagePath}"
+                                                                 class="d-block w-100"
+                                                                 alt="Banner"
+                                                                 style="max-height: 550px; object-fit: contain;">
+                                                        </a>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <img src="${pageContext.request.contextPath}${banner.imagePath}"
+                                                     class="d-block w-100"
+                                                     alt="Banner"
+                                                     style="max-height: 550px; object-fit: contain;">
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </div>
+                                </c:forEach>
                             </div>
 
                             <!-- Nút điều hướng -->
