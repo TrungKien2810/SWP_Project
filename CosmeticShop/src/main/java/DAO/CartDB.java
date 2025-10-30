@@ -60,7 +60,21 @@ public class CartDB {
             stmt.setInt(1, cartId);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                CartItems.add(new CartItems(rs.getInt("cart_item_id"), rs.getInt("cart_id"), rs.getInt("product_id"), rs.getInt("quantity"), rs.getDouble("price")));
+                java.time.LocalDateTime addedAt = null;
+                try {
+                    java.sql.Timestamp ats = rs.getTimestamp("added_at");
+                    if (ats != null) addedAt = ats.toLocalDateTime();
+                } catch (Exception ignore) { addedAt = null; }
+                
+                CartItems.add(new CartItems(
+                    rs.getInt("cart_item_id"), 
+                    rs.getInt("cart_id"), 
+                    rs.getInt("product_id"), 
+                    rs.getInt("quantity"), 
+                    rs.getDouble("price"),
+                    rs.getBoolean("is_selected"),
+                    addedAt
+                ));
             }
             return CartItems;
         } catch (SQLException e) {
@@ -159,13 +173,14 @@ public class CartDB {
     }
 
     public boolean addCartItems(int cart_id, int product_id, int quantity, double price) {
-        String sql = "insert into CartItems(cart_id, product_id, quantity, price) values (?, ?, ?, ?)";
+        String sql = "insert into CartItems(cart_id, product_id, quantity, price, is_selected) values (?, ?, ?, ?, ?)";
         try {
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, cart_id);
             stmt.setInt(2, product_id);
             stmt.setInt(3, quantity);
             stmt.setDouble(4, price);
+            stmt.setBoolean(5, true); // Default to selected
             return stmt.executeUpdate()>0;
         }
         catch(SQLException e){

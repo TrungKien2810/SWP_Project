@@ -63,14 +63,17 @@
                 <div class="cart-items col-md-8">
                     <% for(CartItems p : cartItems) { %>
                     <%
-                    
-                    totalPrice += p.getPrice() * p.getQuantity();
                     Product product;    
                     ProductDB pd = new ProductDB();
                     product = pd.getProductById(p.getProduct_id());
+                    
+                    // Chỉ tính vào tổng nếu item được chọn
+                    if (p.isIs_selected()) {
+                        totalPrice += p.getPrice() * p.getQuantity();
+                    }
                     %>
                     <div class="cart-item d-flex align-items-center mb-4 p-3 border rounded shadow-sm">
-                        <input type="checkbox" class="cart-item-checkbox me-2" checked
+                        <input type="checkbox" class="cart-item-checkbox me-2" <%=p.isIs_selected() ? "checked" : ""%>
                                data-price="<%=p.getPrice()%>" data-quantity="<%=p.getQuantity()%>">
                         <img src="${pageContext.request.contextPath}<%=product.getImageUrl()%>"
                              alt="<%=product.getName()%>" class="me-3" style="width:100px; height:100px; object-fit:cover;">

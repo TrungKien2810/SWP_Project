@@ -4,6 +4,8 @@
  */
 package Model;
 
+import java.time.LocalDateTime;
+
 /**
  *
  * @author ADMIN
@@ -13,12 +15,16 @@ public class CartItems {
 //    cart_id INT FOREIGN KEY REFERENCES Carts(cart_id),
 //    product_id INT FOREIGN KEY REFERENCES Products(product_id),
 //    quantity INT NOT NULL CHECK (quantity > 0),
-//    price DECIMAL(10,2) NOT NULL
+//    price DECIMAL(10,2) NOT NULL,
+//    is_selected BIT DEFAULT 1,
+//    added_at DATETIME DEFAULT GETDATE()
     private int id;
     private int cart_id;
     private int product_id;
     private int quantity;
     private double price;
+    private boolean is_selected;
+    private LocalDateTime added_at;
 
     public CartItems() {
     }
@@ -29,6 +35,18 @@ public class CartItems {
         this.product_id = product_id;
         this.quantity = quantity;
         this.price = price;
+        this.is_selected = true; // Default value
+        this.added_at = LocalDateTime.now();
+    }
+    
+    public CartItems(int id, int cart_id, int product_id, int quantity, double price, boolean is_selected, LocalDateTime added_at) {
+        this.id = id;
+        this.cart_id = cart_id;
+        this.product_id = product_id;
+        this.quantity = quantity;
+        this.price = price;
+        this.is_selected = is_selected;
+        this.added_at = added_at;
     }
 
     public int getId() {
@@ -71,6 +89,20 @@ public class CartItems {
         this.price = price;
     }
 
-    
+    public boolean isIs_selected() {
+        return is_selected;
+    }
+
+    public void setIs_selected(boolean is_selected) {
+        this.is_selected = is_selected;
+    }
+
+    public LocalDateTime getAdded_at() {
+        return added_at;
+    }
+
+    public void setAdded_at(LocalDateTime added_at) {
+        this.added_at = added_at;
+    }
     
 }
