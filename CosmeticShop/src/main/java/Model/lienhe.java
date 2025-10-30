@@ -8,9 +8,11 @@ public class lienhe {
     private String email;
     private String subject;
     private String message;
+    private boolean status; // ✅ Thêm trạng thái xử lý (0 = chưa xử lý, 1 = đã xử lý)
 
     public lienhe() {}
 
+    // Constructor cũ (để tương thích khi thêm mới liên hệ)
     public lienhe(String name, String phone, String address, String email, String subject, String message) {
         this.name = name;
         this.phone = phone;
@@ -18,9 +20,22 @@ public class lienhe {
         this.email = email;
         this.subject = subject;
         this.message = message;
+        this.status = false; // Mặc định là chưa xử lý
     }
 
-    // Getter & Setter
+    // Constructor mới (dùng khi lấy dữ liệu từ SQL)
+    public lienhe(int id, String name, String phone, String address, String email, String subject, String message, boolean status) {
+        this.id = id;
+        this.name = name;
+        this.phone = phone;
+        this.address = address;
+        this.email = email;
+        this.subject = subject;
+        this.message = message;
+        this.status = status;
+    }
+
+    // Getters & Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -41,4 +56,7 @@ public class lienhe {
 
     public String getMessage() { return message; }
     public void setMessage(String message) { this.message = message; }
+
+    public boolean isStatus() { return status; }
+    public void setStatus(boolean status) { this.status = status; }
 }

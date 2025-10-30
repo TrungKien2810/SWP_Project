@@ -1,0 +1,92 @@
+/* Tổng thể trang */
+body {
+    background-color: #fff5f7;
+    font-family: "Poppins", sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* Khung chứa bảng */
+.table-wrapper {
+    width: 95%;
+    margin: 40px auto;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(255, 105, 180, 0.2);
+    overflow-x: auto;
+    padding: 20px 25px;
+}
+
+/* Tiêu đề bảng */
+.feedback-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+}
+
+.feedback-table thead {
+    background: linear-gradient(90deg, #ff99b9, #ffa7c4);
+    color: white;
+}
+
+.feedback-table th {
+    padding: 14px 12px;
+    text-align: left;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.feedback-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #f1d1da;
+    color: #555;
+}
+
+/* Hiệu ứng hover */
+.feedback-table tbody tr:hover {
+    background-color: #ffeaf0;
+    transition: 0.3s ease;
+}
+
+/* Select trạng thái */
+.status-select {
+    border: 1px solid #ff9bb5;
+    border-radius: 8px;
+    padding: 5px 10px;
+    background-color: #fff;
+    color: #444;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    outline: none;
+    transition: 0.2s;
+}
+
+.status-select:hover {
+    border-color: #ff6f9f;
+    box-shadow: 0 0 6px rgba(255, 99, 132, 0.3);
+}
+
+/* Màu tùy theo trạng thái */
+.status-select option[value="Đã xử lý"] {
+    background-color: #eaffea;
+    color: #2e7d32;
+}
+
+.status-select option[value="Chưa xử lý"] {
+    background-color: #ffeaea;
+    color: #c62828;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .feedback-table th, .feedback-table td {
+        padding: 10px 6px;
+        font-size: 13px;
+    }
+
+    .table-wrapper {
+        padding: 10px;
+        margin: 20px auto;
+    }
+}
