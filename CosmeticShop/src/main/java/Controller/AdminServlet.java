@@ -211,6 +211,91 @@ public class AdminServlet extends HttpServlet {
                 request.getRequestDispatcher("/admin/manage-banners.jsp").forward(request, response);
                 break;
             case "reports":
+                // Xử lý bộ lọc
+                String reportStartDateStr = request.getParameter("startDate");
+                String reportEndDateStr = request.getParameter("endDate");
+                String orderStatusFilter = request.getParameter("orderStatus");
+                String dateQuickFilter = request.getParameter("dateQuickFilter");
+                
+                java.sql.Date startDate = null;
+                java.sql.Date endDate = null;
+                boolean hasDateFilter = false;
+                
+                // Xử lý date quick filter (Tất cả, Hôm nay, 7 ngày qua, Tháng này, Năm nay)
+                if (dateQuickFilter != null && !dateQuickFilter.isBlank()) {
+                    java.time.LocalDate today = java.time.LocalDate.now();
+                    switch (dateQuickFilter) {
+                        case "all":
+                            // Lấy dữ liệu từ ngày đầu tiên có đơn hàng đến hiện tại
+                            // Set một ngày xa (10 năm trước) để lấy toàn bộ dữ liệu
+                            startDate = java.sql.Date.valueOf(today.minusYears(10));
+                            endDate = java.sql.Date.valueOf(today);
+                            hasDateFilter = true;
+                            break;
+                        case "today":
+                            startDate = endDate = java.sql.Date.valueOf(today);
+                            hasDateFilter = true;
+                            break;
+                        case "last7days":
+                            startDate = java.sql.Date.valueOf(today.minusDays(6));
+                            endDate = java.sql.Date.valueOf(today);
+                            hasDateFilter = true;
+                            break;
+                        case "thisMonth":
+                            startDate = java.sql.Date.valueOf(today.withDayOfMonth(1));
+                            endDate = java.sql.Date.valueOf(today);
+                            hasDateFilter = true;
+                            break;
+                        case "thisYear":
+                            startDate = java.sql.Date.valueOf(today.withDayOfYear(1));
+                            endDate = java.sql.Date.valueOf(today);
+                            hasDateFilter = true;
+                            break;
+                    }
+                } else if (reportStartDateStr != null && !reportStartDateStr.isBlank() && 
+                           reportEndDateStr != null && !reportEndDateStr.isBlank()) {
+                    try {
+                        startDate = java.sql.Date.valueOf(reportStartDateStr);
+                        endDate = java.sql.Date.valueOf(reportEndDateStr);
+                        hasDateFilter = true;
+                    } catch (Exception e) {
+                        // Không set mặc định nếu parse lỗi
+                    }
+                }
+                
+                // Mặc định filter theo "DELIVERED" hoặc "COMPLETED" nếu không chọn
+                if (orderStatusFilter == null || orderStatusFilter.isBlank() || "ALL".equals(orderStatusFilter)) {
+                    orderStatusFilter = null;
+                }
+                
+                // Lấy dữ liệu báo cáo - chỉ khi có date filter
+                java.util.Map<String, Object> reportData = null;
+                if (hasDateFilter && startDate != null && endDate != null) {
+                    reportData = getReportData(startDate, endDate, orderStatusFilter);
+                } else {
+                    // Tạo empty report data nếu không có filter
+                    reportData = new java.util.HashMap<>();
+                    reportData.put("totalRevenue", 0.0);
+                    reportData.put("totalOrders", 0);
+                    reportData.put("averageOrderValue", 0.0);
+                    reportData.put("totalDiscount", 0.0);
+                    reportData.put("salesByDay", new java.util.LinkedHashMap<>());
+                    reportData.put("topProductsByQuantity", new java.util.ArrayList<>());
+                    reportData.put("topProductsByRevenue", new java.util.ArrayList<>());
+                    reportData.put("lowStockProducts", getLowStockProducts(5));
+                    reportData.put("slowMovingProducts", getSlowMovingProducts(90));
+                    reportData.put("topCustomers", new java.util.ArrayList<>());
+                    reportData.put("newVsReturningCustomers", new java.util.HashMap<>());
+                    reportData.put("topDiscounts", new java.util.ArrayList<>());
+                }
+                
+                request.setAttribute("reportData", reportData);
+                request.setAttribute("startDate", reportStartDateStr != null ? reportStartDateStr : "");
+                request.setAttribute("endDate", reportEndDateStr != null ? reportEndDateStr : "");
+                request.setAttribute("orderStatusFilter", orderStatusFilter != null ? orderStatusFilter : "ALL");
+                request.setAttribute("dateQuickFilter", dateQuickFilter);
+                request.setAttribute("hasDateFilter", hasDateFilter);
+                
                 request.getRequestDispatcher("/admin/reports.jsp").forward(request, response);
                 break;
             case "settings":
@@ -427,6 +512,359 @@ public class AdminServlet extends HttpServlet {
             revenue[6 - i] = (int)Math.round(val);
         }
         return revenue;
+    }
+    
+    // ========== PHƯƠNG THỨC BÁO CÁO ==========
+    
+    private java.util.Map<String, Object> getReportData(java.sql.Date startDate, java.sql.Date endDate, String orderStatusFilter) {
+        java.util.Map<String, Object> data = new java.util.HashMap<>();
+        
+        // Sales Report - Tổng quan
+        data.put("totalRevenue", getTotalRevenue(startDate, endDate, orderStatusFilter));
+        data.put("totalOrders", getTotalOrders(startDate, endDate, orderStatusFilter));
+        data.put("averageOrderValue", getAverageOrderValue(startDate, endDate, orderStatusFilter));
+        data.put("totalDiscount", getTotalDiscount(startDate, endDate, orderStatusFilter));
+        
+        // Sales by Day - Doanh thu theo ngày
+        data.put("salesByDay", getSalesByDay(startDate, endDate, orderStatusFilter));
+        
+        // Top Products - Top sản phẩm bán chạy
+        data.put("topProductsByQuantity", getTopProductsByQuantity(startDate, endDate, orderStatusFilter, 10));
+        data.put("topProductsByRevenue", getTopProductsByRevenue(startDate, endDate, orderStatusFilter, 10));
+        
+        // Inventory Report - Báo cáo tồn kho
+        data.put("lowStockProducts", getLowStockProducts(5));
+        data.put("slowMovingProducts", getSlowMovingProducts(90));
+        
+        // Customer Report - Báo cáo khách hàng
+        data.put("topCustomers", getTopCustomers(startDate, endDate, orderStatusFilter, 10));
+        data.put("newVsReturningCustomers", getNewVsReturningCustomers(startDate, endDate, orderStatusFilter));
+        
+        // Discount Report - Báo cáo khuyến mãi
+        data.put("topDiscounts", getTopDiscounts(startDate, endDate, 10));
+        
+        return data;
+    }
+    
+    private double getTotalRevenue(java.sql.Date startDate, java.sql.Date endDate, String orderStatusFilter) {
+        try {
+            java.sql.Connection c = new DAO.DBConnect().conn;
+            StringBuilder sql = new StringBuilder("SELECT SUM(total_amount) FROM Orders WHERE CAST(order_date AS DATE) BETWEEN ? AND ? AND payment_status = 'PAID'");
+            if (orderStatusFilter != null && !orderStatusFilter.isBlank()) {
+                sql.append(" AND order_status = ?");
+            }
+            try (java.sql.PreparedStatement ps = c.prepareStatement(sql.toString())) {
+                ps.setDate(1, startDate);
+                ps.setDate(2, endDate);
+                if (orderStatusFilter != null && !orderStatusFilter.isBlank()) {
+                    ps.setString(3, orderStatusFilter);
+                }
+                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) return rs.getDouble(1);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0.0;
+    }
+    
+    private int getTotalOrders(java.sql.Date startDate, java.sql.Date endDate, String orderStatusFilter) {
+        try {
+            java.sql.Connection c = new DAO.DBConnect().conn;
+            StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Orders WHERE CAST(order_date AS DATE) BETWEEN ? AND ? AND payment_status = 'PAID'");
+            if (orderStatusFilter != null && !orderStatusFilter.isBlank()) {
+                sql.append(" AND order_status = ?");
+            }
+            try (java.sql.PreparedStatement ps = c.prepareStatement(sql.toString())) {
+                ps.setDate(1, startDate);
+                ps.setDate(2, endDate);
+                if (orderStatusFilter != null && !orderStatusFilter.isBlank()) {
+                    ps.setString(3, orderStatusFilter);
+                }
+                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) return rs.getInt(1);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+    
+    private double getAverageOrderValue(java.sql.Date startDate, java.sql.Date endDate, String orderStatusFilter) {
+        int totalOrders = getTotalOrders(startDate, endDate, orderStatusFilter);
+        if (totalOrders == 0) return 0.0;
+        return getTotalRevenue(startDate, endDate, orderStatusFilter) / totalOrders;
+    }
+    
+    private double getTotalDiscount(java.sql.Date startDate, java.sql.Date endDate, String orderStatusFilter) {
+        try {
+            java.sql.Connection c = new DAO.DBConnect().conn;
+            StringBuilder sql = new StringBuilder("SELECT SUM(discount_amount) FROM Orders WHERE CAST(order_date AS DATE) BETWEEN ? AND ? AND payment_status = 'PAID'");
+            if (orderStatusFilter != null && !orderStatusFilter.isBlank()) {
+                sql.append(" AND order_status = ?");
+            }
+            try (java.sql.PreparedStatement ps = c.prepareStatement(sql.toString())) {
+                ps.setDate(1, startDate);
+                ps.setDate(2, endDate);
+                if (orderStatusFilter != null && !orderStatusFilter.isBlank()) {
+                    ps.setString(3, orderStatusFilter);
+                }
+                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) return rs.getDouble(1);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0.0;
+    }
+    
+    // Doanh thu theo ngày - trả về Map<Date, Revenue> để vẽ biểu đồ
+    private java.util.Map<String, Double> getSalesByDay(java.sql.Date startDate, java.sql.Date endDate, String orderStatusFilter) {
+        java.util.Map<String, Double> sales = new java.util.LinkedHashMap<>();
+        try {
+            java.sql.Connection c = new DAO.DBConnect().conn;
+            StringBuilder sql = new StringBuilder("SELECT CAST(order_date AS DATE) as order_date, SUM(total_amount) as revenue FROM Orders WHERE CAST(order_date AS DATE) BETWEEN ? AND ? AND payment_status = 'PAID'");
+            if (orderStatusFilter != null && !orderStatusFilter.isBlank()) {
+                sql.append(" AND order_status = ?");
+            }
+            sql.append(" GROUP BY CAST(order_date AS DATE) ORDER BY order_date");
+            try (java.sql.PreparedStatement ps = c.prepareStatement(sql.toString())) {
+                ps.setDate(1, startDate);
+                ps.setDate(2, endDate);
+                if (orderStatusFilter != null && !orderStatusFilter.isBlank()) {
+                    ps.setString(3, orderStatusFilter);
+                }
+                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        String dateStr = rs.getDate("order_date").toString();
+                        double revenue = rs.getDouble("revenue");
+                        sales.put(dateStr, revenue);
+                    }
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return sales;
+    }
+    
+    // Top sản phẩm theo số lượng
+    private java.util.List<java.util.Map<String, Object>> getTopProductsByQuantity(java.sql.Date startDate, java.sql.Date endDate, String orderStatusFilter, int limit) {
+        java.util.List<java.util.Map<String, Object>> products = new java.util.ArrayList<>();
+        try {
+            java.sql.Connection c = new DAO.DBConnect().conn;
+            StringBuilder sql = new StringBuilder(
+                "SELECT TOP " + limit + " p.product_id, p.name, SUM(od.quantity) as total_quantity " +
+                "FROM OrderDetails od " +
+                "JOIN Orders o ON od.order_id = o.order_id " +
+                "JOIN Products p ON od.product_id = p.product_id " +
+                "WHERE CAST(o.order_date AS DATE) BETWEEN ? AND ? AND o.payment_status = 'PAID'");
+            if (orderStatusFilter != null && !orderStatusFilter.isBlank()) {
+                sql.append(" AND o.order_status = ?");
+            }
+            sql.append(" GROUP BY p.product_id, p.name ORDER BY total_quantity DESC");
+            try (java.sql.PreparedStatement ps = c.prepareStatement(sql.toString())) {
+                ps.setDate(1, startDate);
+                ps.setDate(2, endDate);
+                if (orderStatusFilter != null && !orderStatusFilter.isBlank()) {
+                    ps.setString(3, orderStatusFilter);
+                }
+                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        java.util.Map<String, Object> product = new java.util.HashMap<>();
+                        product.put("productId", rs.getInt("product_id"));
+                        product.put("name", rs.getString("name"));
+                        product.put("totalQuantity", rs.getInt("total_quantity"));
+                        products.add(product);
+                    }
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return products;
+    }
+    
+    // Top sản phẩm theo doanh thu
+    private java.util.List<java.util.Map<String, Object>> getTopProductsByRevenue(java.sql.Date startDate, java.sql.Date endDate, String orderStatusFilter, int limit) {
+        java.util.List<java.util.Map<String, Object>> products = new java.util.ArrayList<>();
+        try {
+            java.sql.Connection c = new DAO.DBConnect().conn;
+            StringBuilder sql = new StringBuilder(
+                "SELECT TOP " + limit + " p.product_id, p.name, SUM(od.quantity * od.price) as total_revenue " +
+                "FROM OrderDetails od " +
+                "JOIN Orders o ON od.order_id = o.order_id " +
+                "JOIN Products p ON od.product_id = p.product_id " +
+                "WHERE CAST(o.order_date AS DATE) BETWEEN ? AND ? AND o.payment_status = 'PAID'");
+            if (orderStatusFilter != null && !orderStatusFilter.isBlank()) {
+                sql.append(" AND o.order_status = ?");
+            }
+            sql.append(" GROUP BY p.product_id, p.name ORDER BY total_revenue DESC");
+            try (java.sql.PreparedStatement ps = c.prepareStatement(sql.toString())) {
+                ps.setDate(1, startDate);
+                ps.setDate(2, endDate);
+                if (orderStatusFilter != null && !orderStatusFilter.isBlank()) {
+                    ps.setString(3, orderStatusFilter);
+                }
+                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        java.util.Map<String, Object> product = new java.util.HashMap<>();
+                        product.put("productId", rs.getInt("product_id"));
+                        product.put("name", rs.getString("name"));
+                        product.put("totalRevenue", rs.getDouble("total_revenue"));
+                        products.add(product);
+                    }
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return products;
+    }
+    
+    // Sản phẩm sắp hết hàng
+    private java.util.List<java.util.Map<String, Object>> getLowStockProducts(int threshold) {
+        java.util.List<java.util.Map<String, Object>> products = new java.util.ArrayList<>();
+        try {
+            java.sql.Connection c = new DAO.DBConnect().conn;
+            String sql = "SELECT product_id, name, stock FROM Products WHERE stock <= ? ORDER BY stock ASC";
+            try (java.sql.PreparedStatement ps = c.prepareStatement(sql)) {
+                ps.setInt(1, threshold);
+                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        java.util.Map<String, Object> product = new java.util.HashMap<>();
+                        product.put("productId", rs.getInt("product_id"));
+                        product.put("name", rs.getString("name"));
+                        product.put("stock", rs.getInt("stock"));
+                        products.add(product);
+                    }
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return products;
+    }
+    
+    // Sản phẩm tồn kho lâu (không bán được trong X ngày)
+    private java.util.List<java.util.Map<String, Object>> getSlowMovingProducts(int days) {
+        java.util.List<java.util.Map<String, Object>> products = new java.util.ArrayList<>();
+        try {
+            java.sql.Connection c = new DAO.DBConnect().conn;
+            String sql = 
+                "SELECT p.product_id, p.name, p.stock, MAX(o.order_date) as last_sold_date " +
+                "FROM Products p " +
+                "LEFT JOIN OrderDetails od ON p.product_id = od.product_id " +
+                "LEFT JOIN Orders o ON od.order_id = o.order_id AND o.payment_status = 'PAID' " +
+                "GROUP BY p.product_id, p.name, p.stock " +
+                "HAVING MAX(o.order_date) IS NULL OR MAX(o.order_date) < DATEADD(DAY, -" + days + ", GETDATE()) " +
+                "ORDER BY p.stock DESC";
+            try (java.sql.Statement stmt = c.createStatement(); java.sql.ResultSet rs = stmt.executeQuery(sql)) {
+                while (rs.next()) {
+                    java.util.Map<String, Object> product = new java.util.HashMap<>();
+                    product.put("productId", rs.getInt("product_id"));
+                    product.put("name", rs.getString("name"));
+                    product.put("stock", rs.getInt("stock"));
+                    java.sql.Timestamp lastSold = rs.getTimestamp("last_sold_date");
+                    product.put("lastSoldDate", lastSold != null ? lastSold.toString() : "Chưa bán");
+                    products.add(product);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return products;
+    }
+    
+    // Top khách hàng
+    private java.util.List<java.util.Map<String, Object>> getTopCustomers(java.sql.Date startDate, java.sql.Date endDate, String orderStatusFilter, int limit) {
+        java.util.List<java.util.Map<String, Object>> customers = new java.util.ArrayList<>();
+        try {
+            java.sql.Connection c = new DAO.DBConnect().conn;
+            StringBuilder sql = new StringBuilder(
+                "SELECT TOP " + limit + " u.user_id, u.full_name, u.email, SUM(o.total_amount) as total_spent, COUNT(o.order_id) as order_count " +
+                "FROM Users u " +
+                "JOIN Orders o ON u.user_id = o.user_id " +
+                "WHERE CAST(o.order_date AS DATE) BETWEEN ? AND ? AND o.payment_status = 'PAID'");
+            if (orderStatusFilter != null && !orderStatusFilter.isBlank()) {
+                sql.append(" AND o.order_status = ?");
+            }
+            sql.append(" GROUP BY u.user_id, u.full_name, u.email ORDER BY total_spent DESC");
+            try (java.sql.PreparedStatement ps = c.prepareStatement(sql.toString())) {
+                ps.setDate(1, startDate);
+                ps.setDate(2, endDate);
+                if (orderStatusFilter != null && !orderStatusFilter.isBlank()) {
+                    ps.setString(3, orderStatusFilter);
+                }
+                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        java.util.Map<String, Object> customer = new java.util.HashMap<>();
+                        customer.put("userId", rs.getInt("user_id"));
+                        customer.put("fullName", rs.getString("full_name"));
+                        customer.put("email", rs.getString("email"));
+                        customer.put("totalSpent", rs.getDouble("total_spent"));
+                        customer.put("orderCount", rs.getInt("order_count"));
+                        customers.add(customer);
+                    }
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return customers;
+    }
+    
+    // Tỷ lệ khách hàng mới vs quay lại
+    private java.util.Map<String, Integer> getNewVsReturningCustomers(java.sql.Date startDate, java.sql.Date endDate, String orderStatusFilter) {
+        java.util.Map<String, Integer> result = new java.util.HashMap<>();
+        try {
+            java.sql.Connection c = new DAO.DBConnect().conn;
+            StringBuilder sql = new StringBuilder(
+                "SELECT " +
+                "  SUM(CASE WHEN first_order.first_order_date = CAST(o.order_date AS DATE) THEN 1 ELSE 0 END) as new_customers, " +
+                "  SUM(CASE WHEN first_order.first_order_date < CAST(o.order_date AS DATE) THEN 1 ELSE 0 END) as returning_customers " +
+                "FROM Orders o " +
+                "JOIN (SELECT user_id, MIN(CAST(order_date AS DATE)) as first_order_date FROM Orders WHERE payment_status = 'PAID' GROUP BY user_id) first_order " +
+                "  ON o.user_id = first_order.user_id " +
+                "WHERE CAST(o.order_date AS DATE) BETWEEN ? AND ? AND o.payment_status = 'PAID'");
+            if (orderStatusFilter != null && !orderStatusFilter.isBlank()) {
+                sql.append(" AND o.order_status = ?");
+            }
+            try (java.sql.PreparedStatement ps = c.prepareStatement(sql.toString())) {
+                ps.setDate(1, startDate);
+                ps.setDate(2, endDate);
+                if (orderStatusFilter != null && !orderStatusFilter.isBlank()) {
+                    ps.setString(3, orderStatusFilter);
+                }
+                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        result.put("newCustomers", rs.getInt("new_customers"));
+                        result.put("returningCustomers", rs.getInt("returning_customers"));
+                    }
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        if (result.isEmpty()) {
+            result.put("newCustomers", 0);
+            result.put("returningCustomers", 0);
+        }
+        return result;
+    }
+    
+    // Top mã giảm giá
+    private java.util.List<java.util.Map<String, Object>> getTopDiscounts(java.sql.Date startDate, java.sql.Date endDate, int limit) {
+        java.util.List<java.util.Map<String, Object>> discounts = new java.util.ArrayList<>();
+        try {
+            java.sql.Connection c = new DAO.DBConnect().conn;
+            String sql = 
+                "SELECT TOP " + limit + " d.discount_id, d.code, d.name, COUNT(o.order_id) as usage_count, SUM(o.discount_amount) as total_discount " +
+                "FROM Discounts d " +
+                "JOIN Orders o ON d.discount_id = o.discount_id " +
+                "WHERE CAST(o.order_date AS DATE) BETWEEN ? AND ? AND o.payment_status = 'PAID' " +
+                "GROUP BY d.discount_id, d.code, d.name " +
+                "ORDER BY usage_count DESC";
+            try (java.sql.PreparedStatement ps = c.prepareStatement(sql)) {
+                ps.setDate(1, startDate);
+                ps.setDate(2, endDate);
+                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        java.util.Map<String, Object> discount = new java.util.HashMap<>();
+                        discount.put("discountId", rs.getInt("discount_id"));
+                        discount.put("code", rs.getString("code"));
+                        discount.put("name", rs.getString("name"));
+                        discount.put("usageCount", rs.getInt("usage_count"));
+                        discount.put("totalDiscount", rs.getDouble("total_discount"));
+                        discounts.add(discount);
+                    }
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return discounts;
     }
 }
 

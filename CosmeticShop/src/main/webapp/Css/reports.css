@@ -1,0 +1,396 @@
+/* ============================================
+   REPORTS PAGE STYLES
+   ============================================ */
+
+/* Report Card */
+.report-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.report-card h5 {
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.report-card h5 i {
+  color: #f76c85;
+  margin-right: 8px;
+}
+
+/* Stat Cards */
+.stat-card {
+  background: linear-gradient(135deg, #f76c85 0%, #ff9fb3 100%);
+  color: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 8px rgba(247,108,133,0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(247,108,133,0.4);
+}
+
+.stat-card.blue {
+  background: linear-gradient(135deg, #4e73df 0%, #6c8ce7 100%);
+  box-shadow: 0 2px 8px rgba(78,115,223,0.3);
+}
+
+.stat-card.blue:hover {
+  box-shadow: 0 4px 12px rgba(78,115,223,0.4);
+}
+
+.stat-card.green {
+  background: linear-gradient(135deg, #1cc88a 0%, #3fd9a3 100%);
+  box-shadow: 0 2px 8px rgba(28,200,138,0.3);
+}
+
+.stat-card.green:hover {
+  box-shadow: 0 4px 12px rgba(28,200,138,0.4);
+}
+
+.stat-card.orange {
+  background: linear-gradient(135deg, #f6c23e 0%, #f9d871 100%);
+  box-shadow: 0 2px 8px rgba(246,194,62,0.3);
+}
+
+.stat-card.orange:hover {
+  box-shadow: 0 4px 12px rgba(246,194,62,0.4);
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 10px 0;
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Filter Section */
+.filter-section {
+  background: white;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+.filter-section .row {
+  margin: 0;
+  align-items: flex-end;
+}
+
+.filter-section .row > div {
+  padding: 0 8px;
+  margin-bottom: 0;
+}
+
+.filter-section .form-label {
+  font-weight: 500;
+  color: #495057;
+  margin-bottom: 6px;
+  font-size: 0.875rem;
+}
+
+.filter-section .form-select,
+.filter-section .form-control {
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  height: 38px;
+}
+
+.filter-section .form-select:focus,
+.filter-section .form-control:focus {
+  border-color: #f76c85;
+  box-shadow: 0 0 0 0.15rem rgba(247,108,133,0.2);
+  outline: none;
+}
+
+.filter-section .form-select:hover,
+.filter-section .form-control:hover {
+  border-color: #adb5bd;
+}
+
+/* Filter Buttons - Gọn và đẹp hơn */
+.filter-section .filter-actions {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  padding-top: 0;
+}
+
+.filter-section .btn {
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: none;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.filter-section .btn-primary {
+  background: #f76c85;
+  color: white;
+  box-shadow: 0 2px 4px rgba(247,108,133,0.25);
+}
+
+.filter-section .btn-primary:hover {
+  background: #e55a75;
+  box-shadow: 0 4px 8px rgba(247,108,133,0.35);
+  transform: translateY(-1px);
+}
+
+.filter-section .btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(247,108,133,0.25);
+}
+
+.filter-section .btn-primary i {
+  font-size: 0.875rem;
+}
+
+.filter-section .btn-secondary {
+  background: #6c757d;
+  color: white;
+  box-shadow: 0 2px 4px rgba(108,117,125,0.2);
+}
+
+.filter-section .btn-secondary:hover {
+  background: #5a6268;
+  box-shadow: 0 4px 8px rgba(108,117,125,0.3);
+  transform: translateY(-1px);
+}
+
+.filter-section .btn-secondary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(108,117,125,0.2);
+}
+
+/* Responsive cho filter section */
+@media (max-width: 992px) {
+  .filter-section .row > div {
+    margin-bottom: 12px;
+  }
+  
+  .filter-section .filter-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .filter-section .btn {
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .filter-section {
+    padding: 14px 16px;
+  }
+  
+  .filter-section .form-label {
+    font-size: 0.8rem;
+    margin-bottom: 4px;
+  }
+  
+  .filter-section .form-select,
+  .filter-section .form-control {
+    font-size: 0.8rem;
+    padding: 6px 8px;
+    height: 36px;
+  }
+  
+  .filter-section .btn {
+    font-size: 0.8rem;
+    padding: 7px 14px;
+    height: 36px;
+  }
+  
+  .filter-section .filter-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .filter-section .filter-actions .btn {
+    width: 100%;
+  }
+}
+
+/* Chart Container */
+.chart-container {
+  position: relative;
+  height: 400px;
+  margin-top: 20px;
+}
+
+/* Tables */
+.report-card table {
+  font-size: 0.9rem;
+  width: 100%;
+}
+
+.report-card table thead {
+  background: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.report-card table thead th {
+  font-weight: 600;
+  color: #333;
+  padding: 12px;
+  text-align: left;
+}
+
+.report-card table tbody td {
+  padding: 12px;
+  border-bottom: 1px solid #dee2e6;
+  vertical-align: middle;
+}
+
+.report-card table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+/* Badges */
+.badge-stock {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.badge-stock.low {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.badge-stock.medium {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.badge-stock.high {
+  background: #d4edda;
+  color: #155724;
+}
+
+/* Empty State */
+.report-card .empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+}
+
+.report-card .empty-state i {
+  font-size: 3rem;
+  color: #dee2e6;
+  margin-bottom: 15px;
+}
+
+.report-card .empty-state p {
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stat-value {
+    font-size: 1.5rem;
+  }
+  
+  .chart-container {
+    height: 300px;
+  }
+  
+  .filter-section .row > div {
+    margin-bottom: 15px;
+  }
+  
+  .report-card table {
+    font-size: 0.85rem;
+  }
+  
+  .report-card table thead th,
+  .report-card table tbody td {
+    padding: 8px;
+  }
+}
+
+@media (max-width: 576px) {
+  .stat-value {
+    font-size: 1.25rem;
+  }
+  
+  .stat-label {
+    font-size: 0.8rem;
+  }
+  
+  .chart-container {
+    height: 250px;
+  }
+  
+  .filter-section {
+    padding: 15px;
+  }
+}
+
+/* Alert Styles for Reports */
+.alert-info {
+  background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+  border: 1px solid #bee5eb;
+  border-radius: 8px;
+  color: #0c5460;
+  padding: 15px 20px;
+}
+
+.alert-info i {
+  color: #0c5460;
+  margin-right: 8px;
+}
+
+/* Loading State */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255,255,255,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.loading-overlay i {
+  font-size: 2rem;
+  color: #f76c85;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
