@@ -388,9 +388,6 @@ public class AdminServlet extends HttpServlet {
                 
                 request.getRequestDispatcher("/admin/reports.jsp").forward(request, response);
                 break;
-            case "settings":
-                request.getRequestDispatcher("/admin/settings.jsp").forward(request, response);
-                break;
             default:
                 response.sendRedirect(request.getContextPath() + "/admin?action=dashboard");
         }
