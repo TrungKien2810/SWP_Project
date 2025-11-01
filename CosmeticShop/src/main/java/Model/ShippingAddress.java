@@ -82,6 +82,10 @@ public class ShippingAddress {
         return isDefault;
     }
 
+    public boolean getDefault() {
+        return isDefault;
+    }
+
     public void setDefault(boolean aDefault) {
         isDefault = aDefault;
     }

@@ -201,4 +201,105 @@ public class UserDB {
             return false;
         }
     }
+    
+    // Lấy tất cả users
+    public java.util.List<user> getAllUsers() {
+        java.util.List<user> users = new java.util.ArrayList<>();
+        String sql = "SELECT user_id, full_name as username, email, phone, password, role, date_create, avatar_url FROM Users ORDER BY date_create DESC";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                user u = new user(
+                    rs.getInt("user_id"),
+                    rs.getString("username"),
+                    rs.getString("email"),
+                    rs.getString("phone"),
+                    rs.getString("password"),
+                    rs.getString("role"),
+                    rs.getTimestamp("date_create").toLocalDateTime()
+                );
+                try { u.setAvatarUrl(rs.getString("avatar_url")); } catch (Exception ignore) {}
+                users.add(u);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return users;
+    }
+    
+    // Tìm kiếm users theo tên, email, phone
+    public java.util.List<user> searchUsers(String keyword) {
+        java.util.List<user> users = new java.util.ArrayList<>();
+        String sql = "SELECT user_id, full_name as username, email, phone, password, role, date_create, avatar_url " +
+                     "FROM Users " +
+                     "WHERE full_name LIKE ? OR email LIKE ? OR phone LIKE ? " +
+                     "ORDER BY date_create DESC";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            String searchPattern = "%" + keyword + "%";
+            ps.setString(1, searchPattern);
+            ps.setString(2, searchPattern);
+            ps.setString(3, searchPattern);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                user u = new user(
+                    rs.getInt("user_id"),
+                    rs.getString("username"),
+                    rs.getString("email"),
+                    rs.getString("phone"),
+                    rs.getString("password"),
+                    rs.getString("role"),
+                    rs.getTimestamp("date_create").toLocalDateTime()
+                );
+                try { u.setAvatarUrl(rs.getString("avatar_url")); } catch (Exception ignore) {}
+                users.add(u);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return users;
+    }
+    
+    // Lấy users theo role
+    public java.util.List<user> getUsersByRole(String role) {
+        java.util.List<user> users = new java.util.ArrayList<>();
+        String sql = "SELECT user_id, full_name as username, email, phone, password, role, date_create, avatar_url " +
+                     "FROM Users WHERE role = ? ORDER BY date_create DESC";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, role);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                user u = new user(
+                    rs.getInt("user_id"),
+                    rs.getString("username"),
+                    rs.getString("email"),
+                    rs.getString("phone"),
+                    rs.getString("password"),
+                    rs.getString("role"),
+                    rs.getTimestamp("date_create").toLocalDateTime()
+                );
+                try { u.setAvatarUrl(rs.getString("avatar_url")); } catch (Exception ignore) {}
+                users.add(u);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return users;
+    }
+    
+    // Cập nhật role của user
+    public boolean updateRole(int userId, String newRole) {
+        String sql = "UPDATE Users SET role = ? WHERE user_id = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, newRole);
+            ps.setInt(2, userId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
