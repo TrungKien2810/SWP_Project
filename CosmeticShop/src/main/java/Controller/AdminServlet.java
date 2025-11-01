@@ -50,6 +50,13 @@ public class AdminServlet extends HttpServlet {
 
         switch (action) {
             case "dashboard":
+                // Dữ liệu thật cho dashboard
+                request.setAttribute("doanhThuHomNay", getTodayRevenue());
+                request.setAttribute("soDonMoi", getTodayNewOrders());
+                request.setAttribute("soKhachMoi", getTodayNewUsers());
+                request.setAttribute("soSPHetHang", getLowStockCount(5));
+                request.setAttribute("nhan7Ngay", getLast7DayLabels());
+                request.setAttribute("doanhThu7Ngay", getLast7DaysRevenue());
                 request.getRequestDispatcher("/admin/dashboard.jsp").forward(request, response);
                 break;
             case "products":
@@ -328,6 +335,98 @@ public class AdminServlet extends HttpServlet {
             }
         }
         return "/uploads/" + BANNERS_DIR + "/" + safeName;
+    }
+
+    private double getTodayRevenue() {
+        try {
+            java.sql.Connection c = new DAO.DBConnect().conn;
+            String sql = "SELECT SUM(total_amount) FROM Orders WHERE CAST(order_date AS DATE) = CAST(GETDATE() AS DATE) AND payment_status = 'PAID'";
+            try (java.sql.PreparedStatement ps = c.prepareStatement(sql); java.sql.ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getDouble(1);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0.0;
+    }
+
+    private int getTodayNewOrders() {
+        try {
+            java.sql.Connection c = new DAO.DBConnect().conn;
+            String sql = "SELECT COUNT(*) FROM Orders WHERE CAST(order_date AS DATE) = CAST(GETDATE() AS DATE) AND (order_status = 'PENDING' OR order_status IS NULL)";
+            try (java.sql.PreparedStatement ps = c.prepareStatement(sql); java.sql.ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    private int getTodayNewUsers() {
+        try {
+            java.sql.Connection c = new DAO.DBConnect().conn;
+            String sql = "SELECT COUNT(*) FROM Users WHERE CAST(date_create AS DATE) = CAST(GETDATE() AS DATE)";
+            try (java.sql.PreparedStatement ps = c.prepareStatement(sql); java.sql.ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    private int getLowStockCount(int threshold) {
+        try {
+            java.sql.Connection c = new DAO.DBConnect().conn;
+            String sql = "SELECT COUNT(*) FROM Products WHERE stock <= ?";
+            try (java.sql.PreparedStatement ps = c.prepareStatement(sql)) {
+                ps.setInt(1, threshold);
+                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) return rs.getInt(1);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    private String[] getLast7DayLabels() {
+        java.time.LocalDate today = java.time.LocalDate.now();
+        String[] labels = new String[7];
+        for (int i = 6; i >= 0; i--) {
+            java.time.LocalDate d = today.minusDays(i);
+            // Nhãn T2..CN
+            java.time.DayOfWeek dow = d.getDayOfWeek();
+            String label;
+            switch (dow) {
+                case MONDAY: label = "T2"; break;
+                case TUESDAY: label = "T3"; break;
+                case WEDNESDAY: label = "T4"; break;
+                case THURSDAY: label = "T5"; break;
+                case FRIDAY: label = "T6"; break;
+                case SATURDAY: label = "T7"; break;
+                default: label = "CN";
+            }
+            labels[6 - i] = label;
+        }
+        return labels;
+    }
+
+    private int[] getLast7DaysRevenue() {
+        int[] revenue = new int[7];
+        java.util.Map<java.time.LocalDate, Double> map = new java.util.HashMap<>();
+        try {
+            java.sql.Connection c = new DAO.DBConnect().conn;
+            String sql = "SELECT CAST(order_date AS DATE) d, SUM(total_amount) s FROM Orders WHERE payment_status = 'PAID' AND order_date >= DATEADD(DAY, -6, CAST(GETDATE() AS DATE)) GROUP BY CAST(order_date AS DATE)";
+            try (java.sql.PreparedStatement ps = c.prepareStatement(sql); java.sql.ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    java.sql.Date d = rs.getDate(1);
+                    double s = rs.getDouble(2);
+                    map.put(d.toLocalDate(), s);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        java.time.LocalDate today = java.time.LocalDate.now();
+        for (int i = 6; i >= 0; i--) {
+            java.time.LocalDate d = today.minusDays(i);
+            double val = map.getOrDefault(d, 0.0);
+            revenue[6 - i] = (int)Math.round(val);
+        }
+        return revenue;
     }
 }
 
