@@ -178,7 +178,15 @@ public class AdminServlet extends HttpServlet {
                             request.setAttribute("orderItems", items);
                             
                             request.setAttribute("order", order);
-                            request.getRequestDispatcher("/admin/order-detail.jsp").forward(request, response);
+                            // Check if fullPage parameter is set (for direct page view, not modal)
+                            String fullPage = request.getParameter("fullPage");
+                            if (fullPage != null && "true".equals(fullPage)) {
+                                // Forward to full page with header/footer
+                                request.getRequestDispatcher("/admin/order-detail-page.jsp").forward(request, response);
+                            } else {
+                                // Forward to partial JSP (for modal in manage-orders.jsp)
+                                request.getRequestDispatcher("/admin/order-detail.jsp").forward(request, response);
+                            }
                             return;
                         }
                     } catch (NumberFormatException e) {
@@ -188,7 +196,89 @@ public class AdminServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/admin?action=orders");
                 break;
             case "users":
+                DAO.UserDB userDBGet = new DAO.UserDB();
+                String searchKeyword = request.getParameter("search");
+                String roleFilter = request.getParameter("roleFilter");
+                
+                java.util.List<Model.user> userList;
+                
+                // Xử lý tìm kiếm và lọc
+                if (searchKeyword != null && !searchKeyword.isBlank()) {
+                    userList = userDBGet.searchUsers(searchKeyword.trim());
+                    // Áp dụng filter role sau khi search
+                    if (roleFilter != null && !roleFilter.isBlank() && !"ALL".equals(roleFilter)) {
+                        userList.removeIf(u -> !u.getRole().equals(roleFilter));
+                    }
+                } else if (roleFilter != null && !roleFilter.isBlank() && !"ALL".equals(roleFilter)) {
+                    userList = userDBGet.getUsersByRole(roleFilter);
+                } else {
+                    userList = userDBGet.getAllUsers();
+                }
+                
+                request.setAttribute("users", userList);
+                request.setAttribute("searchKeyword", searchKeyword != null ? searchKeyword : "");
+                request.setAttribute("roleFilter", roleFilter != null ? roleFilter : "ALL");
                 request.getRequestDispatcher("/admin/manage-users.jsp").forward(request, response);
+                break;
+            case "userDetail":
+                String userIdStr = request.getParameter("id");
+                if (userIdStr != null && !userIdStr.isBlank()) {
+                    try {
+                        int userId = Integer.parseInt(userIdStr);
+                        DAO.UserDB userDBDetail = new DAO.UserDB();
+                        Model.user userDetail = userDBDetail.getUserById(userId);
+                        
+                        if (userDetail != null) {
+                            java.util.List<Model.Order> userOrders = new java.util.ArrayList<>();
+                            java.util.List<Model.ShippingAddress> userAddresses = new java.util.ArrayList<>();
+                            java.util.List<Model.UserDiscountAssign> userVouchers = new java.util.ArrayList<>();
+                            
+                            // Lấy danh sách đơn hàng của user
+                            try {
+                                DAO.OrderDB orderDBDetail = new DAO.OrderDB();
+                                userOrders = orderDBDetail.listByUserId(userId);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                // Tiếp tục với danh sách rỗng
+                            }
+                            
+                            // Lấy danh sách địa chỉ giao hàng
+                            try {
+                                DAO.ShippingAddressDB addressDB = new DAO.ShippingAddressDB();
+                                userAddresses = addressDB.getByUserId(userId);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                // Tiếp tục với danh sách rỗng
+                            }
+                            
+                            // Lấy danh sách voucher của user
+                            try {
+                                DAO.DiscountDB discountDB = new DAO.DiscountDB();
+                                userVouchers = discountDB.listAssignedDiscountsForUser(userId);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                // Tiếp tục với danh sách rỗng
+                            }
+                            
+                            request.setAttribute("userDetail", userDetail);
+                            request.setAttribute("userOrders", userOrders);
+                            request.setAttribute("userAddresses", userAddresses);
+                            request.setAttribute("userVouchers", userVouchers);
+                            request.getRequestDispatcher("/admin/user-detail.jsp").forward(request, response);
+                            return;
+                        } else {
+                            response.sendRedirect(request.getContextPath() + "/admin?action=users");
+                        }
+                    } catch (NumberFormatException e) {
+                        e.printStackTrace();
+                        response.sendRedirect(request.getContextPath() + "/admin?action=users");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        response.sendRedirect(request.getContextPath() + "/admin?action=users");
+                    }
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/admin?action=users");
+                }
                 break;
             case "categories":
                 request.setAttribute("categories", categoryDb().listAll());
@@ -298,9 +388,6 @@ public class AdminServlet extends HttpServlet {
                 
                 request.getRequestDispatcher("/admin/reports.jsp").forward(request, response);
                 break;
-            case "settings":
-                request.getRequestDispatcher("/admin/settings.jsp").forward(request, response);
-                break;
             default:
                 response.sendRedirect(request.getContextPath() + "/admin?action=dashboard");
         }
@@ -349,6 +436,24 @@ public class AdminServlet extends HttpServlet {
 
             response.sendRedirect(request.getContextPath() + "/admin?action=banners");
             return;
+        }
+        if ("users".equals(action)) {
+            String op = request.getParameter("op");
+            DAO.UserDB userDBPost = new DAO.UserDB();
+            
+            if ("updateRole".equals(op)) {
+                try {
+                    int userId = Integer.parseInt(request.getParameter("userId"));
+                    String newRole = request.getParameter("role");
+                    if (newRole != null && (newRole.equals("USER") || newRole.equals("ADMIN"))) {
+                        userDBPost.updateRole(userId, newRole);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                response.sendRedirect(request.getContextPath() + "/admin?action=users");
+                return;
+            }
         }
         if ("categories".equals(action)) {
             String op = request.getParameter("op");

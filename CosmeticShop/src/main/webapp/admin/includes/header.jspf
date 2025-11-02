@@ -37,7 +37,6 @@
       <a href="${pageContext.request.contextPath}/admin?action=discounts" class="${param.action == 'discounts' ? 'active' : ''}"><i class="fa fa-ticket"></i> Quản lý khuyến mãi</a>
       <a href="${pageContext.request.contextPath}/admin?action=banners" class="${param.action == 'banners' ? 'active' : ''}"><i class="fa fa-image"></i> Quản lý banner</a>
       <a href="${pageContext.request.contextPath}/admin?action=reports" class="${param.action == 'reports' ? 'active' : ''}"><i class="fa fa-chart-line"></i> Báo cáo</a>
-      <a href="${pageContext.request.contextPath}/admin?action=settings" class="${param.action == 'settings' ? 'active' : ''}"><i class="fa fa-gear"></i> Cài đặt</a>
     </div>
   </div>
   <div class="admin-topbar">
