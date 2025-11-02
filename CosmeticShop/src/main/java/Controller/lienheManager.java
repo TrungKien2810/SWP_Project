@@ -5,9 +5,7 @@
 package Controller;
 
 import DAO.lienheDAO;
-import Model.lienhe;
 import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -19,8 +17,8 @@ import java.util.List;
  *
  * @author LENOVO THINKPAD
  */
-@WebServlet(name = "lienheManagerServlet", urlPatterns = {"/lienheManagerServlet"})
-public class lienheManagerServlet extends HttpServlet {
+@WebServlet(name = "lienheManager", urlPatterns = {"/lienheManagerServlet"})
+public class lienheManager extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -36,10 +34,10 @@ public class lienheManagerServlet extends HttpServlet {
      
       
       lienheDAO dao = new lienheDAO();
-        List<lienhe> list = dao.getAllContacts();
+        List<Model.lienhe> list = dao.getAllContacts();
 
         request.setAttribute("contactList", list);
-        request.getRequestDispatcher("View/lienhe-Manager.jsp").forward(request, response);
+        request.getRequestDispatcher("View/contact-manager.jsp").forward(request, response);
     }
 
 

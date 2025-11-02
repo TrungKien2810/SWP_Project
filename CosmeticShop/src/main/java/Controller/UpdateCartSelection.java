@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 @WebServlet(name = "updateCartSelection", urlPatterns = {"/cart/update-selection"})
-public class UpdateCartSelectionServlet extends HttpServlet {
+public class UpdateCartSelection extends HttpServlet {
 
     private final CartDB cartDB = new CartDB();
 

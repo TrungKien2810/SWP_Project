@@ -29,10 +29,10 @@
         <div class="menu_list">
             <ul class="menu_list_item">
                 <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/home.jsp">TRANG CHỦ</a></li>
-                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/vechungtoi.jsp">VỀ CHÚNG TÔI</a></li>
-                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/bosuutap.jsp">BỘ SƯU TẬP</a></li>
+                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/about-us.jsp">VỀ CHÚNG TÔI</a></li>
+                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/collection.jsp">BỘ SƯU TẬP</a></li>
                 <li><a class="menu_list_link" href="${pageContext.request.contextPath}/login">ĐĂNG NHẬP & ĐĂNG KÝ</a></li>
-                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/lienhe.jsp">LIÊN HỆ</a></li>
+                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/contact.jsp">LIÊN HỆ</a></li>
             </ul>
         </div>
     </div>
@@ -99,12 +99,12 @@
                 <div class="col-md-3">
                     <h5 class="fw-bold">DANH MỤC</h5>
                     <ul class="list-unstyled">
-                        <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Sức khỏe và làm đẹp</a></li>
-                        <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Chăm sóc cơ thể</a></li>
-                        <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Chăm sóc da mặt</a></li>
-                        <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Chăm sóc tóc</a></li>
-                        <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Clinic & Spa</a></li>
-                        <li><a href="${pageContext.request.contextPath}/View/bosuutap.jsp" class="text-white text-decoration-none">Trang điểm</a></li>
+                        <li><a href="${pageContext.request.contextPath}/View/collection.jsp" class="text-white text-decoration-none">Sức khỏe và làm đẹp</a></li>
+                        <li><a href="${pageContext.request.contextPath}/View/collection.jsp" class="text-white text-decoration-none">Chăm sóc cơ thể</a></li>
+                        <li><a href="${pageContext.request.contextPath}/View/collection.jsp" class="text-white text-decoration-none">Chăm sóc da mặt</a></li>
+                        <li><a href="${pageContext.request.contextPath}/View/collection.jsp" class="text-white text-decoration-none">Chăm sóc tóc</a></li>
+                        <li><a href="${pageContext.request.contextPath}/View/collection.jsp" class="text-white text-decoration-none">Clinic & Spa</a></li>
+                        <li><a href="${pageContext.request.contextPath}/View/collection.jsp" class="text-white text-decoration-none">Trang điểm</a></li>
                     </ul>
                 </div>
                 <div class="col-md-3">

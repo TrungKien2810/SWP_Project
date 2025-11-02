@@ -1,7 +1,6 @@
 package Controller;
 
 import DAO.ShippingAddressDB;
-import Model.ShippingAddress;
 import Model.user;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -13,7 +12,7 @@ import java.io.IOException;
 import java.util.List;
 
 @WebServlet(name = "shippingAddress", urlPatterns = {"/shipping-address"})
-public class ShippingAddressServlet extends HttpServlet {
+public class ShippingAddress extends HttpServlet {
 
     private final ShippingAddressDB shippingAddressDB = new ShippingAddressDB();
 
@@ -29,7 +28,7 @@ public class ShippingAddressServlet extends HttpServlet {
         String action = req.getParameter("action");
         String returnTo = req.getParameter("return_to");
         if (action == null || action.isEmpty()) {
-            List<ShippingAddress> addresses = shippingAddressDB.getByUserId(currentUser.getUser_id());
+            List<Model.ShippingAddress> addresses = shippingAddressDB.getByUserId(currentUser.getUser_id());
             req.setAttribute("addresses", addresses);
             if (returnTo != null) {
                 req.setAttribute("return_to", returnTo);
@@ -42,7 +41,7 @@ public class ShippingAddressServlet extends HttpServlet {
             String idStr = req.getParameter("id");
             if (idStr != null) {
                 int id = Integer.parseInt(idStr);
-                ShippingAddress sa = shippingAddressDB.getById(id, currentUser.getUser_id());
+                Model.ShippingAddress sa = shippingAddressDB.getById(id, currentUser.getUser_id());
                 req.setAttribute("address", sa);
             }
             if (returnTo != null) {
@@ -95,7 +94,7 @@ public class ShippingAddressServlet extends HttpServlet {
         String ward = req.getParameter("ward");
         boolean isDefault = "on".equals(req.getParameter("is_default"));
 
-        ShippingAddress sa = new ShippingAddress();
+        Model.ShippingAddress sa = new Model.ShippingAddress();
         sa.setUserId(currentUser.getUser_id());
         sa.setFullName(fullName);
         sa.setPhone(phone);

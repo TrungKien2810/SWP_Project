@@ -10,8 +10,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebServlet(name = "OrderManagementServlet", urlPatterns = {"/admin/order-management"})
-public class OrderManagementServlet extends HttpServlet {
+@WebServlet(name = "OrderManagement", urlPatterns = {"/admin/order-management"})
+public class OrderManagement extends HttpServlet {
     
     private OrderDB orderDB;
     

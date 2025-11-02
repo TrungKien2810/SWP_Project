@@ -9,7 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @WebServlet(name = "passwordReset", urlPatterns = {"/password/reset"})
-public class PasswordResetServlet extends HttpServlet {
+public class PasswordReset extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

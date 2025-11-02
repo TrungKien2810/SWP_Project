@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 import java.time.format.DateTimeFormatter;
 
 @WebServlet(name = "orderHistory", urlPatterns = {"/my-orders"})
-public class OrderHistoryServlet extends HttpServlet {
+public class OrderHistory extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession();

@@ -11,8 +11,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
-@WebServlet(name = "ApplyPromotionServlet", urlPatterns = {"/apply-promo"})
-public class ApplyPromotionServlet extends HttpServlet {
+@WebServlet(name = "ApplyPromotion", urlPatterns = {"/apply-promo"})
+public class ApplyPromotion extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

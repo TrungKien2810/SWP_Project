@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
-public class VnPayReturnServlet extends HttpServlet {
+public class VnPayReturn extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Map<String, String> fields = new HashMap<>();

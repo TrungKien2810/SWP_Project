@@ -38,9 +38,9 @@
         <div class="menu_list">
             <ul class="menu_list_item">
                 <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/home.jsp">TRANG CHỦ</a></li>
-                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/vechungtoi.jsp">VỀ CHÚNG TÔI</a></li>
+                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/about-us.jsp">VỀ CHÚNG TÔI</a></li>
                 <li><a class="menu_list_link" href="${pageContext.request.contextPath}/products">BỘ SƯU TẬP</a></li>
-                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/lienhe.jsp">LIÊN HỆ</a></li>
+                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/contact.jsp">LIÊN HỆ</a></li>
             </ul>
             <div class="menu_search">
                 <div class="menu_search_input">

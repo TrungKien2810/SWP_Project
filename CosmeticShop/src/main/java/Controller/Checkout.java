@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet(name = "checkout", urlPatterns = {"/checkout"})
-public class CheckoutServlet extends HttpServlet {
+public class Checkout extends HttpServlet {
 
     private final CartDB cartDB = new CartDB();
     private final ShippingAddressDB addressDB = new ShippingAddressDB();

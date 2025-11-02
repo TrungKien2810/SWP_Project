@@ -13,7 +13,7 @@ import DAO.OrderDB;
 import Model.Order;
 
 @WebServlet(name = "accountManagement", urlPatterns = {"/account-management"})
-public class AccountManagementServlet extends HttpServlet {
+public class AccountManagement extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
