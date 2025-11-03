@@ -5,9 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <title>Thanh toán ngân hàng</title>
 </head>
 <body>
+    <%@ include file="/View/includes/header.jspf" %>
     <div class="container my-5" style="max-width:720px;">
         <h3 class="mb-3">Mô phỏng thanh toán ngân hàng</h3>
         <p>Đơn hàng: <strong>#${param.orderId}</strong></p>

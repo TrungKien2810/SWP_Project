@@ -16,42 +16,7 @@
     <title>PinkyCloud - Đăng Ký</title>
 </head>
 <body>
-    <!-- header -->
-    <div class="header">
-        <div class="header_text"><p style="color:#f76c85;">THEO DÕI CHÚNG TÔI</p></div>
-        <div class="header_social">
-            <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/fb.png" alt="" ></a>
-            <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/ins.png" alt=""></a>
-            <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/tt.png"alt=""><a>
-            <a href=""><img class="header_social_img" src="${pageContext.request.contextPath}/IMG/ytb.png" alt="" ></a>
-        </div>
-    </div>
-    <!-- menu -->
-    <div class="menu">
-        <div class="menu_logo">
-            <img src="${pageContext.request.contextPath}/IMG/logo.jpg" alt="" style="width: 230px;">
-        </div>
-        <div class="menu_list">
-            <ul class="menu_list_item">
-                <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/home.jsp">TRANG CHỦ</a></li>
-                <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/about-us.jsp">VỀ CHÚNG TÔI</a></li>
-                <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/products">BỘ SƯU TẬP</a></li>
-                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/signup">ĐĂNG NHẬP & ĐĂNG KÝ</a></li>
-                <li><a class="menu_list_link" href="${pageContext.request.contextPath}/View/contact.jsp">LIÊN HỆ</a></li>
-            </ul>
-            <div class="menu_search">
-                <div class="menu_search_input">
-                    <input type="text" placeholder="Nhập từ khóa bạn cần tìm kiếm . . . ">
-                </div>
-                <div class="menu_search_icon">
-                    <a href=""><i class="fa-solid fa-magnifying-glass fa-xl" style="color:#f76c85;"></i></a>
-                </div>
-            </div>
-            <div class="menu_search_cart">
-                <i class="fa-solid fa-cart-shopping"></i>
-            </div>
-        </div>
-    </div>
+    <%@ include file="/View/includes/header.jspf" %>
 
     <!-- Phần Đăng Ký -->
     <div class="register-section">
