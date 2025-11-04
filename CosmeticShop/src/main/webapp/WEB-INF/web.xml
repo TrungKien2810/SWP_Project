@@ -26,39 +26,39 @@
     
     <!-- Servlet mapping cho việc phục vụ ảnh từ folder cố định -->
     <servlet>
-        <servlet-name>ImageServlet</servlet-name>
-        <servlet-class>Controller.ImageServlet</servlet-class>
+        <servlet-name>Image</servlet-name>
+        <servlet-class>Controller.Image</servlet-class>
     </servlet>
     
     <servlet-mapping>
-        <servlet-name>ImageServlet</servlet-name>
+        <servlet-name>Image</servlet-name>
         <url-pattern>/uploads/*</url-pattern>
     </servlet-mapping>
     
     <servlet>
-        <servlet-name>VnPayCreateServlet</servlet-name>
-        <servlet-class>Controller.VnPayCreateServlet</servlet-class>
+        <servlet-name>VnPayCreate</servlet-name>
+        <servlet-class>Controller.VnPayCreate</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>VnPayCreateServlet</servlet-name>
+        <servlet-name>VnPayCreate</servlet-name>
         <url-pattern>/payment/vnpay/create</url-pattern>
     </servlet-mapping>
 
     <servlet>
-        <servlet-name>VnPayReturnServlet</servlet-name>
-        <servlet-class>Controller.VnPayReturnServlet</servlet-class>
+        <servlet-name>VnPayReturn</servlet-name>
+        <servlet-class>Controller.VnPayReturn</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>VnPayReturnServlet</servlet-name>
+        <servlet-name>VnPayReturn</servlet-name>
         <url-pattern>/payment/vnpay/return</url-pattern>
     </servlet-mapping>
 
     <servlet>
-        <servlet-name>VnPayIpnServlet</servlet-name>
-        <servlet-class>Controller.VnPayIpnServlet</servlet-class>
+        <servlet-name>VnPayIpn</servlet-name>
+        <servlet-class>Controller.VnPayIpn</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>VnPayIpnServlet</servlet-name>
+        <servlet-name>VnPayIpn</servlet-name>
         <url-pattern>/payment/vnpay/ipn</url-pattern>
     </servlet-mapping>
     

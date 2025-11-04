@@ -16,8 +16,8 @@ import jakarta.servlet.http.HttpServletResponse;
  *
  * @author Admin
  */
-@WebServlet(name = "UpdateLienheStatusServlet", urlPatterns = {"/UpdateLienheStatusServlet"})
-public class UpdateLienheStatusServlet extends HttpServlet {
+@WebServlet(name = "UpdateLienheStatus", urlPatterns = {"/UpdateLienheStatusServlet"})
+public class UpdateLienheStatus extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

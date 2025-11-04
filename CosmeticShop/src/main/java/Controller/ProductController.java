@@ -140,7 +140,7 @@ public class ProductController extends HttpServlet {
         request.setAttribute("pageSize", pageSize);
         request.setAttribute("totalProducts", totalProducts);
         request.setAttribute("totalPages", totalPages);
-        request.getRequestDispatcher("/View/bosuutap.jsp").forward(request, response);
+        request.getRequestDispatcher("/View/collection.jsp").forward(request, response);
     }
 
     private void showNewForm(HttpServletRequest request, HttpServletResponse response)

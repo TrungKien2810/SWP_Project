@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
 @WebServlet(name = "paymentCallback", urlPatterns = {"/payment-callback"})
-public class PaymentCallbackServlet extends HttpServlet {
+public class PaymentCallback extends HttpServlet {
 
     private final OrderDB orderDB = new OrderDB();
 

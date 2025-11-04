@@ -14,9 +14,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-@WebServlet(name = "AdminServlet", urlPatterns = {"/admin"})
+@WebServlet(name = "Admin", urlPatterns = {"/admin"})
 @MultipartConfig
-public class AdminServlet extends HttpServlet {
+public class Admin extends HttpServlet {
 
     private DiscountDB discountDB;
     private ProductDB productDB;

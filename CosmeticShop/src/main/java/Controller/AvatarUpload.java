@@ -15,9 +15,9 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.UUID;
 
-@WebServlet(name = "AvatarUploadServlet", urlPatterns = {"/account/avatar"})
+@WebServlet(name = "AvatarUpload", urlPatterns = {"/account/avatar"})
 @MultipartConfig
-public class AvatarUploadServlet extends HttpServlet {
+public class AvatarUpload extends HttpServlet {
 
     private static final String UPLOAD_DIR = "C:\\CosmeticShop\\uploads";
 

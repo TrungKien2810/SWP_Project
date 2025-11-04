@@ -149,7 +149,7 @@ public class addToCart extends HttpServlet {
         } catch (NumberFormatException e) {
             String error = e.getMessage();
             request.setAttribute("error", error);
-            request.getRequestDispatcher("/View/bosuutap.jsp").forward(request, response);
+            request.getRequestDispatcher("/View/collection.jsp").forward(request, response);
             return;
         }
         // Parse optional quantity, default 1

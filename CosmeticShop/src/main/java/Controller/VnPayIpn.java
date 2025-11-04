@@ -7,7 +7,7 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.util.*;
 
-public class VnPayIpnServlet extends HttpServlet {
+public class VnPayIpn extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		resp.setContentType("application/json; charset=UTF-8");

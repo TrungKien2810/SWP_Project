@@ -17,7 +17,7 @@ import java.time.Instant;
 import java.util.Base64;
 import jakarta.servlet.http.HttpSession;
 @WebServlet(name = "passwordResetRequest", urlPatterns = {"/password/reset/request", "/test-servlet"})
-public class PasswordResetRequestServlet extends HttpServlet {
+public class PasswordResetRequest extends HttpServlet {
 
     private String getFromEmail(HttpServletRequest req) {
         String fromEnv = System.getenv("MAIL_FROM");
@@ -185,9 +185,9 @@ private String createEmailTemplate(String resetLink, String userName) {
         "        <!-- Footer -->\n" +
         "        <div class=\"footer\">\n" +
         "            <div class=\"footer-links\">\n" +
-        "                <a href=\"https://yourwebsite.com/View/vechungtoi.jsp\">VỀ CHÚNG TÔI</a>\n" +
+        "                <a href=\"https://yourwebsite.com/View/about-us.jsp\">VỀ CHÚNG TÔI</a>\n" +
         "                <a href=\"https://yourwebsite.com/products\">BỘ SƯU TẬP</a>\n" +
-        "                <a href=\"https://yourwebsite.com/View/lienhe.jsp\">LIÊN HỆ</a>\n" +
+        "                <a href=\"https://yourwebsite.com/View/contact.jsp\">LIÊN HỆ</a>\n" +
         "            </div>\n" +
         "            \n" +
         "            <div style=\"margin-top: 20px; font-size: 12px; opacity: 0.9;\">\n" +

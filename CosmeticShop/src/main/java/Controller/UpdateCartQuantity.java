@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet(name = "updateCartQuantity", urlPatterns = {"/cart/update-quantity"})
-public class UpdateCartQuantityServlet extends HttpServlet {
+public class UpdateCartQuantity extends HttpServlet {
 
     private final CartDB cartDB = new CartDB();
 

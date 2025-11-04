@@ -10,8 +10,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-@WebServlet(name = "ImageServlet", urlPatterns = {"/uploads/*"})
-public class ImageServlet extends HttpServlet {
+@WebServlet(name = "Image", urlPatterns = {"/uploads/*"})
+public class Image extends HttpServlet {
     
     private static final String UPLOAD_DIR = "C:\\CosmeticShop\\uploads";
     
