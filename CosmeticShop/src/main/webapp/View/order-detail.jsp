@@ -53,6 +53,15 @@
             <i class="fas fa-arrow-left"></i> Quay lại
         </a>
 
+        <c:if test="${param.success == 'true'}">
+            <div class="alert alert-success border-success" role="alert" style="margin-bottom: 20px;">
+                <h4 class="alert-heading"><i class="fas fa-check-circle"></i> Đặt hàng thành công!</h4>
+                <p>Cảm ơn bạn đã mua hàng. Đơn hàng của bạn đã được ghi nhận.</p>
+                <hr>
+                <p class="mb-0">Bạn có thể theo dõi trạng thái đơn hàng bên dưới hoặc trong trang <a href="${pageContext.request.contextPath}/my-orders" class="alert-link">Lịch sử mua hàng</a>.</p>
+            </div>
+        </c:if>
+
         <c:choose>
             <c:when test="${empty order}">
                 <div class="alert alert-danger">Không tìm thấy đơn hàng</div>
