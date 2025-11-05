@@ -30,38 +30,55 @@ public class VnPayReturn extends HttpServlet {
 
         if (ok) {
             HttpSession session = req.getSession(false);
+            Integer orderId = null;
             
             try {
-                int orderId = Integer.parseInt(orderIdStr);
-                OrderDB orderDB = new OrderDB();
-                String paymentStatus = VnPayConfig.statusForResponseCode(rsp);
-                
-                // Nếu thanh toán THẤT BẠI (FAILED hoặc khách hủy giao dịch)
-                if ("FAILED".equals(paymentStatus) || "24".equals(rsp)) {
-                    // Hủy đơn và hoàn kho
-                    orderDB.updateOrderStatus(orderId, "CANCELLED");
-                    orderDB.updatePaymentStatus(orderId, "FAILED");
-                    
-                    // Hoàn lại tồn kho
-                    DAO.ProductDB productDB = new DAO.ProductDB();
-                    List<DAO.OrderDB.OrderItemQuantity> items = orderDB.getOrderItemQuantities(orderId);
-                    for (DAO.OrderDB.OrderItemQuantity item : items) {
-                        productDB.increaseStock(item.getProductId(), item.getQuantity());
-                    }
+                // Lấy orderId từ parameter hoặc từ vnp_TxnRef
+                if (orderIdStr != null && !orderIdStr.isEmpty()) {
+                    orderId = Integer.parseInt(orderIdStr);
                 } else {
-                    // Thanh toán thành công
-                    orderDB.updatePaymentStatus(orderId, paymentStatus);
+                    // Nếu không có orderId trong URL, thử lấy từ vnp_TxnRef
+                    String txnRef = req.getParameter("vnp_TxnRef");
+                    if (txnRef != null && !txnRef.isEmpty()) {
+                        OrderDB orderDB = new OrderDB();
+                        Model.Order order = orderDB.findByVnpTxnRef(txnRef);
+                        if (order != null) {
+                            orderId = order.getOrderId();
+                        }
+                    }
+                }
+                
+                if (orderId != null) {
+                    OrderDB orderDB = new OrderDB();
+                    String paymentStatus = VnPayConfig.statusForResponseCode(rsp);
                     
-                    // Xóa cart items đã chọn sau khi thanh toán thành công
-                    if (session != null) {
-                        Object pendingCartIdObj = session.getAttribute("pendingCartId");
-                        if (pendingCartIdObj != null) {
-                            try {
-                                int cartId = (int) pendingCartIdObj;
-                                orderDB.clearSelectedCartItems(cartId);
-                                session.removeAttribute("pendingCartId");
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                    // Nếu thanh toán THẤT BẠI (FAILED hoặc khách hủy giao dịch)
+                    if ("FAILED".equals(paymentStatus) || "24".equals(rsp)) {
+                        // Hủy đơn và hoàn kho
+                        orderDB.updateOrderStatus(orderId, "CANCELLED");
+                        orderDB.updatePaymentStatus(orderId, "FAILED");
+                        
+                        // Hoàn lại tồn kho
+                        DAO.ProductDB productDB = new DAO.ProductDB();
+                        List<DAO.OrderDB.OrderItemQuantity> items = orderDB.getOrderItemQuantities(orderId);
+                        for (DAO.OrderDB.OrderItemQuantity item : items) {
+                            productDB.increaseStock(item.getProductId(), item.getQuantity());
+                        }
+                    } else {
+                        // Thanh toán thành công
+                        orderDB.updatePaymentStatus(orderId, paymentStatus);
+                        
+                        // Xóa cart items đã chọn sau khi thanh toán thành công
+                        if (session != null) {
+                            Object pendingCartIdObj = session.getAttribute("pendingCartId");
+                            if (pendingCartIdObj != null) {
+                                try {
+                                    int cartId = (int) pendingCartIdObj;
+                                    orderDB.clearSelectedCartItems(cartId);
+                                    session.removeAttribute("pendingCartId");
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
                     }
@@ -74,9 +91,17 @@ public class VnPayReturn extends HttpServlet {
                 session.removeAttribute("cartId");
             }
 
-            String msg = VnPayConfig.describeResponseCode(rsp);
-            String target = req.getContextPath() + "/View/home.jsp?msg=" + java.net.URLEncoder.encode(msg, java.nio.charset.StandardCharsets.UTF_8);
-            resp.sendRedirect(target);
+            // Nếu thanh toán thành công, redirect đến trang chi tiết đơn hàng
+            if (orderId != null && ("00".equals(rsp) || "07".equals(rsp))) {
+                // Thanh toán thành công - redirect đến order-detail với success=true
+                String target = req.getContextPath() + "/order-detail?orderId=" + orderId + "&success=true";
+                resp.sendRedirect(target);
+            } else {
+                // Thanh toán thất bại hoặc không xác định được orderId - hiển thị thông báo lỗi
+                String msg = VnPayConfig.describeResponseCode(rsp);
+                String target = req.getContextPath() + "/View/home.jsp?msg=" + java.net.URLEncoder.encode(msg, java.nio.charset.StandardCharsets.UTF_8);
+                resp.sendRedirect(target);
+            }
         } else {
             resp.sendRedirect(req.getContextPath() + "/View/checkout.jsp?error=payment");
         }

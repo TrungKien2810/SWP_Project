@@ -209,8 +209,8 @@ public class Checkout extends HttpServlet {
             orderDB.clearSelectedCartItems(cart.getCart_id());
             session.removeAttribute("cartItems");
             session.removeAttribute("cartId");
-            String msg = "Đặt hàng thành công!";
-            String target = req.getContextPath() + "/View/home.jsp?msg=" + java.net.URLEncoder.encode(msg, java.nio.charset.StandardCharsets.UTF_8);
+             // Redirect đến trang chi tiết đơn hàng với thông báo thành công
+            String target = req.getContextPath() + "/order-detail?orderId=" + orderId + "&success=true";
             resp.sendRedirect(target);
         }
     }
