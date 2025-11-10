@@ -460,8 +460,13 @@ public class Admin extends HttpServlet {
             if ("create".equals(op)) {
                 String name = request.getParameter("name");
                 String desc = request.getParameter("description");
+                Part imagePart = request.getPart("categoryImage");
+                String imageUrl = null;
+                if (imagePart != null && imagePart.getSize() > 0) {
+                    imageUrl = saveCategoryImage(imagePart);
+                }
                 if (name != null && !name.isBlank()) {
-                    categoryDb().create(name.trim(), (desc != null ? desc.trim() : null));
+                    categoryDb().create(name.trim(), (desc != null ? desc.trim() : null), imageUrl);
                 }
                 response.sendRedirect(request.getContextPath() + "/admin?action=categories");
                 return;
@@ -471,8 +476,14 @@ public class Admin extends HttpServlet {
                     int id = Integer.parseInt(request.getParameter("id"));
                     String name = request.getParameter("name");
                     String desc = request.getParameter("description");
+                    Part imagePart = request.getPart("categoryImage");
                     if (name != null && !name.isBlank()) {
-                        categoryDb().update(id, name.trim(), (desc != null ? desc.trim() : null));
+                        if (imagePart != null && imagePart.getSize() > 0) {
+                            String imageUrl = saveCategoryImage(imagePart);
+                            categoryDb().update(id, name.trim(), (desc != null ? desc.trim() : null), imageUrl);
+                        } else {
+                            categoryDb().updateWithoutImage(id, name.trim(), (desc != null ? desc.trim() : null));
+                        }
                     }
                 } catch (Exception ignored) {}
                 response.sendRedirect(request.getContextPath() + "/admin?action=categories");
@@ -525,6 +536,29 @@ public class Admin extends HttpServlet {
             }
         }
         return "/uploads/" + BANNERS_DIR + "/" + safeName;
+    }
+
+    private String saveCategoryImage(Part imagePart) throws IOException {
+        String submittedFileName = getFileName(imagePart);
+        String safeName = System.currentTimeMillis() + "_" + submittedFileName.replaceAll("[^a-zA-Z0-9.\\-_]", "_");
+
+        final String UPLOAD_BASE = "C:\\CosmeticShop\\uploads";
+        final String CATEGORIES_DIR = "categories";
+
+        File dir = new File(UPLOAD_BASE, CATEGORIES_DIR);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        File saved = new File(dir, safeName);
+        try (InputStream in = imagePart.getInputStream(); FileOutputStream out = new FileOutputStream(saved)) {
+            byte[] buf = new byte[8192];
+            int len;
+            while ((len = in.read(buf)) != -1) {
+                out.write(buf, 0, len);
+            }
+        }
+        return "/uploads/" + CATEGORIES_DIR + "/" + safeName;
     }
 
     private double getTodayRevenue() {

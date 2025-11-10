@@ -430,6 +430,29 @@ public class ProductDB {
         return productList;
     }
 
+    // Lấy sản phẩm bán chạy nhất (best selling products) - top sản phẩm theo số lượng bán
+    public List<Product> getBestSellingProducts(int limit) {
+        List<Product> productList = new ArrayList<>();
+        String sql = "SELECT TOP (?) p.* " +
+                     "FROM Products p " +
+                     "INNER JOIN OrderDetails od ON p.product_id = od.product_id " +
+                     "INNER JOIN Orders o ON od.order_id = o.order_id " +
+                     "WHERE o.payment_status = 'PAID' " +
+                     "GROUP BY p.product_id, p.name, p.price, p.stock, p.description, p.image_url, p.category_id " +
+                     "ORDER BY SUM(od.quantity) DESC";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, limit);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    productList.add(createProductWithImages(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return productList;
+    }
+
     // Phân trang: tìm kiếm + lọc với OFFSET/FETCH
     public List<Product> searchAndFilterProductsWithPaging(String searchTerm, String categoryName,
             double minPrice, double maxPrice, String fixedPriceRange, String sortBy,

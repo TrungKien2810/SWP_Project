@@ -17,11 +17,12 @@ public class CategoryDB {
         c.setCategoryId(rs.getInt("category_id"));
         c.setName(rs.getString("name"));
         c.setDescription(rs.getString("description"));
+        c.setImageUrl(rs.getString("image_url"));
         return c;
     }
 
     public List<Category> listAll() {
-        String sql = "SELECT category_id, name, description FROM Categories ORDER BY name";
+        String sql = "SELECT category_id, name, description, image_url FROM Categories ORDER BY name";
         List<Category> list = new ArrayList<>();
         try (PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) list.add(mapRow(rs));
@@ -32,7 +33,7 @@ public class CategoryDB {
     }
 
     public Category getById(int id) {
-        String sql = "SELECT category_id, name, description FROM Categories WHERE category_id = ?";
+        String sql = "SELECT category_id, name, description, image_url FROM Categories WHERE category_id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
@@ -44,11 +45,12 @@ public class CategoryDB {
         return null;
     }
 
-    public boolean create(String name, String description) {
-        String sql = "INSERT INTO Categories(name, description) VALUES(?, ?)";
+    public boolean create(String name, String description, String imageUrl) {
+        String sql = "INSERT INTO Categories(name, description, image_url) VALUES(?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, name);
             if (description == null || description.isBlank()) ps.setNull(2, java.sql.Types.NVARCHAR); else ps.setString(2, description);
+            if (imageUrl == null || imageUrl.isBlank()) ps.setNull(3, java.sql.Types.NVARCHAR); else ps.setString(3, imageUrl);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -56,7 +58,21 @@ public class CategoryDB {
         }
     }
 
-    public boolean update(int id, String name, String description) {
+    public boolean update(int id, String name, String description, String imageUrl) {
+        String sql = "UPDATE Categories SET name = ?, description = ?, image_url = ? WHERE category_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, name);
+            if (description == null || description.isBlank()) ps.setNull(2, java.sql.Types.NVARCHAR); else ps.setString(2, description);
+            if (imageUrl == null || imageUrl.isBlank()) ps.setNull(3, java.sql.Types.NVARCHAR); else ps.setString(3, imageUrl);
+            ps.setInt(4, id);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updateWithoutImage(int id, String name, String description) {
         String sql = "UPDATE Categories SET name = ?, description = ? WHERE category_id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, name);
