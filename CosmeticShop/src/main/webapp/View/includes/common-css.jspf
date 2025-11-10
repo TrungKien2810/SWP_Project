@@ -1,0 +1,17 @@
+<%@ page pageEncoding="UTF-8" %>
+<!-- Common CSS for all pages - Mobile Responsive -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Bootstrap -->
+<link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
+
+<!-- ⭐ GLOBAL MOBILE CSS - Required for mobile menu & responsive -->
+<link rel="stylesheet" href="${pageContext.request.contextPath}/Css/global-mobile.css">
+
+<!-- FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" 
+      crossorigin="anonymous" referrerpolicy="no-referrer">
+
+<!-- Home CSS - Required for mobile menu -->
+<link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
+

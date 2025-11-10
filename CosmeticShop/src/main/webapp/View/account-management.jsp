@@ -1,6 +1,5 @@
-<%@page import="Model.user"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -225,7 +224,7 @@
                         <label class="btn btn-outline-secondary mb-0">
                           <i class="fas fa-image me-1"></i> Chọn ảnh
                           <input id="avatarFileModal" type="file" name="avatar" accept="image/*" onchange="previewAvatar(event)" style="display:none;">
-                        </label>
+                        </label>    
                       </div>
                       
                     </div>

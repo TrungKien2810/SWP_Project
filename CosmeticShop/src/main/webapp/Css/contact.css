@@ -477,3 +477,120 @@ body {
         font-size: 25px;
         color: #1d1a1a;
 }
+
+/* ========================================= */
+/* MOBILE RESPONSIVE STYLES */
+/* ========================================= */
+
+@media (max-width: 991px) {
+    .contact-container {
+        flex-direction: column;
+        width: 95vw;
+        gap: 20px;
+    }
+    
+    .contact-info {
+        padding-left: 50px;
+        padding-right: 20px;
+    }
+    
+    .contact-form {
+        margin-left: 0;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 767px) {
+    /* Hide desktop menu */
+    .menu_list {
+        display: none !important;
+    }
+    
+    /* Contact section */
+    .contact {
+        flex-direction: column;
+        padding: 20px 10px;
+    }
+    
+    .contact-container {
+        width: 100%;
+        gap: 15px;
+    }
+    
+    .contact-info {
+        padding-left: 20px;
+        padding-right: 20px;
+        margin-top: 15px;
+        font-size: 14px;
+    }
+    
+    .contact-form {
+        padding: 20px;
+        margin-left: 0;
+        max-width: 100%;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-control {
+        font-size: 14px;
+        padding: 10px;
+    }
+    
+    .btn-submit,
+    .btn-reset {
+        font-size: 14px;
+        padding: 10px 15px;
+    }
+    
+    h2 {
+        font-size: 20px;
+        letter-spacing: 1px;
+    }
+    
+    .breadcrumb-container {
+        padding: 5px 15px;
+        margin: 5px 0;
+    }
+}
+
+@media (max-width: 575px) {
+    .contact-info {
+        padding-left: 15px;
+        padding-right: 15px;
+        font-size: 13px;
+    }
+    
+    .contact-form {
+        padding: 15px;
+    }
+    
+    h2 {
+        font-size: 18px;
+    }
+    
+    .form-control {
+        font-size: 13px;
+        padding: 8px;
+    }
+    
+    .btn-submit,
+    .btn-reset {
+        font-size: 13px;
+        padding: 8px 12px;
+    }
+}
+
+@media (max-width: 374px) {
+    .contact-form {
+        padding: 12px;
+    }
+    
+    h2 {
+        font-size: 16px;
+    }
+    
+    .breadcrumb-container {
+        padding: 4px 10px;
+        font-size: 12px;
+    }
+}

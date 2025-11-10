@@ -1,5 +1,4 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@page import="Model.user"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -7,8 +6,9 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/global-mobile.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-…" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/log.css">
         <title>PinkyCloud - Đăng Nhập</title>
     </head>
@@ -175,5 +175,77 @@
 
                         <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
                         <script src="${pageContext.request.contextPath}/Js/home.js"></script>
+                        <script>
+                            // Fallback: Ensure mobile menu works on this page
+                            (function() {
+                                function initMobileMenu() {
+                                    var mobileMenuToggle = document.getElementById('mobileMenuToggle');
+                                    var mobileNav = document.getElementById('mobileNav');
+                                    var mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+                                    var body = document.body;
+
+                                    if (!mobileMenuToggle || !mobileNav || !mobileMenuOverlay) {
+                                        return;
+                                    }
+
+                                    // Check if already initialized by home.js
+                                    if (mobileMenuToggle.hasAttribute('data-initialized')) {
+                                        return;
+                                    }
+
+                                    mobileMenuToggle.setAttribute('data-initialized', 'true');
+
+                                    function openMobileMenu() {
+                                        mobileMenuToggle.classList.add('active');
+                                        mobileNav.classList.add('active');
+                                        mobileMenuOverlay.classList.add('active');
+                                        body.classList.add('mobile-menu-open');
+                                    }
+
+                                    function closeMobileMenu() {
+                                        mobileMenuToggle.classList.remove('active');
+                                        mobileNav.classList.remove('active');
+                                        mobileMenuOverlay.classList.remove('active');
+                                        body.classList.remove('mobile-menu-open');
+                                    }
+
+                                    mobileMenuToggle.addEventListener('click', function(e) {
+                                        e.stopPropagation();
+                                        e.preventDefault();
+                                        if (mobileNav.classList.contains('active')) {
+                                            closeMobileMenu();
+                                        } else {
+                                            openMobileMenu();
+                                        }
+                                    }, true);
+
+                                    mobileMenuOverlay.addEventListener('click', function() {
+                                        closeMobileMenu();
+                                    });
+
+                                    var mobileNavLinks = mobileNav.querySelectorAll('.mobile-nav-links a');
+                                    mobileNavLinks.forEach(function(link) {
+                                        link.addEventListener('click', function() {
+                                            closeMobileMenu();
+                                        });
+                                    });
+
+                                    // Add scroll effect
+                                    window.addEventListener('scroll', function() {
+                                        if (window.scrollY > 50) {
+                                            mobileMenuToggle.classList.add('scrolled');
+                                        } else {
+                                            mobileMenuToggle.classList.remove('scrolled');
+                                        }
+                                    }, { passive: true });
+                                }
+
+                                if (document.readyState === 'loading') {
+                                    document.addEventListener('DOMContentLoaded', initMobileMenu);
+                                } else {
+                                    initMobileMenu();
+                                }
+                            })();
+                        </script>
                         </body>
                         </html>

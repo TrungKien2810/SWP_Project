@@ -526,3 +526,232 @@ body {
     font-size: 1rem;
   }
 }
+
+/* ========================================= */
+/* ADDITIONAL MOBILE RESPONSIVE STYLES */
+/* ========================================= */
+
+@media (max-width: 991px) {
+  /* Feature cards */
+  .feature-card {
+    padding: 20px;
+  }
+  
+  .feature-title {
+    font-size: 16px;
+  }
+  
+  .feature-text {
+    font-size: 15px;
+  }
+  
+  /* Core values */
+  .core-values {
+    height: auto;
+    min-height: 350px;
+    padding: 40px 0;
+  }
+  
+  .core-values h2 {
+    font-size: 1.75rem;
+  }
+  
+  .core-item {
+    padding: 25px;
+    margin-bottom: 20px;
+  }
+  
+  .core-item h4 {
+    font-size: 1.3rem;
+  }
+  
+  .core-item p {
+    font-size: 1rem;
+  }
+  
+  /* Mission vision */
+  .mission-vision {
+    padding: 40px 0;
+  }
+}
+
+@media (max-width: 767px) {
+  /* Hide desktop menu */
+  .menu_list {
+    display: none !important;
+  }
+  
+  /* Feature section */
+  .feature-box {
+    padding: 10px 0;
+  }
+  
+  .feature-card {
+    padding: 20px;
+    margin-bottom: 15px;
+  }
+  
+  .feature-icon {
+    font-size: 20px;
+  }
+  
+  .feature-title {
+    font-size: 15px;
+  }
+  
+  .feature-text {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  
+  /* Core values */
+  .core-values {
+    height: auto;
+    min-height: auto;
+    padding: 30px 15px;
+  }
+  
+  .core-values h2 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+  
+  .core-item {
+    padding: 20px 15px;
+    margin-bottom: 15px;
+  }
+  
+  .core-item h4 {
+    font-size: 1.2rem;
+  }
+  
+  .core-item p {
+    font-size: 0.95rem;
+    text-align: left;
+  }
+  
+  .core-item h4::after {
+    width: 40px;
+    height: 3px;
+  }
+  
+  /* Mission vision */
+  .mission-vision {
+    padding: 30px 15px;
+  }
+  
+  .image-container img {
+    border-radius: 10px;
+  }
+  
+  .overlay-content {
+    width: 90%;
+    bottom: -5px;
+  }
+  
+  .title {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+  }
+  
+  .content {
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+}
+
+@media (max-width: 575px) {
+  /* Feature cards */
+  .feature-card {
+    padding: 15px;
+  }
+  
+  .feature-icon {
+    font-size: 18px;
+  }
+  
+  .feature-title {
+    font-size: 14px;
+    margin-left: 8px;
+  }
+  
+  .feature-text {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  
+  /* Core values */
+  .core-values {
+    padding: 25px 10px;
+  }
+  
+  .core-values h2 {
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+    text-shadow: 0px 3px 8px #f76c85;
+  }
+  
+  .core-item {
+    padding: 15px 12px;
+  }
+  
+  .core-item h4 {
+    font-size: 1.1rem;
+  }
+  
+  .core-item p {
+    font-size: 0.9rem;
+  }
+  
+  /* Mission vision */
+  .mission-vision {
+    padding: 25px 10px;
+  }
+  
+  .overlay-content {
+    width: 95%;
+    bottom: 0;
+  }
+  
+  .title {
+    font-size: 1.1rem;
+  }
+  
+  .content {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 374px) {
+  .feature-card {
+    padding: 12px;
+  }
+  
+  .core-values {
+    padding: 20px 8px;
+  }
+  
+  .core-values h2 {
+    font-size: 1.2rem;
+  }
+  
+  .core-item {
+    padding: 12px 10px;
+  }
+  
+  .core-item h4 {
+    font-size: 1rem;
+  }
+  
+  .core-item p {
+    font-size: 0.85rem;
+  }
+  
+  .title {
+    font-size: 1rem;
+  }
+  
+  .content {
+    font-size: 0.8rem;
+  }
+}

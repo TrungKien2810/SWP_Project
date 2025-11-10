@@ -1,17 +1,19 @@
-<%@page import="Model.Product"%>
-<%@page import="DAO.ProductDB"%>
-<%@page import="Model.CartItems"%>
-<%@ page import="java.util.*" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
+<%@ page import="java.util.*" %>
+<%@ page import="Model.Product" %>
+<%@ page import="Model.CartItems" %>
+<%@ page import="DAO.ProductDB" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Giỏ hàng của bạn - PinkyCloud</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/cart.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/global-mobile.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/cart.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
           crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>

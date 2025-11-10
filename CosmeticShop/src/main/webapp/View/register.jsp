@@ -1,18 +1,18 @@
-<%@page import="Model.user"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/global-mobile.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/dndk.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/font/fontawesome-free-6.7.2-web/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/register.css">
-    <script src="${pageContext.request.contextPath}/JS/home.js"></script>
     <title>PinkyCloud - Đăng Ký</title>
 </head>
 <body>
@@ -137,8 +137,80 @@
         </div>
     </footer>
 
-    <script src="${pageContext.request.contextPath}/JS/bootstrap.bundle.min.js"></script>
+    <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <script src="${pageContext.request.contextPath}/JS/auth.js"></script>
+    <script src="${pageContext.request.contextPath}/Js/home.js"></script>
+    <script>
+        // Fallback: Ensure mobile menu works on this page
+        (function() {
+            function initMobileMenu() {
+                var mobileMenuToggle = document.getElementById('mobileMenuToggle');
+                var mobileNav = document.getElementById('mobileNav');
+                var mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+                var body = document.body;
+
+                if (!mobileMenuToggle || !mobileNav || !mobileMenuOverlay) {
+                    return;
+                }
+
+                // Check if already initialized by home.js
+                if (mobileMenuToggle.hasAttribute('data-initialized')) {
+                    return;
+                }
+
+                mobileMenuToggle.setAttribute('data-initialized', 'true');
+
+                function openMobileMenu() {
+                    mobileMenuToggle.classList.add('active');
+                    mobileNav.classList.add('active');
+                    mobileMenuOverlay.classList.add('active');
+                    body.classList.add('mobile-menu-open');
+                }
+
+                function closeMobileMenu() {
+                    mobileMenuToggle.classList.remove('active');
+                    mobileNav.classList.remove('active');
+                    mobileMenuOverlay.classList.remove('active');
+                    body.classList.remove('mobile-menu-open');
+                }
+
+                mobileMenuToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    if (mobileNav.classList.contains('active')) {
+                        closeMobileMenu();
+                    } else {
+                        openMobileMenu();
+                    }
+                }, true);
+
+                mobileMenuOverlay.addEventListener('click', function() {
+                    closeMobileMenu();
+                });
+
+                var mobileNavLinks = mobileNav.querySelectorAll('.mobile-nav-links a');
+                mobileNavLinks.forEach(function(link) {
+                    link.addEventListener('click', function() {
+                        closeMobileMenu();
+                    });
+                });
+
+                // Add scroll effect
+                window.addEventListener('scroll', function() {
+                    if (window.scrollY > 50) {
+                        mobileMenuToggle.classList.add('scrolled');
+                    } else {
+                        mobileMenuToggle.classList.remove('scrolled');
+                    }
+                }, { passive: true });
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMobileMenu);
+            } else {
+                initMobileMenu();
+            }
+        })();
+    </script>
 </body>
 </html>
