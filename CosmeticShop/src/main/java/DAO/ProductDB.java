@@ -413,6 +413,23 @@ public class ProductDB {
         return productList;
     }
 
+    // Lấy sản phẩm nổi bật (featured products) - top 8 sản phẩm mới nhất
+    public List<Product> getFeaturedProducts(int limit) {
+        List<Product> productList = new ArrayList<>();
+        String sql = "SELECT TOP (?) * FROM Products ORDER BY product_id DESC";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, limit);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    productList.add(createProductWithImages(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return productList;
+    }
+
     // Phân trang: tìm kiếm + lọc với OFFSET/FETCH
     public List<Product> searchAndFilterProductsWithPaging(String searchTerm, String categoryName,
             double minPrice, double maxPrice, String fixedPriceRange, String sortBy,
