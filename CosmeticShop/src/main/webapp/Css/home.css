@@ -667,3 +667,141 @@ footer li a:hover {
   min-width: 20px;
 }
 
+/* ========== DANH MỤC SẢN PHẨM TRANG CHỦ ========== */
+.category-card-home {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 15px;
+  background: #ffffff;
+  border: 2px solid #f0f0f0;
+  border-radius: 15px;
+  transition: all 0.3s ease;
+  height: 100%;
+  min-height: 140px;
+  text-decoration: none;
+}
+
+.category-card-home:hover {
+  border-color: #f76c85;
+  background: #fff5f7;
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(247, 108, 133, 0.2);
+  text-decoration: none;
+}
+
+.category-icon-home {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #f76c85 0%, #ff8fa3 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.category-card-home:hover .category-icon-home {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 5px 15px rgba(247, 108, 133, 0.4);
+}
+
+.category-icon-home i {
+  font-size: 32px;
+  color: #ffffff;
+}
+
+.category-name-home {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+  transition: color 0.3s ease;
+  word-wrap: break-word;
+  line-height: 1.3;
+}
+
+.category-card-home:hover .category-name-home {
+  color: #f76c85;
+}
+
+/* ========== RESPONSIVE CHO DANH MỤC ========== */
+@media (max-width: 768px) {
+  .category-card-home {
+    min-height: 120px;
+    padding: 15px 10px;
+  }
+
+  .category-icon-home {
+    width: 60px;
+    height: 60px;
+  }
+
+  .category-icon-home i {
+    font-size: 28px;
+  }
+
+  .category-name-home {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 576px) {
+  .category-card-home {
+    min-height: 110px;
+    padding: 12px 8px;
+  }
+
+  .category-icon-home {
+    width: 50px;
+    height: 50px;
+  }
+
+  .category-icon-home i {
+    font-size: 24px;
+  }
+
+  .category-name-home {
+    font-size: 11px;
+  }
+}
+
+/* ========== ĐIỀU CHỈNH PRODUCT GRID CHO TRANG CHỦ ========== */
+.container .product-grid {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+  padding: 20px 0;
+}
+
+@media (max-width: 768px) {
+  .container .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 15px;
+  }
+  
+  .product-card img {
+    height: 180px;
+  }
+}
+
+@media (max-width: 576px) {
+  .container .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  
+  .product-card img {
+    height: 160px;
+  }
+  
+  .product-card-body h5 {
+    font-size: 0.95rem;
+    min-height: 40px;
+  }
+  
+  .product-card-body .price {
+    font-size: 1.1rem;
+  }
+}
+
