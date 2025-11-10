@@ -341,85 +341,72 @@
 
         <!-- ========== KHỐI SẢN PHẨM BÁN CHẠY NHẤT ========== -->
         <div class="best-selling-section">
-            <div class="best-selling-decoration-top">
-                <div class="decoration-pattern"></div>
-            </div>
             <div class="container mt-5 mb-5">
-                <div class="best-selling-header">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <div class="best-selling-title-wrapper">
-                            <div class="title-icon-wrapper">
-                                <i class="fas fa-fire title-icon"></i>
-                                <div class="title-sparkle sparkle-1">✨</div>
-                                <div class="title-sparkle sparkle-2">⭐</div>
-                            </div>
-                            <h2 class="text mb-2 best-selling-title">
-                                SẢN PHẨM BÁN CHẠY NHẤT
-                            </h2>
-                            <p class="text-muted mb-0 best-selling-subtitle">Những sản phẩm được khách hàng yêu thích nhất</p>
-                        </div>
-                        <a href="${pageContext.request.contextPath}/products" class="btn btn-outline-primary d-none d-md-block best-selling-btn">
-                            Khám phá <i class="fas fa-arrow-right ms-1"></i>
-                        </a>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="text mb-2" style="color: #f76c85; font-weight: 800; font-family: 'Times New Roman', Times, serif;">
+                            <i class="fas fa-fire text-danger"></i> SẢN PHẨM BÁN CHẠY NHẤT
+                        </h2>
+                        <p class="text-muted mb-0">Những sản phẩm được khách hàng yêu thích nhất</p>
                     </div>
+                    <a href="${pageContext.request.contextPath}/products" class="btn btn-outline-primary d-none d-md-block">
+                        Khám phá <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
                 </div>
             
-            <c:choose>
-                <c:when test="${empty bestSellingProducts}">
-                    <div class="alert alert-info text-center">
-                        <i class="fas fa-info-circle"></i> Chưa có sản phẩm bán chạy nào. Vui lòng quay lại sau.
-                    </div>
-                </c:when>
-                <c:otherwise>
-                    <div class="product-grid best-selling-grid">
-                        <c:forEach var="product" items="${bestSellingProducts}" varStatus="loop">
-                            <div class="product-card best-selling-card"
-                                 onclick="window.location.href='${pageContext.request.contextPath}/product-detail?id=${product.productId}'"
-                                 style="cursor: pointer;">
-                                <div class="best-selling-badge">
-                                    <i class="fas fa-fire"></i> Bán chạy
-                                </div>
-                                <c:choose>
-                                    <c:when test="${not empty product.imageUrl}">
-                                        <img src="${pageContext.request.contextPath}${product.imageUrl}"
-                                             alt="${fn:escapeXml(product.name)}"
-                                             loading="lazy"
-                                             onerror="this.src='${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png'">
-                                    </c:when>
-                                    <c:otherwise>
-                                        <img src="${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png"
-                                             alt="${fn:escapeXml(product.name)}"
-                                             loading="lazy">
-                                    </c:otherwise>
-                                </c:choose>
-                                <div class="product-card-body">
-                                    <h5>${fn:escapeXml(product.name)}</h5>
-                                    <p class="price">
-                                        <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> VNĐ
-                                    </p>
-                                    <div class="action-buttons">
-                                        <a href="${pageContext.request.contextPath}/addToCart?id=${product.productId}"
-                                           class="btn btn-sm btn-buy-now best-selling-buy-btn"
-                                           onclick="event.stopPropagation();">
-                                            <i class="fas fa-shopping-bag"></i> Mua ngay
-                                        </a>
+                <c:choose>
+                    <c:when test="${empty bestSellingProducts}">
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle"></i> Chưa có sản phẩm bán chạy nào. Vui lòng quay lại sau.
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="product-grid">
+                            <c:forEach var="product" items="${bestSellingProducts}">
+                                <div class="product-card"
+                                     onclick="window.location.href='${pageContext.request.contextPath}/product-detail?id=${product.productId}'"
+                                     style="cursor: pointer;">
+                                    <div class="best-selling-badge">
+                                        <i class="fas fa-fire"></i> Bán chạy
+                                    </div>
+                                    <c:choose>
+                                        <c:when test="${not empty product.imageUrl}">
+                                            <img src="${pageContext.request.contextPath}${product.imageUrl}"
+                                                 alt="${fn:escapeXml(product.name)}"
+                                                 loading="lazy"
+                                                 onerror="this.src='${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png'">
+                                        </c:when>
+                                        <c:otherwise>
+                                            <img src="${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png"
+                                                 alt="${fn:escapeXml(product.name)}"
+                                                 loading="lazy">
+                                        </c:otherwise>
+                                    </c:choose>
+                                    <div class="product-card-body">
+                                        <h5>${fn:escapeXml(product.name)}</h5>
+                                        <p class="price">
+                                            <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> VNĐ
+                                        </p>
+                                        <div class="action-buttons">
+                                            <a href="${pageContext.request.contextPath}/addToCart?id=${product.productId}"
+                                               class="btn btn-sm btn-buy-now"
+                                               onclick="event.stopPropagation();">
+                                                <i class="fas fa-shopping-bag"></i> Mua ngay
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </c:forEach>
-                    </div>
-                    
-                    <!-- Nút xem tất cả cho mobile -->
-                    <div class="text-center mt-4 d-md-none">
-                        <a href="${pageContext.request.contextPath}/products" class="btn btn-primary btn-lg">
-                            Xem tất cả sản phẩm <i class="fas fa-arrow-right ms-2"></i>
-                        </a>
-                    </div>
-                </c:otherwise>
-            </c:choose>
-            </div>
-            <div class="best-selling-decoration-bottom">
-                <div class="decoration-pattern"></div>
+                            </c:forEach>
+                        </div>
+                        
+                        <!-- Nút xem tất cả cho mobile -->
+                        <div class="text-center mt-4 d-md-none">
+                            <a href="${pageContext.request.contextPath}/products" class="btn btn-primary btn-lg">
+                                Xem tất cả sản phẩm <i class="fas fa-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
             </div>
         </div>
 

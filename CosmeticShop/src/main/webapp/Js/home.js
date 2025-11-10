@@ -87,23 +87,55 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         function scrollCategories(direction) {
+            updateScrollButtons(); // Cập nhật maxScroll trước khi scroll
+            
             var newPosition = scrollPosition + (direction * scrollAmount);
             
-            // Quay vòng: nếu vượt quá maxScroll thì quay về đầu
-            if (maxScroll > 0) {
-                if (newPosition > maxScroll) {
-                    newPosition = 0;
-                } else if (newPosition < 0) {
-                    // Nếu scroll về trước khi ở đầu, quay về cuối
-                    newPosition = maxScroll;
-                }
-            } else {
-                // Nếu không cần scroll (tất cả đã hiển thị), quay về đầu
-                newPosition = 0;
+            // Giới hạn scroll trong phạm vi hợp lệ
+            if (newPosition > maxScroll) {
+                newPosition = maxScroll; // Không quay vòng, dừng ở cuối
+            } else if (newPosition < 0) {
+                newPosition = 0; // Không quay vòng, dừng ở đầu
             }
 
             scrollPosition = newPosition;
             categoryTrack.style.transform = 'translateX(-' + scrollPosition + 'px)';
+            
+            // Cập nhật trạng thái nút (ẩn nút khi đã đến đầu/cuối)
+            updateButtonStates();
+        }
+        
+        function updateButtonStates() {
+            // Hiển thị/ẩn nút dựa trên vị trí scroll
+            if (maxScroll <= 0) {
+                // Không cần scroll
+                categoryPrevBtn.style.opacity = '0.3';
+                categoryPrevBtn.style.pointerEvents = 'none';
+                categoryNextBtn.style.opacity = '0.3';
+                categoryNextBtn.style.pointerEvents = 'none';
+            } else {
+                // Ở đầu danh sách
+                if (scrollPosition <= 0) {
+                    categoryPrevBtn.style.opacity = '0.3';
+                    categoryPrevBtn.style.pointerEvents = 'none';
+                    categoryNextBtn.style.opacity = '1';
+                    categoryNextBtn.style.pointerEvents = 'auto';
+                }
+                // Ở cuối danh sách
+                else if (scrollPosition >= maxScroll) {
+                    categoryPrevBtn.style.opacity = '1';
+                    categoryPrevBtn.style.pointerEvents = 'auto';
+                    categoryNextBtn.style.opacity = '0.3';
+                    categoryNextBtn.style.pointerEvents = 'none';
+                }
+                // Ở giữa danh sách
+                else {
+                    categoryPrevBtn.style.opacity = '1';
+                    categoryPrevBtn.style.pointerEvents = 'auto';
+                    categoryNextBtn.style.opacity = '1';
+                    categoryNextBtn.style.pointerEvents = 'auto';
+                }
+            }
         }
 
         // Gắn event listener với cả onclick và addEventListener để đảm bảo hoạt động
@@ -134,11 +166,13 @@ document.addEventListener('DOMContentLoaded', function () {
         // Cập nhật khi resize
         window.addEventListener('resize', function() {
             updateScrollButtons();
+            updateButtonStates();
         });
 
         // Khởi tạo sau khi DOM load xong
         setTimeout(function() {
             updateScrollButtons();
+            updateButtonStates();
         }, 200);
 
         // Touch/swipe support cho mobile
