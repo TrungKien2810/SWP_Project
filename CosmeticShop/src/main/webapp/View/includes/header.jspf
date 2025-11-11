@@ -2,6 +2,9 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/site-header.css">
+<script>
+    window.APP_CTX = '${pageContext.request.contextPath}';
+</script>
                     <div class="header">
                         <div class="header_text">
                             <p>THEO DÕI CHÚNG TÔI</p>
@@ -19,7 +22,7 @@
                     </div>
                     <div class="menu">
                             <div class="menu_logo">
-                                <img src="${pageContext.request.contextPath}/IMG/logo.jpg" alt="" style="width: 230px;">
+                                <img src="${pageContext.request.contextPath}/IMG/logo.jpg" alt="" style="width: 200px;">
                             </div>
                             <div class="menu_list">
                                 <ul class="menu_list_item">
@@ -33,11 +36,13 @@
                                 </ul>
                                 <div class="menu_search">
                                     <div class="menu_search_input">
-                                        <input type="text" placeholder="Nhập từ khóa bạn cần tìm kiếm . . . ">
+                                        <input type="text" id="globalSearchInput" placeholder="Nhập từ khóa bạn cần tìm kiếm . . . " autocomplete="off">
                                     </div>
                                     <div class="menu_search_icon">
-                                        <a href=""><i class="fa-solid fa-magnifying-glass fa-xl" style="color: #f76c85;"></i></a>
+                                        <a href="#" id="globalSearchBtn"><i class="fa-solid fa-magnifying-glass fa-xl" style="color: #f76c85;"></i></a>
                                     </div>
+                                    <!-- Suggestions dropdown -->
+                                    <div id="searchSuggestions" class="search-suggestions" style="display:none;"></div>
                                 </div>
                                 <div class="menu_search_cart">
                                     <a href="${pageContext.request.contextPath}/cart" class="cart-link"> 
@@ -63,7 +68,7 @@
                                                     <a href="#" id="viewAllNotifications">Xem tất cả</a>
                                                 </div>
                                             </div>
-                                        </div>
+                        </div>
                                     </c:if>
                                     <!-- Tài khoản -->
                                     <c:if test="${!empty sessionScope.user}">
@@ -95,3 +100,4 @@
 
 
 
+<script src="${pageContext.request.contextPath}/Js/search-suggest.js"></script>
