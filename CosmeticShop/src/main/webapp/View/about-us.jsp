@@ -9,43 +9,16 @@
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/about-us.css">
-                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-                    integrity="sha512-…" crossorigin="anonymous" referrerpolicy="no-referrer" />
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
                 <title>Pinky Cloud</title>
             </head>
 
             <body>
                 <%@ include file="/View/includes/header.jspf" %>
-                    <c:if test="${not empty param.msg}">
-                        <div class="container mt-3">
-                            <div class="alert alert-success">${param.msg}</div>
-                        </div>
-                    </c:if>
 
-                    <!-- Modal Đăng Ký -->
-                    <div class="modal" id="registerModal">
-                        <div class="modal-content">
-                            <span class="close">&times;</span>
-                            <h2>Đăng ký</h2>
-                            <form>
-                                <div class="input-group">
-                                    <label for="fullname">Họ và tên</label>
-                                    <input type="text" id="fullname" placeholder="Nhập họ và tên" required>
-                                </div>
-                                <div class="input-group">
-                                    <label for="emailReg">Email</label>
-                                    <input type="email" id="emailReg" placeholder="Nhập email của bạn" required>
-                                </div>
-                                <div class="input-group">
-                                    <label for="passwordReg">Mật khẩu</label>
-                                    <input type="password" id="passwordReg" placeholder="Tạo mật khẩu" required>
-                                </div>
-                                <button type="submit">Đăng ký</button>
-                            </form>
-                            <p>Đã có tài khoản? <a href="#" id="showLogin">Đăng nhập</a></p>
-                        </div>
-                    </div>
+                    <main class="container-fluid" style="margin-top: 20px;">
                     <div class="container brand-section" style="margin-top: 30px;">
                         <div class="row align-items-center">
                             <!-- Cột Hình Ảnh -->
@@ -180,6 +153,7 @@
                             </div>
                         </div>
                     </section>
+                    </main>
                     <%@ include file="/View/includes/footer.jspf" %>
                         <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
                         <script src="${pageContext.request.contextPath}/Js/home.js"></script>

@@ -9,22 +9,22 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-…" crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/log.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/auth.css">
         <title>PinkyCloud - Đăng Nhập</title>
     </head>
-    <body>
+    <body 
+        <c:if test="${not empty sessionScope.loginSuccessMsg}">data-success-msg="${sessionScope.loginSuccessMsg}"</c:if>
+        <c:if test="${not empty sessionScope.loginErrorMsg}">data-error-msg="${sessionScope.loginErrorMsg}"</c:if>
+        <c:if test="${not empty sessionScope.signupSuccessMsg}">data-success-msg="${sessionScope.signupSuccessMsg}"</c:if>
+    >
+        <c:remove var="loginSuccessMsg" scope="session" />
+        <c:remove var="loginErrorMsg" scope="session" />
+        <c:remove var="signupSuccessMsg" scope="session" />
         <%@ include file="/View/includes/header.jspf" %>
 
                         <!-- Phần Đăng Nhập -->
                         <div class="login-section">
-                            <div class="toast" id="notificationToast" role="alert" aria-live="assertive" aria-atomic="true">
-                                <div class="toast-header">
-                                    <strong class="me-auto">Thông báo</strong>
-                                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                                </div>
-                                <div class="toast-body"></div>
-                            </div>
-
                             <div class="container">
                                 <div class="row">
                                     <div class="col-md-6">
@@ -78,47 +78,9 @@
                                         </form>
                                         <p class="terms mt-3">Bằng cách nhấn vào "Đăng nhập ngay!", bạn đã đồng ý với <a href="#">Điều khoản dịch vụ</a> | <a href="#">Chính sách bảo mật</a></p>
                                         <a class="d-block mt-2" href="${pageContext.request.contextPath}/View/forgot-password.jsp">Quên mật khẩu?</a>
-                                        <%
-                                            if (request.getAttribute("error") != null) {
-                                                String error = (String) request.getAttribute("error");
-                                        %>
-                                        <h5 style="color: red"><%=error%></h5>
-                                        <%
-                                            }
-                                        %>
-                                        <%
-    String msg = request.getParameter("msg");
-    if (msg == null) {
-        msg = (String) request.getAttribute("msg");
-    }
-    if (msg != null) {
-%>
-<h5 style="color: green"><%=msg%></h5>
-<%
-    }
-%>
-
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="successModalLabel">Đăng ký thành công</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            Chúc mừng! Bạn đã đăng nhập thành công. Bạn sẽ được chuyển hướng về trang đăng nhập trong giây lát${pageContext.request.contextPath}.
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
                         </div>
 
                         <!-- Footer -->

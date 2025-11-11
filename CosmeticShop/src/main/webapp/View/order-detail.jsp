@@ -49,9 +49,18 @@
     <%@ include file="includes/header.jspf" %>
 
     <div class="order-detail-container">
-        <a href="${pageContext.request.contextPath}/my-orders" class="btn btn-outline-secondary back-btn">
-            <i class="fas fa-arrow-left"></i> Quay lại
-        </a>
+        <c:choose>
+            <c:when test="${param.success == 'true'}">
+                <a href="${pageContext.request.contextPath}/View/home.jsp" class="btn btn-outline-secondary back-btn">
+                    <i class="fas fa-home"></i> Về trang chủ
+                </a>
+            </c:when>
+            <c:otherwise>
+                <a href="${pageContext.request.contextPath}/my-orders" class="btn btn-outline-secondary back-btn">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+            </c:otherwise>
+        </c:choose>
 
         <c:if test="${param.success == 'true'}">
             <div class="alert alert-success border-success" role="alert" style="margin-bottom: 20px;">

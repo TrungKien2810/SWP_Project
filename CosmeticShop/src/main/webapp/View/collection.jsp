@@ -17,17 +17,14 @@
                 
             </head>
 
-            <body>
+            <body 
+                <c:if test="${not empty sessionScope.cartSuccessMsg}">data-success-msg="${sessionScope.cartSuccessMsg}"</c:if>
+                <c:if test="${not empty sessionScope.cartErrorMsg}">data-error-msg="${sessionScope.cartErrorMsg}"</c:if>
+            >
+              <c:remove var="cartSuccessMsg" scope="session" />
+              <c:remove var="cartErrorMsg" scope="session" />
               <%@ include file="/View/includes/header.jspf" %>
                     <main class="container-fluid my-5">
-                        <!-- Hiển thị thông báo -->
-                        <c:if test="${not empty requestScope.msg}">
-                            <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin-bottom: 20px;">
-                                <i class="fas fa-check-circle me-2"></i>
-                                ${requestScope.msg}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        </c:if>
                         
                         <div class="text-center mb-4">
                             <h2 class="fw-bold" style="color: #f76c85; font-family: 'Times New Roman', Times, serif;">BỘ
@@ -47,30 +44,15 @@
 
                                     <form method="GET" action="${pageContext.request.contextPath}/products"
                                         class="filter-form">
-                                        <!-- Tìm kiếm -->
-                                        <div class="filter-section mb-4">
-                                            <label for="search" class="form-label">
-                                                <i class="fas fa-search me-2"></i>Tìm kiếm
-                                            </label>
-                                            <div class="input-group">
-                                                <input type="text" class="form-control" id="search" name="search"
-                                                    placeholder="Nhập tên sản phẩm..." value="${searchTerm}">
-                                                <button class="btn btn-outline-secondary" type="submit">
-                                                    <i class="fas fa-search"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-
                                         <!-- Danh mục -->
-                                        <div class="filter-section mb-4">
+                                        <div class="filter-section mb-3">
                                             <label for="category" class="form-label">
-                                                <i class="fas fa-tags me-2"></i>Danh mục
+                                                <i class="fas fa-tags me-1"></i>Danh mục
                                             </label>
-                                            <select class="form-select" id="category" name="category">
-                                                <option value="">Tất cả danh mục</option>
+                                            <select class="form-select form-select-sm" id="category" name="category">
+                                                <option value="">Tất cả</option>
                                                 <c:forEach var="category" items="${categories}">
-                                                    <option value="${category}" ${selectedCategory==category
-                                                        ? 'selected' : '' }>
+                                                    <option value="${category}" ${selectedCategory==category ? 'selected' : '' }>
                                                         ${category}
                                                     </option>
                                                 </c:forEach>
@@ -78,92 +60,61 @@
                                         </div>
 
                                         <!-- Khoảng giá -->
-                                        <div class="filter-section mb-4">
+                                        <div class="filter-section mb-3">
                                             <label for="fixedPriceRange" class="form-label">
-                                                <i class="fas fa-money-bill-wave me-2"></i>Khoảng giá
+                                                <i class="fas fa-money-bill-wave me-1"></i>Khoảng giá
                                             </label>
-                                            <select class="form-select" id="fixedPriceRange" name="fixedPriceRange">
-                                                <option value="">Tất cả mức giá</option>
-                                                <option value="under-100k" ${selectedFixedPriceRange=='under-100k'
-                                                    ? 'selected' : '' }>
-                                                    💰 Dưới 100.000 VNĐ
-                                                </option>
-                                                <option value="100k-300k" ${selectedFixedPriceRange=='100k-300k'
-                                                    ? 'selected' : '' }>
-                                                    💰 100.000 - 300.000 VNĐ
-                                                </option>
-                                                <option value="300k-500k" ${selectedFixedPriceRange=='300k-500k'
-                                                    ? 'selected' : '' }>
-                                                    💰 300.000 - 500.000 VNĐ
-                                                </option>
-                                                <option value="500k-1m" ${selectedFixedPriceRange=='500k-1m'
-                                                    ? 'selected' : '' }>
-                                                    💰 500.000 - 1.000.000 VNĐ
-                                                </option>
-                                                <option value="over-1m" ${selectedFixedPriceRange=='over-1m'
-                                                    ? 'selected' : '' }>
-                                                    💰 Trên 1.000.000 VNĐ
-                                                </option>
+                                            <select class="form-select form-select-sm" id="fixedPriceRange" name="fixedPriceRange">
+                                                <option value="">Tất cả</option>
+                                                <option value="under-100k" ${selectedFixedPriceRange=='under-100k' ? 'selected' : '' }>Dưới 100k</option>
+                                                <option value="100k-300k" ${selectedFixedPriceRange=='100k-300k' ? 'selected' : '' }>100k - 300k</option>
+                                                <option value="300k-500k" ${selectedFixedPriceRange=='300k-500k' ? 'selected' : '' }>300k - 500k</option>
+                                                <option value="500k-1m" ${selectedFixedPriceRange=='500k-1m' ? 'selected' : '' }>500k - 1tr</option>
+                                                <option value="over-1m" ${selectedFixedPriceRange=='over-1m' ? 'selected' : '' }>Trên 1tr</option>
                                             </select>
                                         </div>
 
                                         <!-- Giá tùy chỉnh -->
-                                        <div class="filter-section mb-4">
+                                        <div class="filter-section mb-3">
                                             <label class="form-label">
-                                                <i class="fas fa-sliders-h me-2"></i>Giá tùy chỉnh
+                                                <i class="fas fa-sliders-h me-1"></i>Giá tùy chỉnh
                                             </label>
                                             <div class="row g-2">
                                                 <div class="col-6">
-                                                    <input type="number" class="form-control" id="minPrice"
+                                                    <input type="number" class="form-control form-control-sm" id="minPrice"
                                                         name="minPrice" placeholder="Từ" min="0" value="${minPrice}">
                                                 </div>
                                                 <div class="col-6">
-                                                    <input type="number" class="form-control" id="maxPrice"
+                                                    <input type="number" class="form-control form-control-sm" id="maxPrice"
                                                         name="maxPrice" placeholder="Đến" min="0" value="${maxPrice}">
                                                 </div>
                                             </div>
                                         </div>
 
                                         <!-- Sắp xếp -->
-                                        <div class="filter-section mb-4">
+                                        <div class="filter-section mb-3">
                                             <label for="sortBy" class="form-label">
-                                                <i class="fas fa-sort me-2"></i>Sắp xếp
+                                                <i class="fas fa-sort me-1"></i>Sắp xếp
                                             </label>
-                                            <select class="form-select" id="sortBy" name="sortBy">
+                                            <select class="form-select form-select-sm" id="sortBy" name="sortBy">
                                                 <option value="">Mặc định</option>
-                                                <option value="price-asc" ${selectedSortBy=='price-asc' ? 'selected'
-                                                    : '' }>
-                                                    💰 Giá: Thấp → Cao
-                                                </option>
-                                                <option value="price-desc" ${selectedSortBy=='price-desc' ? 'selected'
-                                                    : '' }>
-                                                    💰 Giá: Cao → Thấp
-                                                </option>
-                                                <option value="name-asc" ${selectedSortBy=='name-asc' ? 'selected' : ''
-                                                    }>
-                                                    📝 Tên: A → Z
-                                                </option>
-                                                <option value="name-desc" ${selectedSortBy=='name-desc' ? 'selected'
-                                                    : '' }>
-                                                    📝 Tên: Z → A
-                                                </option>
-                                                <option value="newest" ${selectedSortBy=='newest' ? 'selected' : '' }>
-                                                    🆕 Mới nhất
-                                                </option>
-                                                <option value="oldest" ${selectedSortBy=='oldest' ? 'selected' : '' }>
-                                                    📅 Cũ nhất
-                                                </option>
+                                                <option value="price-asc" ${selectedSortBy=='price-asc' ? 'selected' : '' }>Giá tăng</option>
+                                                <option value="price-desc" ${selectedSortBy=='price-desc' ? 'selected' : '' }>Giá giảm</option>
+                                                <option value="name-asc" ${selectedSortBy=='name-asc' ? 'selected' : '' }>Tên A-Z</option>
+                                                <option value="name-desc" ${selectedSortBy=='name-desc' ? 'selected' : '' }>Tên Z-A</option>
+                                                <option value="newest" ${selectedSortBy=='newest' ? 'selected' : '' }>Mới nhất</option>
+                                                <option value="oldest" ${selectedSortBy=='oldest' ? 'selected' : '' }>Cũ nhất</option>
                                             </select>
                                         </div>
 
                                         <!-- Nút lọc -->
                                         <div class="filter-actions">
-                                            <button type="submit" class="btn btn-primary w-100 mb-2">
-                                                <i class="fas fa-filter me-2"></i>Áp dụng bộ lọc
+                                            <button type="submit" class="btn btn-primary btn-sm w-100 mb-2">
+                                                <i class="fas fa-check me-1"></i>Áp dụng
                                             </button>
                                             <a href="${pageContext.request.contextPath}/products"
-                                                class="btn btn-outline-secondary w-100">
-                                                <i class="fas fa-refresh me-2"></i>Xóa bộ lọc
+                                                class="btn btn-outline-secondary btn-sm w-100">
+                                                <i class="fas fa-redo me-1"></i>Đặt lại
                                             </a>
                                         </div>
 
@@ -276,7 +227,7 @@
                                                                     ${String.format("%,.0f", product.price)} VNĐ
                                                             </p>
                                                             <div class="action-buttons">
-                                                                <a href="${pageContext.request.contextPath}/addToCart?id=${product.productId}"
+                                                                <a href="${pageContext.request.contextPath}/addToCart?id=${product.productId}&buyNow=true"
                                                                     class="btn btn-sm btn-buy-now"
                                                                     onclick="event.stopPropagation();">
                                                                     <i class="fas fa-shopping-bag"></i> Mua ngay

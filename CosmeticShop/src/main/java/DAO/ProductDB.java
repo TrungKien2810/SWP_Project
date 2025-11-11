@@ -33,6 +33,57 @@ public class ProductDB {
         return productList;
     }
 
+    // Gợi ý tìm kiếm: trả về danh sách sản phẩm rút gọn theo tên
+    public List<Suggestion> suggestProducts(String term, int limit) {
+        List<Suggestion> list = new ArrayList<>();
+        if (term == null || term.trim().isEmpty()) return list;
+        int safeLimit = Math.max(1, Math.min(limit, 20));
+        String sql = "SELECT TOP " + safeLimit + " product_id, name, price, image_url " +
+                     "FROM Products " +
+                     "WHERE name LIKE ? OR description LIKE ? " +
+                     "ORDER BY CASE WHEN name LIKE ? THEN 0 ELSE 1 END, product_id DESC";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            String like = "%" + term + "%";
+            String starts = term + "%";
+            stmt.setString(1, like);
+            stmt.setString(2, like);
+            stmt.setString(3, starts);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    list.add(new Suggestion(
+                            rs.getInt("product_id"),
+                            rs.getString("name"),
+                            rs.getDouble("price"),
+                            rs.getString("image_url")
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    // Kiểu dữ liệu rút gọn cho gợi ý
+    public static class Suggestion {
+        private final int productId;
+        private final String name;
+        private final double price;
+        private final String imageUrl;
+
+        public Suggestion(int productId, String name, double price, String imageUrl) {
+            this.productId = productId;
+            this.name = name;
+            this.price = price;
+            this.imageUrl = imageUrl;
+        }
+
+        public int getProductId() { return productId; }
+        public String getName() { return name; }
+        public double getPrice() { return price; }
+        public String getImageUrl() { return imageUrl; }
+    }
+
     // Lấy sản phẩm theo ID (Read)
     public Product getProductById(int id) {
         String sql = "SELECT * FROM Products WHERE product_id = ?";
@@ -450,6 +501,44 @@ public class ProductDB {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return productList;
+    }
+
+    // Lấy sản phẩm khuyến mại (demo) - fix cứng các sản phẩm có product_id chẵn
+    public List<Product> getPromotionalProducts(int limit) {
+        List<Product> productList = new ArrayList<>();
+        int safeLimit = Math.max(1, Math.min(limit, 50));
+        String sql = "SELECT TOP " + safeLimit + " * FROM Products " +
+                     "WHERE stock > 0 AND product_id % 2 = 0 " +
+                     "ORDER BY price ASC";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    productList.add(createProductWithImages(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        if (productList.size() < safeLimit) {
+            int remaining = safeLimit - productList.size();
+            String fallbackSql = "SELECT TOP " + remaining + " * FROM Products " +
+                                 "WHERE stock > 0 AND product_id NOT IN ( " +
+                                 "    SELECT TOP " + safeLimit + " product_id FROM Products " +
+                                 "    WHERE stock > 0 AND product_id % 2 = 0 ORDER BY price ASC " +
+                                 ") ORDER BY price ASC";
+            try (PreparedStatement stmt = conn.prepareStatement(fallbackSql)) {
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        productList.add(createProductWithImages(rs));
+                    }
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
         return productList;
     }
 
