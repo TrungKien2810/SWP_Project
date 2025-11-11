@@ -1,6 +1,8 @@
 package Controller;
 
 import DAO.CommentDB;
+import DAO.NotificationDB;
+import DAO.ProductDB;
 import Model.Comment;
 import Model.CommentMedia;
 import Model.CommentReply;
@@ -96,6 +98,25 @@ public class CommentServlet extends HttpServlet {
             if (commentId <= 0) {
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Không thể thêm bình luận");
                 return;
+            }
+            
+            // Tạo thông báo cho admin nếu đánh giá thấp (rating <= 2)
+            if (rating <= 2) {
+                try {
+                    NotificationDB notificationDB = new NotificationDB();
+                    ProductDB productDB = new ProductDB();
+                    Model.Product product = productDB.getProductById(productId);
+                    String productName = product != null ? product.getName() : "Sản phẩm #" + productId;
+                    
+                    String title = "Cảnh báo: Sản phẩm bị đánh giá thấp";
+                    String message = String.format("Sản phẩm '%s' vừa nhận được đánh giá %d sao từ khách hàng %s", 
+                        productName, rating, currentUser.getUsername());
+                    String linkUrl = request.getContextPath() + "/product-detail?id=" + productId;
+                    notificationDB.createAdminNotification("LOW_RATING", title, message, linkUrl);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    // Không làm gián đoạn flow nếu tạo thông báo thất bại
+                }
             }
             
             // Handle media uploads
