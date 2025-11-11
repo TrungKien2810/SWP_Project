@@ -288,6 +288,22 @@ public class UserDB {
         }
         return users;
     }
+
+    // Lấy danh sách user_id của tất cả tài khoản ADMIN
+    public java.util.List<Integer> getAdminUserIds() {
+        java.util.List<Integer> adminIds = new java.util.ArrayList<>();
+        String sql = "SELECT user_id FROM Users WHERE role = 'ADMIN'";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                adminIds.add(rs.getInt("user_id"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return adminIds;
+    }
     
     // Cập nhật role của user
     public boolean updateRole(int userId, String newRole) {

@@ -14,18 +14,39 @@ document.addEventListener('DOMContentLoaded', function() {
     const contextPath = notificationBell.getAttribute('data-context-path') || '';
     
     let notifications = [];
+    let unreadCount = 0;
+    // Versioning tách biệt cho count và list để tránh can nhiễu lẫn nhau
+    let countVersion = 0;
+    let listVersion = 0;
     
     // Load notifications count
+    function updateBadge() {
+        const badgeValue = unreadCount > 99 ? '99+' : unreadCount;
+        notificationBadge.textContent = badgeValue;
+        notificationBadge.dataset.count = unreadCount;
+        // Control both hidden attribute and inline style for compatibility with existing CSS
+        if (unreadCount > 0) {
+            notificationBadge.removeAttribute('hidden');
+            notificationBadge.removeAttribute('aria-hidden');
+            notificationBadge.style.display = 'flex';
+        } else {
+            notificationBadge.textContent = '0';
+            notificationBadge.setAttribute('hidden', '');
+            notificationBadge.setAttribute('aria-hidden', 'true');
+            notificationBadge.style.display = 'none';
+        }
+    }
+
     function loadNotificationCount() {
-        fetch(contextPath + '/notifications?action=count')
+        const localVersion = ++countVersion;
+        fetch(contextPath + '/notifications?action=count', {
+            cache: 'no-store'
+        })
             .then(response => response.json())
             .then(data => {
-                if (data.count > 0) {
-                    notificationBadge.textContent = data.count > 99 ? '99+' : data.count;
-                    notificationBadge.style.display = 'flex';
-                } else {
-                    notificationBadge.style.display = 'none';
-                }
+                if (localVersion !== countVersion) return; // bỏ qua response cũ
+                unreadCount = typeof data.count === 'number' ? data.count : 0;
+                updateBadge();
             })
             .catch(error => {
                 console.error('Error loading notification count:', error);
@@ -34,11 +55,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Load notifications list
     function loadNotifications() {
+        const localVersion = ++listVersion;
         notificationList.innerHTML = '<div class="notification-loading">Đang tải...</div>';
         
-        fetch(contextPath + '/notifications?action=unread')
+        // Lấy danh sách đầy đủ (bao gồm global cho admin). Badge sẽ được cập nhật từ kênh count riêng.
+        fetch(contextPath + '/notifications?action=list', {
+            cache: 'no-store'
+        })
             .then(response => response.json())
             .then(data => {
+                if (localVersion !== listVersion) return; // bỏ qua response cũ
                 notifications = data;
                 renderNotifications(data);
             })
@@ -89,16 +115,19 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Mark notification as read
     function markAsRead(notificationId) {
-        const formData = new FormData();
-        formData.append('action', 'markRead');
-        formData.append('notificationId', notificationId);
+        const localListVersion = ++listVersion; // đảm bảo phản hồi cũ không override list
+        // Sử dụng x-www-form-urlencoded để Servlet đọc được bằng getParameter
+        const body = 'action=' + encodeURIComponent('markRead') +
+                     '&notificationId=' + encodeURIComponent(notificationId);
         
         fetch(contextPath + '/notifications', {
             method: 'POST',
-            body: formData
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+            body: body
         })
         .then(response => response.json())
         .then(data => {
+            if (localListVersion !== listVersion) return;
             if (data.success) {
                 // Update UI
                 const item = notificationList.querySelector(`[data-id="${notificationId}"]`);
@@ -106,8 +135,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     item.classList.remove('unread');
                     item.dataset.read = 'true';
                 }
-                // Reload count
-                loadNotificationCount();
+                if (typeof data.unreadCount === 'number') {
+                    unreadCount = data.unreadCount;
+                } else {
+                    unreadCount = Math.max(0, unreadCount - 1);
+                }
+                updateBadge();
+                // Reload count to sync with server in background
+                loadNotificationCount(); // tăng countVersion riêng, không ảnh hưởng list
             }
         })
         .catch(error => {
@@ -117,23 +152,65 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Mark all as read
     function markAllAsRead() {
-        const formData = new FormData();
-        formData.append('action', 'markAllRead');
+        const localListVersion = ++listVersion; // cô lập với count
+        // Sử dụng x-www-form-urlencoded để Servlet đọc được bằng getParameter
+        const body = 'action=' + encodeURIComponent('markAllRead');
+        
+        console.log('[DEBUG] markAllAsRead - starting request');
         
         fetch(contextPath + '/notifications', {
             method: 'POST',
-            body: formData
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+            body: body,
+            cache: 'no-store'
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Reload notifications
-                loadNotifications();
-                loadNotificationCount();
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
+            return response.json();
+        })
+        .then(data => {
+            console.log('[DEBUG] markAllAsRead - response received:', data);
+            
+            if (localListVersion !== listVersion) {
+                console.log('[DEBUG] markAllAsRead - ignoring stale response');
+                return;
+            }
+            
+            if (data.success) {
+                console.log('[DEBUG] markAllAsRead - success! clearing notifications');
+                // Server trả về danh sách thông báo đã cập nhật
+                if (data.notifications && Array.isArray(data.notifications)) {
+                    notifications = data.notifications;
+                    renderNotifications(notifications);
+                } else {
+                    notifications = [];
+                    notificationList.innerHTML = '<div class="notification-empty">Không có thông báo mới</div>';
+                }
+            } else {
+                console.warn('[DEBUG] markAllAsRead - failed:', data.error);
+                // Reload từ server để cập nhật
+                loadNotifications();
+            }
+            
+            // Cập nhật unreadCount từ response
+            if (typeof data.unreadCount === 'number') {
+                unreadCount = data.unreadCount;
+                console.log('[DEBUG] markAllAsRead - updated unreadCount:', unreadCount);
+            } else {
+                unreadCount = 0;
+            }
+            
+            updateBadge();
+            // Đồng bộ lại count từ server (kênh riêng)
+            loadNotificationCount();
         })
         .catch(error => {
             console.error('Error marking all as read:', error);
+            // Fallback: reload từ server
+            loadNotifications();
+            loadNotificationCount();
         });
     }
     
@@ -157,6 +234,13 @@ document.addEventListener('DOMContentLoaded', function() {
     if (markAllReadBtn) {
         markAllReadBtn.addEventListener('click', function(e) {
             e.stopPropagation();
+            // Optimistic UI: hide badge immediately
+            unreadCount = 0;
+            updateBadge();
+            // Clear list visually
+            if (notificationList) {
+                notificationList.innerHTML = '<div class="notification-empty">Không có thông báo mới</div>';
+            }
             markAllAsRead();
         });
     }

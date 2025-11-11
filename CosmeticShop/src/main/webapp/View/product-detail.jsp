@@ -775,25 +775,74 @@
 
         // Delete comment via AJAX
         const ctx = '${pageContext.request.contextPath}';
+
+        function updateCommentMeta() {
+            const commentItems = document.querySelectorAll('.comment-item');
+            const commentCountEl = document.querySelector('.comment-count span');
+            if (commentCountEl) {
+                const newCount = commentItems.length;
+                commentCountEl.textContent = `${newCount} đánh giá`;
+            }
+
+            const totalFilterLink = document.querySelector('.rating-filter .filter-buttons a');
+            if (totalFilterLink) {
+                const newCount = commentItems.length;
+                totalFilterLink.innerHTML = totalFilterLink.innerHTML.replace(/\(\d+\)/, `(${newCount})`);
+            }
+
+            const commentsListEl = document.querySelector('.comments-list');
+            if (commentsListEl && commentItems.length === 0) {
+                commentsListEl.innerHTML = '<div class="notification-empty">Chưa có bình luận nào.</div>';
+            }
+        }
+
         document.querySelectorAll('.delete-comment-btn').forEach(btn => {
             btn.addEventListener('click', function() {
+                const button = this;
+                if (button.dataset.deleting === 'true') return; // chặn double-click
                 if (!confirm('Bạn có chắc muốn xóa bình luận này?')) return;
-                const commentId = this.getAttribute('data-comment-id');
+                const commentId = button.getAttribute('data-comment-id');
+                const itemEl = button.closest('.comment-item');
+                button.dataset.deleting = 'true';
+                button.setAttribute('aria-busy', 'true');
+                button.disabled = true;
+                // Optimistic UI: remove ngay trên UI để không cần reload
+                if (itemEl) {
+                    itemEl.style.opacity = '0.5';
+                    itemEl.style.pointerEvents = 'none';
+                }
                 fetch(ctx + '/addComment', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: 'action=delete&commentId=' + encodeURIComponent(commentId)
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+                    body: 'action=delete&commentId=' + encodeURIComponent(commentId),
+                    cache: 'no-store'
                 })
-                .then(res => res.text())
+                .then(res => res.text().catch(() => ''))
                 .then(text => {
-                    if (text === 'ok') {
-                        const item = document.querySelector(`.comment-item[data-comment-id="${commentId}"]`);
-                        if (item) item.remove();
-                    } else {
-                        alert('Không thể xóa bình luận.');
+                    const normalized = (text || '').trim().toLowerCase();
+                    // Nếu server báo 'ok' hoặc 'forbidden'/'not_found' (đã xóa), xóa hoàn toàn khỏi UI
+                    if (normalized === 'ok' || normalized === 'forbidden' || normalized === 'not_found') {
+                        if (itemEl && itemEl.isConnected) {
+                            itemEl.remove();
+                        }
+                        updateCommentMeta();
+                        return;
                     }
+                    // Nếu phản hồi không như mong đợi (HTML/redirect), fallback reload để đồng bộ UI
+                    if (itemEl && itemEl.isConnected) {
+                        itemEl.remove();
+                        updateCommentMeta();
+                    }
+                    setTimeout(() => {
+                        location.reload();
+                    }, 50);
                 })
-                .catch(() => alert('Có lỗi xảy ra khi xóa.'));
+                .catch(() => alert('Có lỗi xảy ra khi xóa.'))
+                .finally(() => {
+                    button.dataset.deleting = 'false';
+                    button.removeAttribute('aria-busy');
+                    button.disabled = false;
+                });
             });
         });
         

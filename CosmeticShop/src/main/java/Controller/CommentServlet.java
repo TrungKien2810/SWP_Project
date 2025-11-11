@@ -112,7 +112,8 @@ public class CommentServlet extends HttpServlet {
                     String message = String.format("Sản phẩm '%s' vừa nhận được đánh giá %d sao từ khách hàng %s", 
                         productName, rating, currentUser.getUsername());
                     String linkUrl = request.getContextPath() + "/product-detail?id=" + productId;
-                    notificationDB.createAdminNotification("LOW_RATING", title, message, linkUrl);
+                    // Gửi thông báo tới tất cả tài khoản ADMIN (mỗi admin một bản ghi)
+                    notificationDB.createNotificationsForAdmins("LOW_RATING", title, message, linkUrl);
                 } catch (Exception e) {
                     e.printStackTrace();
                     // Không làm gián đoạn flow nếu tạo thông báo thất bại
