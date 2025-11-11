@@ -9,19 +9,18 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <title>Thanh toán</title>
     <style>
         .container-sm { max-width: 1000px; }
         .card { border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .highlight { color:#f76c85; }
     </style>
-    <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
-    <script src="${pageContext.request.contextPath}/Js/home.js"></script>
 </head>
 <body>
     <%@ include file="/View/includes/header.jspf" %>
 
-    <div class="container-sm my-4">
+    <main class="container-sm my-4">
         <c:if test="${param.error == 'no_address'}">
             <div class="alert alert-danger">Cần thêm địa chỉ giao hàng trước khi đặt hàng.</div>
         </c:if>
@@ -125,7 +124,9 @@
                 </div>
             </div>
         </form>
-    </div>
+    </main>
+
+    <%@ include file="/View/includes/footer.jspf" %>
     <script>
         (function(){
             var itemsTotal = Number('${itemsTotal}'.replace(/,/g, '')) || 0;
