@@ -295,7 +295,7 @@
                         <p class="text-muted mb-0">Giá tốt nhất dành cho bạn</p>
                     </div>
                     <a href="${pageContext.request.contextPath}/products" class="btn btn-outline-success d-none d-md-block">
-                        Xem thêm <i class="fas fa-arrow-right ms-1"></i>
+                        Khám phá <i class="fas fa-arrow-right ms-1"></i>
                     </a>
                 </div>
                 
