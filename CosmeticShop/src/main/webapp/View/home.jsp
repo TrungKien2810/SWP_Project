@@ -15,7 +15,12 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/collection.css">
         <title>Pinky Cloud - Trang Chủ</title>
     </head>
-    <body>
+    <body 
+        <c:if test="${not empty sessionScope.cartSuccessMsg}">data-success-msg="${sessionScope.cartSuccessMsg}"</c:if>
+        <c:if test="${not empty sessionScope.cartErrorMsg}">data-error-msg="${sessionScope.cartErrorMsg}"</c:if>
+    >
+        <c:remove var="cartSuccessMsg" scope="session" />
+        <c:remove var="cartErrorMsg" scope="session" />
         <%@ include file="/View/includes/header.jspf" %>
 
         <%
@@ -328,7 +333,7 @@
                                             <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> VNĐ
                                         </p>
                                         <div class="action-buttons">
-                                            <a href="${pageContext.request.contextPath}/addToCart?id=${product.productId}"
+                                            <a href="${pageContext.request.contextPath}/addToCart?id=${product.productId}&buyNow=true"
                                                class="btn btn-sm btn-buy-now"
                                                onclick="event.stopPropagation();">
                                                 <i class="fas fa-shopping-bag"></i> Mua ngay
@@ -395,7 +400,7 @@
                                         <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> VNĐ
                                     </p>
                                     <div class="action-buttons">
-                                        <a href="${pageContext.request.contextPath}/addToCart?id=${product.productId}"
+                                        <a href="${pageContext.request.contextPath}/addToCart?id=${product.productId}&buyNow=true"
                                            class="btn btn-sm btn-buy-now"
                                            onclick="event.stopPropagation();">
                                             <i class="fas fa-shopping-bag"></i> Mua ngay
@@ -465,7 +470,7 @@
                                             <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> VNĐ
                                         </p>
                                         <div class="action-buttons">
-                                            <a href="${pageContext.request.contextPath}/addToCart?id=${product.productId}"
+                                            <a href="${pageContext.request.contextPath}/addToCart?id=${product.productId}&buyNow=true"
                                                class="btn btn-sm btn-buy-now"
                                                onclick="event.stopPropagation();">
                                                 <i class="fas fa-shopping-bag"></i> Mua ngay

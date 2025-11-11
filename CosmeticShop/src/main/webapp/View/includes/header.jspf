@@ -2,9 +2,11 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/site-header.css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/Css/toast-notification.css">
 <script>
     window.APP_CTX = '${pageContext.request.contextPath}';
 </script>
+<script src="${pageContext.request.contextPath}/Js/toast-notification.js"></script>
                     <div class="header">
                         <div class="header_text">
                             <p>THEO DÕI CHÚNG TÔI</p>
