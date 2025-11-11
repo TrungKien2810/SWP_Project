@@ -2,6 +2,7 @@ package DAO;
 
 import Model.Discount;
 import Model.UserDiscountAssign;
+import Model.Notification;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -397,6 +398,7 @@ public class DiscountDB {
     // Assign all due auto-assign discounts to a specific user, idempotent
     public void assignDueForUser(int userId) {
         System.out.println("[DEBUG] Checking vouchers eligible for user " + userId + ":");
+        NotificationDB notificationDB = new NotificationDB();
         
         // Gán voucher AUTO_ALL
         String autoAllSql = "INSERT INTO UserVouchers(user_id, discount_id) " +
@@ -412,6 +414,11 @@ public class DiscountDB {
             ps.setInt(2, userId);
             int assigned = ps.executeUpdate();
             System.out.println("[DEBUG] Assigned " + assigned + " AUTO_ALL vouchers to user " + userId);
+            
+            // Tạo thông báo cho user khi nhận mã giảm giá
+            if (assigned > 0) {
+                createDiscountNotifications(userId, "AUTO_ALL", notificationDB);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -431,6 +438,11 @@ public class DiscountDB {
             ps.setInt(3, userId);
             int assigned = ps.executeUpdate();
             System.out.println("[DEBUG] Assigned " + assigned + " ORDER_COUNT vouchers to user " + userId);
+            
+            // Tạo thông báo cho user khi nhận mã giảm giá
+            if (assigned > 0) {
+                createDiscountNotifications(userId, "ORDER_COUNT", notificationDB);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -450,6 +462,11 @@ public class DiscountDB {
             ps.setInt(3, userId);
             int assigned = ps.executeUpdate();
             System.out.println("[DEBUG] Assigned " + assigned + " TOTAL_SPENT vouchers to user " + userId);
+            
+            // Tạo thông báo cho user khi nhận mã giảm giá
+            if (assigned > 0) {
+                createDiscountNotifications(userId, "TOTAL_SPENT", notificationDB);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -469,6 +486,51 @@ public class DiscountDB {
             ps.setInt(3, userId);
             int assigned = ps.executeUpdate();
             System.out.println("[DEBUG] Assigned " + assigned + " FIRST_ORDER vouchers to user " + userId);
+            
+            // Tạo thông báo cho user khi nhận mã giảm giá
+            if (assigned > 0) {
+                createDiscountNotifications(userId, "FIRST_ORDER", notificationDB);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    // Helper method để tạo thông báo khi user nhận mã giảm giá
+    private void createDiscountNotifications(int userId, String conditionType, NotificationDB notificationDB) {
+        try {
+            // Lấy thông tin các mã giảm giá vừa được gán
+            String sql = "SELECT TOP 5 d.name, d.code, d.discount_type, d.discount_value " +
+                         "FROM UserVouchers uv " +
+                         "JOIN Discounts d ON uv.discount_id = d.discount_id " +
+                         "WHERE uv.user_id = ? AND uv.status = 'UNUSED' " +
+                         "ORDER BY uv.created_at DESC";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, userId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    int count = 0;
+                    StringBuilder discountNames = new StringBuilder();
+                    while (rs.next() && count < 3) {
+                        if (count > 0) discountNames.append(", ");
+                        discountNames.append(rs.getString("name"));
+                        count++;
+                    }
+                    
+                    if (count > 0) {
+                        String title = "Bạn đã nhận mã giảm giá mới!";
+                        String message;
+                        if (count == 1) {
+                            message = String.format("Bạn đã nhận được mã giảm giá '%s'. Hãy sử dụng ngay!", discountNames.toString());
+                        } else {
+                            message = String.format("Bạn đã nhận được %d mã giảm giá mới: %s. Hãy kiểm tra ngay!", count, discountNames.toString());
+                        }
+                        String linkUrl = "/my-promos";
+                        
+                        Notification notification = new Notification(userId, "DISCOUNT_ASSIGNED", title, message, linkUrl);
+                        notificationDB.createNotification(notification);
+                    }
+                }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

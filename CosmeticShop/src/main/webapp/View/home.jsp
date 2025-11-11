@@ -36,6 +36,12 @@
                 ProductDB productDB = new ProductDB();
                 request.setAttribute("featuredProducts", productDB.getFeaturedProducts(8));
             }
+            
+            // Load best selling products (top 8 sản phẩm bán chạy nhất)
+            if (request.getAttribute("bestSellingProducts") == null) {
+                ProductDB productDB = new ProductDB();
+                request.setAttribute("bestSellingProducts", productDB.getBestSellingProducts(8));
+            }
         %>
 
         <c:if test="${not empty param.msg}">
@@ -143,62 +149,125 @@
                     </div>
                 </c:when>
                 <c:otherwise>
-                    <div class="row g-3 g-md-4">
-                        <c:forEach var="category" items="${categoryList}" varStatus="loop">
-                            <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-                                <c:url var="categoryUrl" value="/products">
-                                    <c:param name="category" value="${category.name}"/>
-                                </c:url>
-                                <a href="${categoryUrl}" 
-                                   class="category-card-home text-decoration-none">
-                                    <div class="category-icon-home">
-                                        <c:set var="catName" value="${fn:toLowerCase(fn:trim(category.name))}" />
-                                        <c:choose>
-                                            <c:when test="${fn:contains(catName, 'son') || fn:contains(catName, 'môi')}">
-                                                <i class="fas fa-lips"></i>
-                                            </c:when>
-                                            <c:when test="${fn:contains(catName, 'kem') || fn:contains(catName, 'dưỡng')}">
-                                                <i class="fas fa-spa"></i>
-                                            </c:when>
-                                            <c:when test="${fn:contains(catName, 'rửa') || fn:contains(catName, 'sữa')}">
-                                                <i class="fas fa-pump-soap"></i>
-                                            </c:when>
-                                            <c:when test="${fn:contains(catName, 'mặt nạ') || fn:contains(catName, 'mask')}">
-                                                <i class="fas fa-mask"></i>
-                                            </c:when>
-                                            <c:when test="${fn:contains(catName, 'phấn') || fn:contains(catName, 'nền')}">
-                                                <i class="fas fa-palette"></i>
-                                            </c:when>
-                                            <c:when test="${fn:contains(catName, 'tóc') || fn:contains(catName, 'gội')}">
-                                                <i class="fas fa-cut"></i>
-                                            </c:when>
-                                            <c:when test="${fn:contains(catName, 'nước hoa') || fn:contains(catName, 'perfume')}">
-                                                <i class="fas fa-spray-can"></i>
-                                            </c:when>
-                                            <c:when test="${fn:contains(catName, 'phụ kiện') || fn:contains(catName, 'accessory')}">
-                                                <i class="fas fa-brush"></i>
-                                            </c:when>
-                                            <c:when test="${fn:contains(catName, 'mắt') || fn:contains(catName, 'eye')}">
-                                                <i class="fas fa-eye"></i>
-                                            </c:when>
-                                            <c:when test="${fn:contains(catName, 'serum')}">
-                                                <i class="fas fa-flask"></i>
-                                            </c:when>
-                                            <c:when test="${fn:contains(catName, 'tẩy') || fn:contains(catName, 'trang')}">
-                                                <i class="fas fa-hand-sparkles"></i>
-                                            </c:when>
-                                            <c:when test="${fn:contains(catName, 'nắng') || fn:contains(catName, 'sun')}">
-                                                <i class="fas fa-sun"></i>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <i class="fas fa-cube"></i>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </div>
-                                    <h6 class="category-name-home mt-2 mb-0">${fn:escapeXml(category.name)}</h6>
-                                </a>
+                    <div class="category-carousel-wrapper">
+                        <button type="button" class="category-carousel-btn category-carousel-btn-prev" id="categoryPrevBtn" aria-label="Previous">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div class="category-carousel-container" id="categoryCarousel">
+                            <div class="category-carousel-track" id="categoryTrack">
+                                <c:forEach var="category" items="${categoryList}" varStatus="loop">
+                                    <c:url var="categoryUrl" value="/products">
+                                        <c:param name="category" value="${category.name}"/>
+                                    </c:url>
+                                    <a href="${categoryUrl}" class="category-card-home text-decoration-none">
+                                        <div class="category-icon-home">
+                                            <c:choose>
+                                                <c:when test="${not empty category.imageUrl}">
+                                                    <img src="${pageContext.request.contextPath}${category.imageUrl}" 
+                                                         alt="${fn:escapeXml(category.name)}" 
+                                                         class="category-image" 
+                                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                                    <div class="category-fallback-icon" style="display: none;">
+                                                        <c:set var="catName" value="${fn:toLowerCase(fn:trim(category.name))}" />
+                                                        <c:choose>
+                                                            <c:when test="${fn:contains(catName, 'son') || fn:contains(catName, 'môi')}">
+                                                                <i class="fas fa-lips"></i>
+                                                            </c:when>
+                                                            <c:when test="${fn:contains(catName, 'kem') || fn:contains(catName, 'dưỡng')}">
+                                                                <i class="fas fa-spa"></i>
+                                                            </c:when>
+                                                            <c:when test="${fn:contains(catName, 'rửa') || fn:contains(catName, 'sữa')}">
+                                                                <i class="fas fa-pump-soap"></i>
+                                                            </c:when>
+                                                            <c:when test="${fn:contains(catName, 'mặt nạ') || fn:contains(catName, 'mask')}">
+                                                                <i class="fas fa-mask"></i>
+                                                            </c:when>
+                                                            <c:when test="${fn:contains(catName, 'phấn') || fn:contains(catName, 'nền')}">
+                                                                <i class="fas fa-palette"></i>
+                                                            </c:when>
+                                                            <c:when test="${fn:contains(catName, 'tóc') || fn:contains(catName, 'gội')}">
+                                                                <i class="fas fa-cut"></i>
+                                                            </c:when>
+                                                            <c:when test="${fn:contains(catName, 'nước hoa') || fn:contains(catName, 'perfume')}">
+                                                                <i class="fas fa-spray-can"></i>
+                                                            </c:when>
+                                                            <c:when test="${fn:contains(catName, 'phụ kiện') || fn:contains(catName, 'accessory')}">
+                                                                <i class="fas fa-brush"></i>
+                                                            </c:when>
+                                                            <c:when test="${fn:contains(catName, 'mắt') || fn:contains(catName, 'eye')}">
+                                                                <i class="fas fa-eye"></i>
+                                                            </c:when>
+                                                            <c:when test="${fn:contains(catName, 'serum')}">
+                                                                <i class="fas fa-flask"></i>
+                                                            </c:when>
+                                                            <c:when test="${fn:contains(catName, 'tẩy') || fn:contains(catName, 'trang')}">
+                                                                <i class="fas fa-hand-sparkles"></i>
+                                                            </c:when>
+                                                            <c:when test="${fn:contains(catName, 'nắng') || fn:contains(catName, 'sun')}">
+                                                                <i class="fas fa-sun"></i>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <i class="fas fa-cube"></i>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </div>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <div class="category-fallback-icon">
+                                                        <c:set var="catName" value="${fn:toLowerCase(fn:trim(category.name))}" />
+                                                        <c:choose>
+                                                            <c:when test="${fn:contains(catName, 'son') || fn:contains(catName, 'môi')}">
+                                                                <i class="fas fa-lips"></i>
+                                                            </c:when>
+                                                            <c:when test="${fn:contains(catName, 'kem') || fn:contains(catName, 'dưỡng')}">
+                                                                <i class="fas fa-spa"></i>
+                                                            </c:when>
+                                                            <c:when test="${fn:contains(catName, 'rửa') || fn:contains(catName, 'sữa')}">
+                                                                <i class="fas fa-pump-soap"></i>
+                                                            </c:when>
+                                                            <c:when test="${fn:contains(catName, 'mặt nạ') || fn:contains(catName, 'mask')}">
+                                                                <i class="fas fa-mask"></i>
+                                                            </c:when>
+                                                            <c:when test="${fn:contains(catName, 'phấn') || fn:contains(catName, 'nền')}">
+                                                                <i class="fas fa-palette"></i>
+                                                            </c:when>
+                                                            <c:when test="${fn:contains(catName, 'tóc') || fn:contains(catName, 'gội')}">
+                                                                <i class="fas fa-cut"></i>
+                                                            </c:when>
+                                                            <c:when test="${fn:contains(catName, 'nước hoa') || fn:contains(catName, 'perfume')}">
+                                                                <i class="fas fa-spray-can"></i>
+                                                            </c:when>
+                                                            <c:when test="${fn:contains(catName, 'phụ kiện') || fn:contains(catName, 'accessory')}">
+                                                                <i class="fas fa-brush"></i>
+                                                            </c:when>
+                                                            <c:when test="${fn:contains(catName, 'mắt') || fn:contains(catName, 'eye')}">
+                                                                <i class="fas fa-eye"></i>
+                                                            </c:when>
+                                                            <c:when test="${fn:contains(catName, 'serum')}">
+                                                                <i class="fas fa-flask"></i>
+                                                            </c:when>
+                                                            <c:when test="${fn:contains(catName, 'tẩy') || fn:contains(catName, 'trang')}">
+                                                                <i class="fas fa-hand-sparkles"></i>
+                                                            </c:when>
+                                                            <c:when test="${fn:contains(catName, 'nắng') || fn:contains(catName, 'sun')}">
+                                                                <i class="fas fa-sun"></i>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <i class="fas fa-cube"></i>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </div>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </div>
+                                        <h6 class="category-name-home mt-2 mb-0">${fn:escapeXml(category.name)}</h6>
+                                    </a>
+                                </c:forEach>
                             </div>
-                        </c:forEach>
+                        </div>
+                        <button type="button" class="category-carousel-btn category-carousel-btn-next" id="categoryNextBtn" aria-label="Next">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
                     </div>
                 </c:otherwise>
             </c:choose>
@@ -214,7 +283,7 @@
                     <p class="text-muted mb-0">Những sản phẩm được yêu thích nhất</p>
                 </div>
                 <a href="${pageContext.request.contextPath}/products" class="btn btn-outline-primary d-none d-md-block">
-                    Xem tất cả <i class="fas fa-arrow-right ms-1"></i>
+                    Khám phá <i class="fas fa-arrow-right ms-1"></i>
                 </a>
             </div>
             
@@ -268,6 +337,77 @@
                     </div>
                 </c:otherwise>
             </c:choose>
+        </div>
+
+        <!-- ========== KHỐI SẢN PHẨM BÁN CHẠY NHẤT ========== -->
+        <div class="best-selling-section">
+            <div class="container mt-5 mb-5">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="text mb-2" style="color: #f76c85; font-weight: 800; font-family: 'Times New Roman', Times, serif;">
+                            <i class="fas fa-fire text-danger"></i> SẢN PHẨM BÁN CHẠY NHẤT
+                        </h2>
+                        <p class="text-muted mb-0">Những sản phẩm được khách hàng yêu thích nhất</p>
+                    </div>
+                    <a href="${pageContext.request.contextPath}/products" class="btn btn-outline-primary d-none d-md-block">
+                        Khám phá <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            
+                <c:choose>
+                    <c:when test="${empty bestSellingProducts}">
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle"></i> Chưa có sản phẩm bán chạy nào. Vui lòng quay lại sau.
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="product-grid">
+                            <c:forEach var="product" items="${bestSellingProducts}">
+                                <div class="product-card"
+                                     onclick="window.location.href='${pageContext.request.contextPath}/product-detail?id=${product.productId}'"
+                                     style="cursor: pointer;">
+                                    <div class="best-selling-badge">
+                                        <i class="fas fa-fire"></i> Bán chạy
+                                    </div>
+                                    <c:choose>
+                                        <c:when test="${not empty product.imageUrl}">
+                                            <img src="${pageContext.request.contextPath}${product.imageUrl}"
+                                                 alt="${fn:escapeXml(product.name)}"
+                                                 loading="lazy"
+                                                 onerror="this.src='${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png'">
+                                        </c:when>
+                                        <c:otherwise>
+                                            <img src="${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png"
+                                                 alt="${fn:escapeXml(product.name)}"
+                                                 loading="lazy">
+                                        </c:otherwise>
+                                    </c:choose>
+                                    <div class="product-card-body">
+                                        <h5>${fn:escapeXml(product.name)}</h5>
+                                        <p class="price">
+                                            <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> VNĐ
+                                        </p>
+                                        <div class="action-buttons">
+                                            <a href="${pageContext.request.contextPath}/addToCart?id=${product.productId}"
+                                               class="btn btn-sm btn-buy-now"
+                                               onclick="event.stopPropagation();">
+                                                <i class="fas fa-shopping-bag"></i> Mua ngay
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </c:forEach>
+                        </div>
+                        
+                        <!-- Nút xem tất cả cho mobile -->
+                        <div class="text-center mt-4 d-md-none">
+                            <a href="${pageContext.request.contextPath}/products" class="btn btn-primary btn-lg">
+                                Xem tất cả sản phẩm <i class="fas fa-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
+            </div>
         </div>
 
         <!-- ========== KHỐI CHI NHÁNH PHÂN PHỐI ========== -->

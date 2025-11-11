@@ -1,6 +1,8 @@
 package Controller;
 
 import DAO.lienheDAO;
+import DAO.NotificationDB;
+import Model.Notification;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -28,6 +30,21 @@ public class lienhe extends HttpServlet {
             // Gọi DAO để lưu vào DB
             lienheDAO dao = new lienheDAO();
             boolean result = dao.insertContact(contact);
+
+            // Tạo thông báo cho admin khi có phản hồi khách hàng
+            if (result) {
+                try {
+                    NotificationDB notificationDB = new NotificationDB();
+                    String title = "Phản hồi mới từ khách hàng";
+                    String notificationMessage = String.format("Khách hàng %s (%s) đã gửi phản hồi với chủ đề: %s", 
+                        name, email, subject);
+                    String linkUrl = request.getContextPath() + "/admin?action=contact";
+                    notificationDB.createAdminNotification("CUSTOMER_FEEDBACK", title, notificationMessage, linkUrl);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    // Không làm gián đoạn flow nếu tạo thông báo thất bại
+                }
+            }
 
             // Điều hướng kết quả
             if (result) {
