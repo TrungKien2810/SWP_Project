@@ -1,7 +1,7 @@
 package Model;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Product {
     private int productId;
@@ -12,6 +12,7 @@ public class Product {
     private String imageUrl;
     private List<String> imageUrls; // Danh sách nhiều ảnh
     private int categoryId;
+    private Discount activeDiscount;
 
     public Product(int productId, String name, double price, int stock, String description, String imageUrl, int categoryId) {
         this.productId = productId;
@@ -117,5 +118,43 @@ public class Product {
             this.imageUrl = imageUrl;
         }
     }
-    
+
+    public Discount getActiveDiscount() {
+        return activeDiscount;
+    }
+
+    public void setActiveDiscount(Discount activeDiscount) {
+        this.activeDiscount = activeDiscount;
+    }
+
+    public double getDiscountedPrice() {
+        if (activeDiscount == null) {
+            return price;
+        }
+        double discountedPrice = price;
+        if ("PERCENTAGE".equalsIgnoreCase(activeDiscount.getType())) {
+            discountedPrice = price * (1 - (activeDiscount.getValue() / 100.0));
+        } else if ("FIXED_AMOUNT".equalsIgnoreCase(activeDiscount.getType())) {
+            discountedPrice = price - activeDiscount.getValue();
+        }
+        if (activeDiscount.getMaxDiscountAmount() != null && "PERCENTAGE".equalsIgnoreCase(activeDiscount.getType())) {
+            double maxDiscount = activeDiscount.getMaxDiscountAmount();
+            double actualDiscount = price - discountedPrice;
+            if (actualDiscount > maxDiscount) {
+                discountedPrice = price - maxDiscount;
+            }
+        }
+        if (discountedPrice < 0) {
+            discountedPrice = 0;
+        }
+        return discountedPrice;
+    }
+
+    public boolean isDiscountActive() {
+        return activeDiscount != null && getDiscountedPrice() < price;
+    }
+
+    public double getDiscountAmount() {
+        return Math.max(0, price - getDiscountedPrice());
+    }
 }

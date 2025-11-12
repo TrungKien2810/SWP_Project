@@ -38,7 +38,16 @@ public class Checkout extends HttpServlet {
 
         Cart cart = cartDB.getOrCreateCartByUserId(currentUser.getUser_id());
         List<Model.CheckoutItem> items = cartDB.getSelectedCheckoutItems(cart.getCart_id());
-        double itemsTotal = cartDB.calculateSelectedTotal(cart.getCart_id());
+        // Đồng bộ lại giá hiện tại theo sản phẩm (kể cả giảm giá)
+        DAO.ProductDB pdSync = new DAO.ProductDB();
+        double itemsTotal = 0.0;
+        for (Model.CheckoutItem it : items) {
+            Model.Product p = pdSync.getProductById(it.getProductId());
+            if (p != null) {
+                it.setPrice(p.getDiscountedPrice());
+            }
+            itemsTotal += it.getSubtotal();
+        }
         
         // Lấy discount từ session (nếu có)
         Double appliedDiscountAmount = 0.0;
@@ -92,7 +101,16 @@ public class Checkout extends HttpServlet {
         // bank_code UI removed; always redirect to VNPAY when BANK is selected
         String notes = req.getParameter("notes");
 
-        double itemsTotal = cartDB.calculateSelectedTotal(cart.getCart_id());
+        // Đồng bộ lại giá hiện tại theo sản phẩm (kể cả giảm giá) và tính tổng
+        DAO.ProductDB pdSync2 = new DAO.ProductDB();
+        double itemsTotal = 0.0;
+        for (Model.CheckoutItem it : items) {
+            Model.Product p = pdSync2.getProductById(it.getProductId());
+            if (p != null) {
+                it.setPrice(p.getDiscountedPrice());
+            }
+            itemsTotal += it.getSubtotal();
+        }
         
         // Lấy discount từ session (nếu có)
         Double appliedDiscountAmount = 0.0;

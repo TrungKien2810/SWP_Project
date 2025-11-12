@@ -46,11 +46,21 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: relative;
+  position: sticky;
+  top: 0;
+  background: #ffffff;
   z-index: 1000;
   padding: 20px 0;
   margin: 0;
   box-sizing: border-box;
+}
+
+/* Push page content down a bit to avoid menu overlay in pages lacking top spacing */
+.menu + .container,
+.menu + .container-fluid,
+.menu + main,
+.menu + section {
+  margin-top: 12px;
 }
 
 .menu_logo {

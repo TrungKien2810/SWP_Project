@@ -92,7 +92,7 @@ public class addToCart extends HttpServlet {
                 int id = Integer.parseInt(idStr);
                 for (Map.Entry<Product, Integer> entry : cart.entrySet()) {
                     if (entry.getKey().getProductId() == id) {
-                        cartTotalSelected += entry.getKey().getPrice() * entry.getValue();
+                        cartTotalSelected += entry.getKey().getDiscountedPrice() * entry.getValue();
                     }
                 }
             }
@@ -209,7 +209,7 @@ public class addToCart extends HttpServlet {
                 if (createQty > maxAvailable) {
                     createQty = maxAvailable;
                 }
-                cd.addCartItems(cart.getCart_id(), p_id, createQty, product.getPrice());
+                cd.addCartItems(cart.getCart_id(), p_id, createQty, product.getDiscountedPrice());
             }
             cartItems.clear();
             cartItems = cd.getCartItemsByCartId(cart.getCart_id());

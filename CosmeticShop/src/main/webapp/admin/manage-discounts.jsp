@@ -5,14 +5,28 @@
 <div class="container-fluid">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h5 class="mb-0">Quản lý khuyến mãi</h5>
-    <a class="btn btn-primary" href="${pageContext.request.contextPath}/discounts?action=new">Tạo mã mới</a>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-primary" href="${pageContext.request.contextPath}/admin?action=discountAssign">
+        Gán/Bỏ gán mã cho sản phẩm
+      </a>
+      <a class="btn btn-primary" href="${pageContext.request.contextPath}/discounts?action=new">Tạo mã mới</a>
+    </div>
   </div>
+
+  <c:if test="${not empty param.msg}">
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      ${param.msg}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </c:if>
 
   <c:choose>
     <c:when test="${empty discounts}">
       <div class="alert alert-info">Chưa có mã giảm giá. Hãy tạo mã đầu tiên.</div>
     </c:when>
     <c:otherwise>
+      <!-- Chức năng gán/bỏ gán đã chuyển sang trang riêng: /admin?action=discountAssign -->
+
       <div class="table-responsive">
         <table class="table table-hover align-middle">
           <thead class="table-light">
