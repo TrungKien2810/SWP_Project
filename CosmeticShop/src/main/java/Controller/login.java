@@ -149,7 +149,7 @@ public class login extends HttpServlet {
                     } else {
                         Product p = pd.getProductById(pid);
                         if (p != null) {
-                            cd.addCartItems(cart.getCart_id(), pid, addQty, p.getPrice());
+                            cd.addCartItems(cart.getCart_id(), pid, addQty, p.getDiscountedPrice());
                         }
                     }
                 }

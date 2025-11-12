@@ -1,14 +1,17 @@
 package DAO;
 
+import Model.Discount;
 import Model.Product;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
-import java.sql.Types;
 
 public class ProductDB {
     private final DBConnect db = new DBConnect();
@@ -133,6 +136,8 @@ public class ProductDB {
         for (String imageUrl : additionalImages) {
             product.addImageUrl(imageUrl);
         }
+        Discount discount = fetchActiveDiscount(rs.getInt("product_id"));
+        product.setActiveDiscount(discount);
         return product;
     }
 
@@ -145,6 +150,66 @@ public class ProductDB {
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt("category_id");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private Discount fetchActiveDiscount(int productId) {
+        String sql = "SELECT TOP 1 d.*, dp.assigned_at, p.price FROM DiscountProducts dp " +
+                     "JOIN Discounts d ON dp.discount_id = d.discount_id " +
+                     "JOIN Products p ON p.product_id = dp.product_id " +
+                     "WHERE dp.product_id = ? AND d.is_active = 1 " +
+                     "AND (d.start_date IS NULL OR d.start_date <= GETDATE()) " +
+                     "AND (d.end_date IS NULL OR d.end_date >= GETDATE()) " +
+                     "ORDER BY " +
+                     // 1) ưu tiên mức giảm thực tế lớn nhất (đã tính cap nếu là %)
+                     "CASE WHEN d.discount_type = 'PERCENTAGE' THEN " +
+                     "       CASE WHEN d.max_discount_amount IS NOT NULL " +
+                     "             THEN CASE WHEN (p.price * d.discount_value / 100.0) > d.max_discount_amount " +
+                     "                        THEN d.max_discount_amount " +
+                     "                        ELSE (p.price * d.discount_value / 100.0) END " +
+                     "             ELSE (p.price * d.discount_value / 100.0) END " +
+                     "     ELSE d.discount_value END DESC, " +
+                     // 2) nếu bằng nhau, ưu tiên mã còn hạn lâu hơn
+                     "DATEDIFF(SECOND, GETDATE(), d.end_date) DESC, " +
+                     // 3) cuối cùng, ưu tiên mã mới gán hơn
+                     "dp.assigned_at DESC";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Discount discount = new Discount();
+                    discount.setDiscountId(rs.getInt("discount_id"));
+                    discount.setCode(rs.getString("code"));
+                    discount.setName(rs.getString("name"));
+                    discount.setType(rs.getString("discount_type"));
+                    discount.setValue(rs.getDouble("discount_value"));
+                    BigDecimal minOrder = rs.getBigDecimal("min_order_amount");
+                    discount.setMinOrderAmount(minOrder != null ? minOrder.doubleValue() : 0);
+                    BigDecimal maxDiscount = rs.getBigDecimal("max_discount_amount");
+                    discount.setMaxDiscountAmount(maxDiscount != null ? maxDiscount.doubleValue() : null);
+                    discount.setActive(rs.getBoolean("is_active"));
+                    Timestamp startDate = rs.getTimestamp("start_date");
+                    Timestamp endDate = rs.getTimestamp("end_date");
+                    discount.setStartDate(startDate);
+                    discount.setEndDate(endDate);
+                    discount.setDescription(rs.getString("description"));
+                    Integer usageLimit = rs.getObject("usage_limit") != null ? rs.getInt("usage_limit") : null;
+                    Integer usedCount = rs.getObject("used_count") != null ? rs.getInt("used_count") : null;
+                    discount.setUsageLimit(usageLimit);
+                    discount.setUsedCount(usedCount);
+                    discount.setConditionType(rs.getString("condition_type"));
+                    BigDecimal conditionValue = rs.getBigDecimal("condition_value");
+                    discount.setConditionValue(conditionValue != null ? conditionValue.doubleValue() : null);
+                    discount.setConditionDescription(rs.getString("condition_description"));
+                    discount.setSpecialEvent(rs.getObject("special_event") != null ? rs.getBoolean("special_event") : null);
+                    discount.setAutoAssignAll(rs.getObject("auto_assign_all") != null ? rs.getBoolean("auto_assign_all") : null);
+                    discount.setAssignDate(rs.getTimestamp("assign_date"));
+                    return discount;
                 }
             }
         } catch (SQLException e) {
@@ -166,6 +231,52 @@ public class ProductDB {
             e.printStackTrace();
         }
         return categories;
+    }
+
+    // Lấy danh sách product_id theo tên danh mục
+    public List<Integer> getProductIdsByCategoryName(String categoryName) {
+        List<Integer> ids = new ArrayList<>();
+        if (categoryName == null || categoryName.trim().isEmpty()) return ids;
+        String sql = "SELECT p.product_id FROM Products p JOIN Categories c ON p.category_id = c.category_id WHERE c.name = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, categoryName.trim());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ids.add(rs.getInt(1));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return ids;
+    }
+
+    // Lấy danh sách product_id theo khoảng giá
+    public List<Integer> getProductIdsByPriceRange(double minPrice, double maxPrice) {
+        List<Integer> ids = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT product_id FROM Products WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+        if (minPrice > 0) {
+            sql.append(" AND price >= ?");
+            params.add(minPrice);
+        }
+        if (maxPrice < Double.MAX_VALUE) {
+            sql.append(" AND price <= ?");
+            params.add(maxPrice);
+        }
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ids.add(rs.getInt(1));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return ids;
     }
 
     // Lấy tên danh mục theo ID

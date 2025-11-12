@@ -98,7 +98,7 @@ public class removeFromCart extends HttpServlet {
             for (java.util.Map.Entry<Integer, Integer> e : cookieCart.entrySet()) {
                 Product p = pd.getProductById(e.getKey());
                 if (p == null) continue;
-                cartItems.add(new CartItems(0, 0, p.getProductId(), e.getValue(), p.getPrice()));
+                cartItems.add(new CartItems(0, 0, p.getProductId(), e.getValue(), p.getDiscountedPrice()));
             }
             session.setAttribute("cartItems", cartItems);
             request.getRequestDispatcher("/View/cart.jsp").forward(request, response);

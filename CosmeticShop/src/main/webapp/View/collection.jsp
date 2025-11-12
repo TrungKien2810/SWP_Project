@@ -216,16 +216,47 @@
                                                     <div class="product-card"
                                                         onclick="window.location.href='${pageContext.request.contextPath}/product-detail?id=${product.productId}'"
                                                         style="cursor: pointer;">
+                                                        <c:if test="${product.discountActive}">
+                                                            <div class="discount-flag">
+                                                                <c:choose>
+                                                                    <c:when test="${product.activeDiscount.type == 'PERCENTAGE'}">
+                                                                        -<fmt:formatNumber value="${product.activeDiscount.value}" maxFractionDigits="0" />%
+                                                                    </c:when>
+                                                                    <c:otherwise>
+                                                                        -<fmt:formatNumber value="${product.activeDiscount.value}" type="number" maxFractionDigits="0" /> VNĐ
+                                                                    </c:otherwise>
+                                                                </c:choose>
+                                                            </div>
+                                                        </c:if>
                                                         <img src="${pageContext.request.contextPath}${product.imageUrl}"
-                                                            alt="${product.name}" loading="lazy">
+                                                            alt="${product.name}" loading="lazy"
+                                                            onerror="this.src='${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png'">
                                                         <div class="product-card-body">
                                                             <h5>
                                                                 <c:out value="${product.name}" />
                                                             </h5>
-                                                            <p class="price">
-                                                                <%-- Định dạng giá tiền cho dễ đọc --%>
-                                                                    ${String.format("%,.0f", product.price)} VNĐ
-                                                            </p>
+                                                            <c:choose>
+                                                                <c:when test="${product.discountActive}">
+                                                                    <div class="price-wrapper">
+                                                                        <span class="price-old">
+                                                                            <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> VNĐ
+                                                                        </span>
+                                                                        <span class="price-new">
+                                                                            <fmt:formatNumber value="${product.discountedPrice}" type="number" maxFractionDigits="0" /> VNĐ
+                                                                        </span>
+                                                                        <c:if test="${product.discountAmount > 0}">
+                                                                            <span class="price-save">
+                                                                                Tiết kiệm <fmt:formatNumber value="${product.discountAmount}" type="number" maxFractionDigits="0" /> VNĐ
+                                                                            </span>
+                                                                        </c:if>
+                                                                    </div>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    <p class="price">
+                                                                        <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> VNĐ
+                                                                    </p>
+                                                                </c:otherwise>
+                                                            </c:choose>
                                                             <div class="action-buttons">
                                                                 <a href="${pageContext.request.contextPath}/addToCart?id=${product.productId}&buyNow=true"
                                                                     class="btn btn-sm btn-buy-now"

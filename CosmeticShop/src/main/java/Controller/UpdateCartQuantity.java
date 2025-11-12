@@ -55,9 +55,18 @@ public class UpdateCartQuantity extends HttpServlet {
 
         boolean ok = cartDB.updateQuantityAddToCart(cart.getCart_id(), productId, quantity);
 
-        // Refresh session cart items after update
+        // Refresh session cart items after update & sync current prices (include discount)
         List<CartItems> cartItems = new ArrayList<>();
         cartItems = cartDB.getCartItemsByCartId(cart.getCart_id());
+        try {
+            DAO.ProductDB pd = new DAO.ProductDB();
+            for (CartItems ci : cartItems) {
+                Model.Product p = pd.getProductById(ci.getProduct_id());
+                if (p != null) {
+                    ci.setPrice(p.getDiscountedPrice());
+                }
+            }
+        } catch (Exception ignore) {}
         session.setAttribute("cartItems", cartItems);
 
         resp.setContentType("application/json;charset=UTF-8");

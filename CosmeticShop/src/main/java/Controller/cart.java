@@ -85,6 +85,17 @@ public class cart extends HttpServlet {
                 request.setAttribute("assignedDiscounts",
                         new DiscountDB().listAssignedDiscountsForUser(u.getUser_id()));
             }
+            // Đồng bộ giá hiện tại cho các item đang có trong session (kể cả giảm giá mới)
+            try {
+                ProductDB pd = new ProductDB();
+                for (CartItems ci : cartItems) {
+                    Model.Product prod = pd.getProductById(ci.getProduct_id());
+                    if (prod != null) {
+                        ci.setPrice(prod.getDiscountedPrice());
+                    }
+                }
+                session.setAttribute("cartItems", cartItems);
+            } catch (Exception ignore) {}
             request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
         } else {
             if (session.getAttribute("user") != null) {
@@ -98,6 +109,14 @@ public class cart extends HttpServlet {
                 Cart cart = cd.getCartByUserId(user.getUser_id());
                 if (cart != null) {
                     cartItems = cd.getCartItemsByCartId(cart.getCart_id());
+                    // Cập nhật giá theo thời điểm hiện tại
+                    ProductDB pd = new ProductDB();
+                    for (CartItems ci : cartItems) {
+                        Product p = pd.getProductById(ci.getProduct_id());
+                        if (p != null) {
+                            ci.setPrice(p.getDiscountedPrice());
+                        }
+                    }
                 }
                 session.setAttribute("cartItems", cartItems);
                 request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
@@ -109,7 +128,7 @@ public class cart extends HttpServlet {
                     Product p = pd.getProductById(e.getKey());
                     if (p == null)
                         continue;
-                    CartItems ci = new CartItems(0, 0, p.getProductId(), e.getValue(), p.getPrice());
+                    CartItems ci = new CartItems(0, 0, p.getProductId(), e.getValue(), p.getDiscountedPrice());
                     cartItems.add(ci);
                 }
                 session.setAttribute("cartItems", cartItems);

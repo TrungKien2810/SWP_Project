@@ -73,8 +73,26 @@
                 <!-- Product Details -->
                 <div class="product-details">
                     <h2><%= p.getName() %></h2>
+                    <%
+                        Model.Discount activeDiscount = p.getActiveDiscount();
+                        double originalPrice = p.getPrice();
+                        double discountedPrice = p.getDiscountedPrice();
+                        boolean hasDiscount = p.isDiscountActive();
+                    %>
                     <div class="price-section">
-                        <span class="price"><%= String.format("%,.0f", p.getPrice()) %> VND</span>
+                        <% if (hasDiscount) { %>
+                            <span class="price-original"><%= String.format("%,.0f", originalPrice) %> VND</span>
+                            <span class="price-discounted"><%= String.format("%,.0f", discountedPrice) %> VND</span>
+                            <span class="price-badge">
+                                <% if (activeDiscount != null && "PERCENTAGE".equalsIgnoreCase(activeDiscount.getType())) { %>
+                                    -<%= String.format("%.0f", activeDiscount.getValue()) %>%
+                                <% } else if (activeDiscount != null) { %>
+                                    -<%= String.format("%,.0f", activeDiscount.getValue()) %> VND
+                                <% } %>
+                            </span>
+                        <% } else { %>
+                            <span class="price"><%= String.format("%,.0f", originalPrice) %> VND</span>
+                        <% } %>
                     </div>
                     <div class="product-info">
                         <p><b>Số lượng:</b> <%= p.getStock() %> sản phẩm có sẵn</p>
