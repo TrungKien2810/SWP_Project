@@ -96,6 +96,22 @@ public class CategoryDB {
             return false;
         }
     }
+
+    public List<Integer> getCategoryIdsByName(String name) {
+        List<Integer> ids = new ArrayList<>();
+        String sql = "SELECT category_id FROM Categories WHERE name = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, name);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ids.add(rs.getInt("category_id"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return ids;
+    }
 }
 
 

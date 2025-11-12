@@ -135,6 +135,53 @@ public class DiscountDB {
         return null;
     }
 
+    // Kiểm tra mã giảm giá có còn hiệu lực không (chưa hết hạn, đang active, đã đến thời gian bắt đầu)
+    public String validateDiscountForAssignment(int discountId) {
+        try {
+            Discount discount = getById(discountId);
+            if (discount == null) {
+                System.out.println("[DiscountDB] validateDiscountForAssignment: Discount ID " + discountId + " not found");
+                return "Mã giảm giá không tồn tại";
+            }
+            
+            System.out.println("[DiscountDB] validateDiscountForAssignment: Checking discount ID " + discountId + 
+                ", active=" + discount.getActive() + 
+                ", startDate=" + discount.getStartDate() + 
+                ", endDate=" + discount.getEndDate());
+            
+            // Kiểm tra is_active
+            if (discount.getActive() == null || !discount.getActive()) {
+                System.out.println("[DiscountDB] validateDiscountForAssignment: Discount is not active");
+                return "Mã giảm giá không còn hoạt động";
+            }
+            
+            java.sql.Timestamp now = new java.sql.Timestamp(System.currentTimeMillis());
+            System.out.println("[DiscountDB] validateDiscountForAssignment: Current time = " + now);
+            
+            // Kiểm tra start_date
+            if (discount.getStartDate() != null && discount.getStartDate().after(now)) {
+                System.out.println("[DiscountDB] validateDiscountForAssignment: Start date not reached yet");
+                return "Mã giảm giá chưa đến thời gian bắt đầu";
+            }
+            
+            // Kiểm tra end_date
+            if (discount.getEndDate() != null) {
+                if (discount.getEndDate().before(now)) {
+                    System.out.println("[DiscountDB] validateDiscountForAssignment: End date has passed. EndDate=" + 
+                        discount.getEndDate() + ", Now=" + now);
+                    return "Mã giảm giá đã hết hạn";
+                }
+            }
+            
+            System.out.println("[DiscountDB] validateDiscountForAssignment: Discount is valid");
+            return null; // null = hợp lệ
+        } catch (Exception e) {
+            System.err.println("[DiscountDB] validateDiscountForAssignment: Exception occurred: " + e.getMessage());
+            e.printStackTrace();
+            return "Lỗi kiểm tra mã giảm giá: " + e.getMessage();
+        }
+    }
+
     public boolean create(String code, String name, String type, double value, Double minOrderAmount, Double maxDiscountAmount, java.sql.Timestamp start, java.sql.Timestamp end, boolean isActive,
                           String description, Integer usageLimit, String conditionType, Double conditionValue, String conditionDescription, Boolean specialEvent, Boolean autoAssignAll, java.sql.Timestamp assignDate) {
         String sql = "INSERT INTO Discounts (code, name, discount_type, discount_value, min_order_amount, max_discount_amount, start_date, end_date, is_active, description, usage_limit, condition_type, condition_value, condition_description, special_event, auto_assign_all, assign_date) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";

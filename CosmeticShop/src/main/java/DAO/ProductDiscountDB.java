@@ -65,6 +65,65 @@ public class ProductDiscountDB {
         }
         return affected;
     }
+
+    // Xóa tất cả mã giảm giá khỏi tất cả sản phẩm
+    public int unassignAllDiscountsFromAllProducts() {
+        String sql = "DELETE FROM DiscountProducts";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            return ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    // Xóa tất cả mã giảm giá khỏi sản phẩm theo danh sách category IDs
+    public int unassignAllDiscountsFromProductsByCategoryIds(List<Integer> categoryIds) {
+        if (categoryIds == null || categoryIds.isEmpty()) return 0;
+        // Lọc category IDs hợp lệ
+        java.util.List<Integer> validCategoryIds = new java.util.ArrayList<>();
+        for (Integer cid : categoryIds) {
+            if (cid != null && cid > 0) {
+                validCategoryIds.add(cid);
+            }
+        }
+        if (validCategoryIds.isEmpty()) return 0;
+        
+        // Tạo placeholders cho IN clause
+        StringBuilder placeholders = new StringBuilder();
+        for (int i = 0; i < validCategoryIds.size(); i++) {
+            if (i > 0) placeholders.append(",");
+            placeholders.append("?");
+        }
+        
+        String sql = "DELETE FROM DiscountProducts WHERE product_id IN (" +
+                     "SELECT DISTINCT product_id FROM ProductCategories WHERE category_id IN (" +
+                     placeholders.toString() + "))";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            int index = 1;
+            for (Integer cid : validCategoryIds) {
+                ps.setInt(index++, cid);
+            }
+            return ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    // Xóa tất cả mã giảm giá khỏi sản phẩm theo khoảng giá
+    public int unassignAllDiscountsFromProductsByPriceRange(double minPrice, double maxPrice) {
+        String sql = "DELETE FROM DiscountProducts WHERE product_id IN (" +
+                     "SELECT product_id FROM Products WHERE price >= ? AND price <= ?)";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDouble(1, minPrice);
+            ps.setDouble(2, maxPrice);
+            return ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 }
 
 

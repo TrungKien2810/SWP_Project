@@ -36,6 +36,21 @@ public class ProductDB {
         return productList;
     }
 
+    // Lấy danh sách tất cả product IDs
+    public List<Integer> getAllProductIds() {
+        List<Integer> productIds = new ArrayList<>();
+        String sql = "SELECT product_id FROM Products";
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                productIds.add(rs.getInt("product_id"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return productIds;
+    }
+
     // Gợi ý tìm kiếm: trả về danh sách sản phẩm rút gọn theo tên
     public List<Suggestion> suggestProducts(String term, int limit) {
         List<Suggestion> list = new ArrayList<>();
@@ -122,21 +137,32 @@ public class ProductDB {
     
     // Helper method để tạo Product object với ảnh bổ sung
     private Product createProductWithImages(ResultSet rs) throws SQLException {
+        int productId = rs.getInt("product_id");
         Product product = new Product(
-                rs.getInt("product_id"),
+                productId,
                 rs.getString("name"),
                 rs.getDouble("price"),
                 rs.getInt("stock"),
                 rs.getString("description"),
                 rs.getString("image_url"),
-                rs.getInt("category_id")
+                0  // Không dùng category_id từ Products nữa, set = 0
         );
+        
+        // Load categories từ ProductCategories
+        ProductCategoryDB pcDB = new ProductCategoryDB();
+        List<Integer> categoryIds = pcDB.getCategoryIdsByProductId(productId);
+        product.setCategoryIds(categoryIds);
+        
+        // Load category names (optional, để cache)
+        List<String> categoryNames = pcDB.getCategoryNamesByProductId(productId);
+        product.setCategoryNames(categoryNames);
+        
         // Lấy danh sách ảnh bổ sung
-        List<String> additionalImages = getProductImages(rs.getInt("product_id"));
+        List<String> additionalImages = getProductImages(productId);
         for (String imageUrl : additionalImages) {
             product.addImageUrl(imageUrl);
         }
-        Discount discount = fetchActiveDiscount(rs.getInt("product_id"));
+        Discount discount = fetchActiveDiscount(productId);
         product.setActiveDiscount(discount);
         return product;
     }
@@ -235,20 +261,9 @@ public class ProductDB {
 
     // Lấy danh sách product_id theo tên danh mục
     public List<Integer> getProductIdsByCategoryName(String categoryName) {
-        List<Integer> ids = new ArrayList<>();
-        if (categoryName == null || categoryName.trim().isEmpty()) return ids;
-        String sql = "SELECT p.product_id FROM Products p JOIN Categories c ON p.category_id = c.category_id WHERE c.name = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, categoryName.trim());
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    ids.add(rs.getInt(1));
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return ids;
+        // Dùng ProductCategoryDB thay vì query trực tiếp
+        ProductCategoryDB pcDB = new ProductCategoryDB();
+        return pcDB.getProductIdsByCategoryName(categoryName);
     }
 
     // Lấy danh sách product_id theo khoảng giá
@@ -297,23 +312,29 @@ public class ProductDB {
 
     // Thêm sản phẩm mới (Create)
     public boolean addProduct(Product product) {
-        String sql = "INSERT INTO Products (name, price, stock, description, image_url, category_id) VALUES (?, ?, ?, ?, ?, ?)";
+        // Không insert category_id vào Products nữa
+        String sql = "INSERT INTO Products (name, price, stock, description, image_url) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, product.getName());
             stmt.setDouble(2, product.getPrice());
             stmt.setInt(3, product.getStock());
             stmt.setString(4, product.getDescription());
             stmt.setString(5, product.getImageUrl());
-            if (product.getCategoryId() <= 0) {
-                stmt.setNull(6, Types.INTEGER);
-            } else {
-                stmt.setInt(6, product.getCategoryId());
+            
+            if (stmt.executeUpdate() > 0) {
+                // Lấy product_id vừa insert
+                int productId = getLastInsertedProductId();
+                if (productId > 0) {
+                    // Gán categories vào ProductCategories
+                    ProductCategoryDB pcDB = new ProductCategoryDB();
+                    return pcDB.assignCategoriesToProduct(productId, product.getCategoryIds());
+                }
+                return true;
             }
-            return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
         }
+        return false;
     }
     
     // Lấy ID của sản phẩm vừa được thêm
@@ -332,24 +353,25 @@ public class ProductDB {
 
     // Cập nhật sản phẩm (Update)
     public boolean updateProduct(Product product) {
-        String sql = "UPDATE Products SET name = ?, price = ?, stock = ?, description = ?, image_url = ?, category_id = ? WHERE product_id = ?";
+        // Không update category_id vào Products nữa
+        String sql = "UPDATE Products SET name = ?, price = ?, stock = ?, description = ?, image_url = ? WHERE product_id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, product.getName());
             stmt.setDouble(2, product.getPrice());
             stmt.setInt(3, product.getStock());
             stmt.setString(4, product.getDescription());
             stmt.setString(5, product.getImageUrl());
-            if (product.getCategoryId() <= 0) {
-                stmt.setNull(6, Types.INTEGER);
-            } else {
-                stmt.setInt(6, product.getCategoryId());
+            stmt.setInt(6, product.getProductId());
+            
+            if (stmt.executeUpdate() > 0) {
+                // Cập nhật categories trong ProductCategories
+                ProductCategoryDB pcDB = new ProductCategoryDB();
+                return pcDB.assignCategoriesToProduct(product.getProductId(), product.getCategoryIds());
             }
-            stmt.setInt(7, product.getProductId());
-            return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
         }
+        return false;
     }
 
     // Xóa sản phẩm (Delete)
@@ -386,7 +408,11 @@ public class ProductDB {
     // Lọc sản phẩm theo danh mục
     public List<Product> getProductsByCategory(String categoryName) {
         List<Product> productList = new ArrayList<>();
-        String sql = "SELECT p.* FROM Products p JOIN Categories c ON p.category_id = c.category_id WHERE c.name = ?";
+        // JOIN với ProductCategories thay vì Products.category_id
+        String sql = "SELECT DISTINCT p.* FROM Products p " +
+                     "JOIN ProductCategories pc ON p.product_id = pc.product_id " +
+                     "JOIN Categories c ON pc.category_id = c.category_id " +
+                     "WHERE c.name = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, categoryName);
             try (ResultSet rs = stmt.executeQuery()) {
@@ -458,19 +484,30 @@ public class ProductDB {
     // Tìm kiếm và lọc kết hợp (cập nhật để hỗ trợ lọc giá cố định và sắp xếp)
     public List<Product> searchAndFilterProducts(String searchTerm, String categoryName, double minPrice, double maxPrice, String fixedPriceRange, String sortBy) {
         List<Product> productList = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT p.* FROM Products p JOIN Categories c ON p.category_id = c.category_id WHERE 1=1");
+        // Dùng LEFT JOIN để hiển thị cả sản phẩm không có category
+        // Khi filter category thì thêm điều kiện WHERE
+        StringBuilder sql;
+        if (categoryName != null && !categoryName.trim().isEmpty() && !categoryName.equals("all")) {
+            // Có filter category: dùng INNER JOIN
+            sql = new StringBuilder("SELECT DISTINCT p.* FROM Products p " +
+                                 "JOIN ProductCategories pc ON p.product_id = pc.product_id " +
+                                 "JOIN Categories c ON pc.category_id = c.category_id " +
+                                 "WHERE c.name = ?");
+        } else {
+            // Không filter category: query Products trực tiếp
+            sql = new StringBuilder("SELECT DISTINCT p.* FROM Products p WHERE 1=1");
+        }
         List<Object> parameters = new ArrayList<>();
+        
+        if (categoryName != null && !categoryName.trim().isEmpty() && !categoryName.equals("all")) {
+            parameters.add(categoryName);
+        }
         
         if (searchTerm != null && !searchTerm.trim().isEmpty()) {
             sql.append(" AND (p.name LIKE ? OR p.description LIKE ?)");
             String searchPattern = "%" + searchTerm + "%";
             parameters.add(searchPattern);
             parameters.add(searchPattern);
-        }
-        
-        if (categoryName != null && !categoryName.trim().isEmpty() && !categoryName.equals("all")) {
-            sql.append(" AND c.name = ?");
-            parameters.add(categoryName);
         }
         
         // Xử lý lọc giá cố định
@@ -658,19 +695,30 @@ public class ProductDB {
             double minPrice, double maxPrice, String fixedPriceRange, String sortBy,
             int page, int pageSize) {
         List<Product> productList = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT p.* FROM Products p JOIN Categories c ON p.category_id = c.category_id WHERE 1=1");
+        // Dùng LEFT JOIN để hiển thị cả sản phẩm không có category
+        // Khi filter category thì thêm điều kiện WHERE
+        StringBuilder sql;
+        if (categoryName != null && !categoryName.trim().isEmpty() && !categoryName.equals("all")) {
+            // Có filter category: dùng INNER JOIN
+            sql = new StringBuilder("SELECT DISTINCT p.* FROM Products p " +
+                                 "JOIN ProductCategories pc ON p.product_id = pc.product_id " +
+                                 "JOIN Categories c ON pc.category_id = c.category_id " +
+                                 "WHERE c.name = ?");
+        } else {
+            // Không filter category: query Products trực tiếp
+            sql = new StringBuilder("SELECT DISTINCT p.* FROM Products p WHERE 1=1");
+        }
         List<Object> parameters = new ArrayList<>();
+
+        if (categoryName != null && !categoryName.trim().isEmpty() && !categoryName.equals("all")) {
+            parameters.add(categoryName);
+        }
 
         if (searchTerm != null && !searchTerm.trim().isEmpty()) {
             sql.append(" AND (p.name LIKE ? OR p.description LIKE ?)");
             String searchPattern = "%" + searchTerm + "%";
             parameters.add(searchPattern);
             parameters.add(searchPattern);
-        }
-
-        if (categoryName != null && !categoryName.trim().isEmpty() && !categoryName.equals("all")) {
-            sql.append(" AND c.name = ?");
-            parameters.add(categoryName);
         }
 
         if (fixedPriceRange != null && !fixedPriceRange.trim().isEmpty() && !fixedPriceRange.equals("all")) {
@@ -773,19 +821,30 @@ public class ProductDB {
 
     public int getFilteredProductsCount(String searchTerm, String categoryName,
             double minPrice, double maxPrice, String fixedPriceRange) {
-        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Products p JOIN Categories c ON p.category_id = c.category_id WHERE 1=1");
+        // Dùng LEFT JOIN để đếm cả sản phẩm không có category
+        // Khi filter category thì thêm điều kiện WHERE
+        StringBuilder sql;
+        if (categoryName != null && !categoryName.trim().isEmpty() && !categoryName.equals("all")) {
+            // Có filter category: dùng INNER JOIN
+            sql = new StringBuilder("SELECT COUNT(DISTINCT p.product_id) FROM Products p " +
+                                 "JOIN ProductCategories pc ON p.product_id = pc.product_id " +
+                                 "JOIN Categories c ON pc.category_id = c.category_id " +
+                                 "WHERE c.name = ?");
+        } else {
+            // Không filter category: query Products trực tiếp
+            sql = new StringBuilder("SELECT COUNT(*) FROM Products p WHERE 1=1");
+        }
         List<Object> parameters = new ArrayList<>();
+
+        if (categoryName != null && !categoryName.trim().isEmpty() && !categoryName.equals("all")) {
+            parameters.add(categoryName);
+        }
 
         if (searchTerm != null && !searchTerm.trim().isEmpty()) {
             sql.append(" AND (p.name LIKE ? OR p.description LIKE ?)");
             String searchPattern = "%" + searchTerm + "%";
             parameters.add(searchPattern);
             parameters.add(searchPattern);
-        }
-
-        if (categoryName != null && !categoryName.trim().isEmpty() && !categoryName.equals("all")) {
-            sql.append(" AND c.name = ?");
-            parameters.add(categoryName);
         }
 
         if (fixedPriceRange != null && !fixedPriceRange.trim().isEmpty() && !fixedPriceRange.equals("all")) {

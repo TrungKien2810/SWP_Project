@@ -11,7 +11,9 @@ public class Product {
     private String description;
     private String imageUrl;
     private List<String> imageUrls; // Danh sách nhiều ảnh
-    private int categoryId;
+    private int categoryId; // Giữ lại để backward compatibility
+    private List<Integer> categoryIds; // Danh sách nhiều category IDs
+    private List<String> categoryNames; // Danh sách category names (optional, để cache)
     private Discount activeDiscount;
 
     public Product(int productId, String name, double price, int stock, String description, String imageUrl, int categoryId) {
@@ -91,11 +93,44 @@ public class Product {
     }
 
     public int getCategoryId() {
+        // Backward compatibility: trả về category đầu tiên nếu có
+        if (categoryIds != null && !categoryIds.isEmpty()) {
+            return categoryIds.get(0);
+        }
         return categoryId;
     }
 
     public void setCategoryId(int categoryId) {
         this.categoryId = categoryId;
+        // Nếu set categoryId cũ, tự động thêm vào categoryIds
+        if (categoryIds == null) {
+            categoryIds = new ArrayList<>();
+        }
+        if (categoryId > 0 && !categoryIds.contains(categoryId)) {
+            categoryIds.add(categoryId);
+        }
+    }
+    
+    public List<Integer> getCategoryIds() {
+        return categoryIds != null ? categoryIds : new ArrayList<>();
+    }
+
+    public void setCategoryIds(List<Integer> categoryIds) {
+        this.categoryIds = categoryIds;
+        // Cập nhật categoryId để backward compatibility
+        if (categoryIds != null && !categoryIds.isEmpty()) {
+            this.categoryId = categoryIds.get(0);
+        } else {
+            this.categoryId = 0;
+        }
+    }
+
+    public List<String> getCategoryNames() {
+        return categoryNames != null ? categoryNames : new ArrayList<>();
+    }
+
+    public void setCategoryNames(List<String> categoryNames) {
+        this.categoryNames = categoryNames;
     }
     
     public List<String> getImageUrls() {

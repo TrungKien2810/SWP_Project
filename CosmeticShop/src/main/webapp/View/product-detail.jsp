@@ -10,6 +10,8 @@
 <%
     Product p = (Product) request.getAttribute("product");
     String categoryName = (String) request.getAttribute("categoryName");
+    java.util.List<String> categoryNames = (java.util.List<String>) request.getAttribute("categoryNames");
+    if (categoryNames == null) categoryNames = new java.util.ArrayList<>();
 %>
 
 <!DOCTYPE html>
@@ -96,7 +98,18 @@
                     </div>
                     <div class="product-info">
                         <p><b>Số lượng:</b> <%= p.getStock() %> sản phẩm có sẵn</p>
-                        <p><b>Danh mục:</b> <%= categoryName != null ? categoryName : "Không xác định" %></p>
+                        <p><b>Danh mục:</b> 
+                            <c:choose>
+                                <c:when test="${not empty categoryNames}">
+                                    <c:forEach var="catName" items="${categoryNames}" varStatus="loop">
+                                        ${catName}<c:if test="${!loop.last}">, </c:if>
+                                    </c:forEach>
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="text-muted">Chưa phân loại</span>
+                                </c:otherwise>
+                            </c:choose>
+                        </p>
                     </div>
                     
                     <!-- Nút thêm vào giỏ hàng + số lượng -->
