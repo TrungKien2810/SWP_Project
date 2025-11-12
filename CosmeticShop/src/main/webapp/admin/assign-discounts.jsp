@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ include file="/admin/includes/header.jspf" %>
 
 <div class="container-fluid">
@@ -12,7 +13,7 @@
   </div>
 
   <c:if test="${not empty param.msg}">
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <div class="alert ${fn:contains(param.msg, 'thành công') ? 'alert-success' : 'alert-danger'} alert-dismissible fade show" role="alert">
       ${param.msg}
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
@@ -33,6 +34,9 @@
         </li>
         <li class="nav-item" role="presentation">
           <button class="nav-link" id="by-price-tab" data-bs-toggle="tab" data-bs-target="#by-price" type="button" role="tab">Theo mức giá</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="all-products-tab" data-bs-toggle="tab" data-bs-target="#all-products" type="button" role="tab">Tất cả sản phẩm</button>
         </li>
       </ul>
       <div class="tab-content p-3 border border-top-0 rounded-bottom">
@@ -151,13 +155,15 @@
               </select>
             </div>
             <div class="col-md-8">
-              <label class="form-label">Danh mục áp dụng</label>
-              <select class="form-select" name="categoryName" required>
-                <option value="" disabled selected>-- Chọn danh mục --</option>
+              <label class="form-label">Danh mục áp dụng <span class="text-muted">(có thể chọn nhiều)</span></label>
+              <select class="form-select" name="categoryNames" multiple size="5" style="min-height: 120px;" required>
                 <c:forEach var="cname" items="${allCategories}">
                   <option value="${cname}">${cname}</option>
                 </c:forEach>
               </select>
+              <small class="form-text text-muted">
+                <i class="fas fa-info-circle"></i> Giữ <kbd>Ctrl</kbd> (Windows) hoặc <kbd>Cmd</kbd> (Mac) để chọn nhiều danh mục
+              </small>
             </div>
             <div class="col-12 d-flex gap-2">
               <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> Gán mã theo danh mục</button>
@@ -177,13 +183,15 @@
               </select>
             </div>
             <div class="col-md-8">
-              <label class="form-label">Danh mục</label>
-              <select class="form-select" name="categoryName" required>
-                <option value="" disabled selected>-- Chọn danh mục --</option>
+              <label class="form-label">Danh mục <span class="text-muted">(có thể chọn nhiều)</span></label>
+              <select class="form-select" name="categoryNames" multiple size="5" style="min-height: 120px;" required>
                 <c:forEach var="cname" items="${allCategories}">
                   <option value="${cname}">${cname}</option>
                 </c:forEach>
               </select>
+              <small class="form-text text-muted">
+                <i class="fas fa-info-circle"></i> Giữ <kbd>Ctrl</kbd> (Windows) hoặc <kbd>Cmd</kbd> (Mac) để chọn nhiều danh mục
+              </small>
             </div>
             <div class="col-12 d-flex gap-2">
               <button type="submit" class="btn btn-outline-danger"><i class="fa fa-unlink"></i> Bỏ gán theo danh mục</button>
@@ -248,6 +256,58 @@
             </div>
             <div class="col-12 d-flex gap-2">
               <button type="submit" class="btn btn-outline-danger"><i class="fa fa-unlink"></i> Bỏ gán theo mức giá</button>
+            </div>
+          </form>
+        </div>
+        <!-- All Products -->
+        <div class="tab-pane fade" id="all-products" role="tabpanel">
+          <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Cảnh báo:</strong> Thao tác này sẽ áp dụng cho <strong>TẤT CẢ</strong> sản phẩm trong hệ thống. Hãy chắc chắn trước khi thực hiện.
+          </div>
+          <form action="${pageContext.request.contextPath}/admin" method="post" class="row g-3">
+            <input type="hidden" name="action" value="discounts" />
+            <input type="hidden" name="op" value="assignAllProducts" />
+            <div class="col-md-4">
+              <label class="form-label">Chọn mã giảm giá</label>
+              <select class="form-select" name="discountId" required>
+                <option value="" disabled selected>-- Chọn mã --</option>
+                <c:forEach var="d" items="${discounts}">
+                  <option value="${d.discountId}">${d.code} - ${d.name}</option>
+                </c:forEach>
+              </select>
+            </div>
+            <div class="col-md-8">
+              <label class="form-label">Gán mã cho tất cả sản phẩm</label>
+              <div class="form-text text-muted">
+                Mã giảm giá sẽ được gán cho tất cả sản phẩm hiện có trong hệ thống.
+              </div>
+            </div>
+            <div class="col-12 d-flex gap-2">
+              <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> Gán mã cho tất cả sản phẩm</button>
+            </div>
+          </form>
+          <hr/>
+          <form action="${pageContext.request.contextPath}/admin" method="post" class="row g-3">
+            <input type="hidden" name="action" value="discounts" />
+            <input type="hidden" name="op" value="unassignAllProducts" />
+            <div class="col-md-4">
+              <label class="form-label">Bỏ gán mã giảm giá</label>
+              <select class="form-select" name="discountId" required>
+                <option value="" disabled selected>-- Chọn mã --</option>
+                <c:forEach var="d" items="${discounts}">
+                  <option value="${d.discountId}">${d.code} - ${d.name}</option>
+                </c:forEach>
+              </select>
+            </div>
+            <div class="col-md-8">
+              <label class="form-label">Bỏ gán mã khỏi tất cả sản phẩm</label>
+              <div class="form-text text-muted">
+                Mã giảm giá sẽ được bỏ gán khỏi tất cả sản phẩm hiện có trong hệ thống.
+              </div>
+            </div>
+            <div class="col-12 d-flex gap-2">
+              <button type="submit" class="btn btn-outline-danger"><i class="fa fa-unlink"></i> Bỏ gán mã khỏi tất cả sản phẩm</button>
             </div>
           </form>
         </div>

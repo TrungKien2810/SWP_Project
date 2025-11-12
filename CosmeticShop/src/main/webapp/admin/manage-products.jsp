@@ -49,8 +49,14 @@
                   </td>
                   <td>
                     <c:choose>
-                      <c:when test="${p.categoryId > 0}">${categoryNames[p.categoryId]}</c:when>
-                      <c:otherwise><span class="text-muted">(Chưa phân loại)</span></c:otherwise>
+                      <c:when test="${not empty productCategoryMap[p.productId]}">
+                        <c:forEach var="catName" items="${productCategoryMap[p.productId]}" varStatus="loop">
+                          <span class="badge bg-secondary me-1">${catName}</span>
+                        </c:forEach>
+                      </c:when>
+                      <c:otherwise>
+                        <span class="text-muted">(Chưa phân loại)</span>
+                      </c:otherwise>
                     </c:choose>
                   </td>
                   <td class="text-end"><strong style="color:#f76c85;">${String.format("%,.0f", p.price)} đ</strong></td>

@@ -64,17 +64,16 @@ public class Admin extends HttpServlet {
                 java.util.List<Model.Product> list = (search != null && !search.isBlank())
                         ? productDb().searchProducts(search.trim())
                         : productDb().getAllProducts();
-                java.util.Map<Integer, String> categoryNames = new java.util.HashMap<>();
+                // Load category names cho từng product (nhiều categories)
+                java.util.Map<Integer, java.util.List<String>> productCategoryMap = new java.util.HashMap<>();
+                DAO.ProductCategoryDB pcDB = new DAO.ProductCategoryDB();
                 for (Model.Product p : list) {
-                    int cid = p.getCategoryId();
-                    if (cid > 0 && !categoryNames.containsKey(cid)) {
-                        String name = productDb().getCategoryNameById(cid);
-                        if (name != null) categoryNames.put(cid, name);
-                    }
+                    java.util.List<String> catNames = pcDB.getCategoryNamesByProductId(p.getProductId());
+                    productCategoryMap.put(p.getProductId(), catNames);
                 }
                 request.setAttribute("search", search);
                 request.setAttribute("productList", list);
-                request.setAttribute("categoryNames", categoryNames);
+                request.setAttribute("productCategoryMap", productCategoryMap);
                 request.getRequestDispatcher("/admin/manage-products.jsp").forward(request, response);
                 break;
             case "orders":
@@ -473,6 +472,22 @@ public class Admin extends HttpServlet {
             if ("assignProducts".equals(op)) {
                 try {
                     int discountId = Integer.parseInt(request.getParameter("discountId"));
+                    
+                    // Kiểm tra mã giảm giá có còn hiệu lực không
+                    String validationError = null;
+                    try {
+                        validationError = discountDb().validateDiscountForAssignment(discountId);
+                    } catch (Exception validationEx) {
+                        validationError = "Lỗi kiểm tra mã giảm giá: " + validationEx.getMessage();
+                        validationEx.printStackTrace();
+                    }
+                    
+                    if (validationError != null) {
+                        String msg = java.net.URLEncoder.encode(validationError, "UTF-8");
+                        response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                        return;
+                    }
+                    
                     String[] productIdsRaw = request.getParameterValues("productIds");
                     java.util.List<Integer> productIds = new java.util.ArrayList<>();
                     if (productIdsRaw != null) {
@@ -480,19 +495,27 @@ public class Admin extends HttpServlet {
                             try { productIds.add(Integer.parseInt(pid)); } catch (Exception ignored) {}
                         }
                     }
-                    int affected = 0;
-                    if (!productIds.isEmpty()) {
-                        affected = new DAO.ProductDiscountDB().assignDiscountToProducts(discountId, productIds);
+                    if (productIds.isEmpty()) {
+                        String msg = java.net.URLEncoder.encode("Không có sản phẩm nào để gán (vui lòng chọn ít nhất một sản phẩm)", "UTF-8");
+                        response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                        return;
+                    }
+                    
+                    int affected = new DAO.ProductDiscountDB().assignDiscountToProducts(discountId, productIds);
+                    if (affected < 0) {
+                        String msg = java.net.URLEncoder.encode("Lỗi khi gán mã giảm giá", "UTF-8");
+                        response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                        return;
                     }
                     String msg = java.net.URLEncoder.encode("Gán mã thành công: " + affected + " sản phẩm", "UTF-8");
                     response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
                     return;
                 } catch (Exception e) {
                     e.printStackTrace();
+                    String msg = java.net.URLEncoder.encode("Gán mã thất bại: " + e.getMessage(), "UTF-8");
+                    response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                    return;
                 }
-                String msg = java.net.URLEncoder.encode("Gán mã thất bại", "UTF-8");
-                response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
-                return;
             } else if ("unassignProducts".equals(op)) {
                 try {
                     int discountId = Integer.parseInt(request.getParameter("discountId"));
@@ -503,10 +526,13 @@ public class Admin extends HttpServlet {
                             try { productIds.add(Integer.parseInt(pid)); } catch (Exception ignored) {}
                         }
                     }
-                    int affected = 0;
-                    if (!productIds.isEmpty()) {
-                        affected = new DAO.ProductDiscountDB().unassignDiscountFromProducts(discountId, productIds);
+                    if (productIds.isEmpty()) {
+                        String msg = java.net.URLEncoder.encode("Không có sản phẩm nào để bỏ gán (vui lòng chọn ít nhất một sản phẩm)", "UTF-8");
+                        response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                        return;
                     }
+                    
+                    int affected = new DAO.ProductDiscountDB().unassignDiscountFromProducts(discountId, productIds);
                     String msg = java.net.URLEncoder.encode("Bỏ gán mã thành công: " + affected + " sản phẩm", "UTF-8");
                     response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
                     return;
@@ -519,12 +545,48 @@ public class Admin extends HttpServlet {
             } else if ("assignByCategory".equals(op)) {
                 try {
                     int discountId = Integer.parseInt(request.getParameter("discountId"));
-                    String categoryName = request.getParameter("categoryName");
-                    java.util.List<Integer> productIds = productDb().getProductIdsByCategoryName(categoryName);
-                    int affected = 0;
-                    if (productIds != null && !productIds.isEmpty()) {
-                        affected = new DAO.ProductDiscountDB().assignDiscountToProducts(discountId, productIds);
+                    
+                    // Kiểm tra mã giảm giá có còn hiệu lực không
+                    String validationError = null;
+                    try {
+                        validationError = discountDb().validateDiscountForAssignment(discountId);
+                    } catch (Exception validationEx) {
+                        validationError = "Lỗi kiểm tra mã giảm giá: " + validationEx.getMessage();
+                        validationEx.printStackTrace();
                     }
+                    
+                    if (validationError != null) {
+                        String msg = java.net.URLEncoder.encode(validationError, "UTF-8");
+                        response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                        return;
+                    }
+                    
+                    // Nhận nhiều categoryNames
+                    String[] categoryNames = request.getParameterValues("categoryNames");
+                    java.util.List<Integer> productIds = new java.util.ArrayList<>();
+                    
+                    if (categoryNames != null && categoryNames.length > 0) {
+                        // Chuyển array thành List và filter empty
+                        java.util.List<String> categoryNameList = new java.util.ArrayList<>();
+                        for (String catName : categoryNames) {
+                            if (catName != null && !catName.trim().isEmpty()) {
+                                categoryNameList.add(catName.trim());
+                            }
+                        }
+                        
+                        // Lấy sản phẩm có TẤT CẢ các categories (AND logic)
+                        if (!categoryNameList.isEmpty()) {
+                            productIds = new DAO.ProductCategoryDB().getProductIdsByAllCategoryNames(categoryNameList);
+                        }
+                    }
+                    
+                    if (productIds.isEmpty()) {
+                        String msg = java.net.URLEncoder.encode("Không có sản phẩm nào để gán (không có sản phẩm nào có tất cả các danh mục đã chọn)", "UTF-8");
+                        response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                        return;
+                    }
+                    
+                    int affected = new DAO.ProductDiscountDB().assignDiscountToProducts(discountId, productIds);
                     String msg = java.net.URLEncoder.encode("Gán theo danh mục thành công: " + affected + " sản phẩm", "UTF-8");
                     response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
                     return;
@@ -537,12 +599,32 @@ public class Admin extends HttpServlet {
             } else if ("unassignByCategory".equals(op)) {
                 try {
                     int discountId = Integer.parseInt(request.getParameter("discountId"));
-                    String categoryName = request.getParameter("categoryName");
-                    java.util.List<Integer> productIds = productDb().getProductIdsByCategoryName(categoryName);
-                    int affected = 0;
-                    if (productIds != null && !productIds.isEmpty()) {
-                        affected = new DAO.ProductDiscountDB().unassignDiscountFromProducts(discountId, productIds);
+                    // Nhận nhiều categoryNames
+                    String[] categoryNames = request.getParameterValues("categoryNames");
+                    java.util.List<Integer> productIds = new java.util.ArrayList<>();
+                    
+                    if (categoryNames != null && categoryNames.length > 0) {
+                        // Chuyển array thành List và filter empty
+                        java.util.List<String> categoryNameList = new java.util.ArrayList<>();
+                        for (String catName : categoryNames) {
+                            if (catName != null && !catName.trim().isEmpty()) {
+                                categoryNameList.add(catName.trim());
+                            }
+                        }
+                        
+                        // Lấy sản phẩm có TẤT CẢ các categories (AND logic)
+                        if (!categoryNameList.isEmpty()) {
+                            productIds = new DAO.ProductCategoryDB().getProductIdsByAllCategoryNames(categoryNameList);
+                        }
                     }
+                    
+                    if (productIds.isEmpty()) {
+                        String msg = java.net.URLEncoder.encode("Không có sản phẩm nào để bỏ gán (không có sản phẩm nào có tất cả các danh mục đã chọn)", "UTF-8");
+                        response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                        return;
+                    }
+                    
+                    int affected = new DAO.ProductDiscountDB().unassignDiscountFromProducts(discountId, productIds);
                     String msg = java.net.URLEncoder.encode("Bỏ gán theo danh mục thành công: " + affected + " sản phẩm", "UTF-8");
                     response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
                     return;
@@ -555,15 +637,34 @@ public class Admin extends HttpServlet {
             } else if ("assignByPrice".equals(op)) {
                 try {
                     int discountId = Integer.parseInt(request.getParameter("discountId"));
+                    
+                    // Kiểm tra mã giảm giá có còn hiệu lực không
+                    String validationError = null;
+                    try {
+                        validationError = discountDb().validateDiscountForAssignment(discountId);
+                    } catch (Exception validationEx) {
+                        validationError = "Lỗi kiểm tra mã giảm giá: " + validationEx.getMessage();
+                        validationEx.printStackTrace();
+                    }
+                    
+                    if (validationError != null) {
+                        String msg = java.net.URLEncoder.encode(validationError, "UTF-8");
+                        response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                        return;
+                    }
+                    
                     double minPrice = 0;
                     double maxPrice = Double.MAX_VALUE;
                     try { String s = request.getParameter("minPrice"); if (s != null && !s.isBlank()) minPrice = Double.parseDouble(s); } catch (Exception ignored) {}
                     try { String s = request.getParameter("maxPrice"); if (s != null && !s.isBlank()) maxPrice = Double.parseDouble(s); } catch (Exception ignored) {}
                     java.util.List<Integer> productIds = productDb().getProductIdsByPriceRange(minPrice, maxPrice);
-                    int affected = 0;
-                    if (productIds != null && !productIds.isEmpty()) {
-                        affected = new DAO.ProductDiscountDB().assignDiscountToProducts(discountId, productIds);
+                    if (productIds == null || productIds.isEmpty()) {
+                        String msg = java.net.URLEncoder.encode("Không có sản phẩm nào để gán (không có sản phẩm nào trong khoảng giá đã chọn)", "UTF-8");
+                        response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                        return;
                     }
+                    
+                    int affected = new DAO.ProductDiscountDB().assignDiscountToProducts(discountId, productIds);
                     String msg = java.net.URLEncoder.encode("Gán theo mức giá thành công: " + affected + " sản phẩm", "UTF-8");
                     response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
                     return;
@@ -581,10 +682,13 @@ public class Admin extends HttpServlet {
                     try { String s = request.getParameter("minPrice"); if (s != null && !s.isBlank()) minPrice = Double.parseDouble(s); } catch (Exception ignored) {}
                     try { String s = request.getParameter("maxPrice"); if (s != null && !s.isBlank()) maxPrice = Double.parseDouble(s); } catch (Exception ignored) {}
                     java.util.List<Integer> productIds = productDb().getProductIdsByPriceRange(minPrice, maxPrice);
-                    int affected = 0;
-                    if (productIds != null && !productIds.isEmpty()) {
-                        affected = new DAO.ProductDiscountDB().unassignDiscountFromProducts(discountId, productIds);
+                    if (productIds == null || productIds.isEmpty()) {
+                        String msg = java.net.URLEncoder.encode("Không có sản phẩm nào để bỏ gán (không có sản phẩm nào trong khoảng giá đã chọn)", "UTF-8");
+                        response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                        return;
                     }
+                    
+                    int affected = new DAO.ProductDiscountDB().unassignDiscountFromProducts(discountId, productIds);
                     String msg = java.net.URLEncoder.encode("Bỏ gán theo mức giá thành công: " + affected + " sản phẩm", "UTF-8");
                     response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
                     return;
@@ -603,17 +707,80 @@ public class Admin extends HttpServlet {
                             try { productIds.add(Integer.parseInt(pid)); } catch (Exception ignored) {}
                         }
                     }
-                    int affected = 0;
-                    if (!productIds.isEmpty()) {
-                        affected = new DAO.ProductDiscountDB().unassignAllDiscountsFromProducts(productIds);
+                    if (productIds.isEmpty()) {
+                        String msg = java.net.URLEncoder.encode("Không có sản phẩm nào để xóa mã (vui lòng chọn ít nhất một sản phẩm)", "UTF-8");
+                        response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                        return;
                     }
-                    String msg = java.net.URLEncoder.encode("Đã xóa tất cả mã của " + productIds.size() + " sản phẩm", "UTF-8");
+                    
+                    int affected = new DAO.ProductDiscountDB().unassignAllDiscountsFromProducts(productIds);
+                    String msg = java.net.URLEncoder.encode("Đã xóa tất cả mã của " + affected + " sản phẩm", "UTF-8");
                     response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
                     return;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
                 String msg = java.net.URLEncoder.encode("Xóa tất cả mã thất bại", "UTF-8");
+                response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                return;
+            } else if ("assignAllProducts".equals(op)) {
+                try {
+                    int discountId = Integer.parseInt(request.getParameter("discountId"));
+                    
+                    // Kiểm tra mã giảm giá có còn hiệu lực không
+                    String validationError = null;
+                    try {
+                        validationError = discountDb().validateDiscountForAssignment(discountId);
+                    } catch (Exception validationEx) {
+                        validationError = "Lỗi kiểm tra mã giảm giá: " + validationEx.getMessage();
+                        validationEx.printStackTrace();
+                    }
+                    
+                    if (validationError != null) {
+                        String msg = java.net.URLEncoder.encode(validationError, "UTF-8");
+                        response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                        return;
+                    }
+                    
+                    // Lấy tất cả product IDs
+                    java.util.List<Integer> productIds = productDb().getAllProductIds();
+                    
+                    if (productIds.isEmpty()) {
+                        String msg = java.net.URLEncoder.encode("Không có sản phẩm nào trong hệ thống", "UTF-8");
+                        response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                        return;
+                    }
+                    
+                    int affected = new DAO.ProductDiscountDB().assignDiscountToProducts(discountId, productIds);
+                    String msg = java.net.URLEncoder.encode("Gán mã cho tất cả sản phẩm thành công: " + affected + " sản phẩm", "UTF-8");
+                    response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                    return;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                String msg = java.net.URLEncoder.encode("Gán mã cho tất cả sản phẩm thất bại", "UTF-8");
+                response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                return;
+            } else if ("unassignAllProducts".equals(op)) {
+                try {
+                    int discountId = Integer.parseInt(request.getParameter("discountId"));
+                    // Lấy tất cả product IDs
+                    java.util.List<Integer> productIds = productDb().getAllProductIds();
+                    
+                    if (productIds.isEmpty()) {
+                        String msg = java.net.URLEncoder.encode("Không có sản phẩm nào trong hệ thống", "UTF-8");
+                        response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                        return;
+                    }
+                    
+                    int affected = new DAO.ProductDiscountDB().unassignDiscountFromProducts(discountId, productIds);
+                    String msg = java.net.URLEncoder.encode("Bỏ gán mã khỏi tất cả sản phẩm thành công: " + affected + " sản phẩm", "UTF-8");
+                    response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                    return;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                String msg = java.net.URLEncoder.encode("Bỏ gán mã khỏi tất cả sản phẩm thất bại", "UTF-8");
                 response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
                 return;
             }

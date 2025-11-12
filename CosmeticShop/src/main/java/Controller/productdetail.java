@@ -30,8 +30,9 @@ public class productdetail extends HttpServlet {
             Product product = dao.getProductById(id);
 
             if (product != null) {
-                // Lấy tên danh mục theo category_id
-                String categoryName = dao.getCategoryNameById(product.getCategoryId());
+                // Lấy danh sách tên danh mục (nhiều categories)
+                List<String> categoryNames = product.getCategoryNames();
+                String categoryName = categoryNames.isEmpty() ? null : String.join(", ", categoryNames);
                 
                 // Lấy bình luận và thống kê
                 CommentDB commentDB = new CommentDB();
@@ -82,6 +83,7 @@ public class productdetail extends HttpServlet {
                 
                 request.setAttribute("product", product);
                 request.setAttribute("categoryName", categoryName);
+                request.setAttribute("categoryNames", categoryNames);
                 request.setAttribute("comments", comments);
                 request.setAttribute("avgRating", avgRating);
                 request.setAttribute("commentCount", commentCount);
