@@ -81,32 +81,29 @@ public class signup extends HttpServlet {
         String cp = request.getParameter("confirm-password");
         UserDB ud = new UserDB();
         if (email == null || !email.matches("^[A-Za-z0-9._%+-]+@gmail\\.com$")) {
-            request.setAttribute("error", "Email must be a valid Gmail address");
-            request.getRequestDispatcher("/View/register.jsp").forward(request, response);
+            session.setAttribute("signupErrorMsg", "Email phải là địa chỉ Gmail hợp lệ (@gmail.com)!");
+            response.sendRedirect(request.getContextPath() + "/signup");
             return;
         }
         if(email.equals("") || password.equals("") || username.equals("") || cp.equals("")){
-            request.setAttribute("error", "Không thể để trống thông tin");
-            request.getRequestDispatcher("/View/register.jsp").forward(request, response);
+            session.setAttribute("signupErrorMsg", "Vui lòng điền đầy đủ tất cả các thông tin!");
+            response.sendRedirect(request.getContextPath() + "/signup");
             return;
-
         }
         if (!cp.equals(password)) {
-            request.setAttribute("error", "Confirm password is invalid");
-            request.getRequestDispatcher("/View/register.jsp").forward(request, response);
+            session.setAttribute("signupErrorMsg", "Mật khẩu nhập lại không khớp!");
+            response.sendRedirect(request.getContextPath() + "/signup");
             return;
-
         }
         if (ud.signup(username, email, password)) {
             session.setAttribute("user", ud.getUserByEmail(email));
-            request.getRequestDispatcher("/View/home.jsp").forward(request, response);
+            session.setAttribute("signupSuccessMsg", "Đăng ký thành công! Chào mừng " + username + " đến với PinkyCloud!");
+            response.sendRedirect(request.getContextPath() + "/View/home.jsp");
             return;
-
         } else {
-            request.setAttribute("error", "email is duplicate, please enter another email");
-            request.getRequestDispatcher("/View/register.jsp").forward(request, response);
+            session.setAttribute("signupErrorMsg", "Email đã được sử dụng. Vui lòng chọn email khác!");
+            response.sendRedirect(request.getContextPath() + "/signup");
             return;
-
         }
     }
 

@@ -24,7 +24,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
 </head>
-<body>
+<body 
+    <c:if test="${not empty sessionScope.cartSuccessMsg}">data-success-msg="${sessionScope.cartSuccessMsg}"</c:if>
+    <c:if test="${not empty sessionScope.cartErrorMsg}">data-error-msg="${sessionScope.cartErrorMsg}"</c:if>
+>
+    <c:remove var="cartSuccessMsg" scope="session" />
+    <c:remove var="cartErrorMsg" scope="session" />
     <%@ include file="/View/includes/header.jspf" %>
 
     <div class="container" style="margin-top: 20px;">
