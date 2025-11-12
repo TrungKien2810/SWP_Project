@@ -615,7 +615,7 @@ public class ProductDB {
     // Lấy sản phẩm nổi bật (featured products) - top 8 sản phẩm mới nhất
     public List<Product> getFeaturedProducts(int limit) {
         List<Product> productList = new ArrayList<>();
-        String sql = "SELECT TOP (?) * FROM Products ORDER BY product_id DESC";
+        String sql = "SELECT TOP (?) * FROM Products WHERE stock > 0 ORDER BY product_id DESC";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, limit);
             try (ResultSet rs = stmt.executeQuery()) {
@@ -630,36 +630,82 @@ public class ProductDB {
     }
 
     // Lấy sản phẩm bán chạy nhất (best selling products) - top sản phẩm theo số lượng bán
+    // Chỉ tính các đơn hàng đã thanh toán (payment_status = 'PAID')
     public List<Product> getBestSellingProducts(int limit) {
         List<Product> productList = new ArrayList<>();
+        int safeLimit = Math.max(1, Math.min(limit, 50));
         String sql = "SELECT TOP (?) p.* " +
                      "FROM Products p " +
-                     "INNER JOIN OrderDetails od ON p.product_id = od.product_id " +
-                     "INNER JOIN Orders o ON od.order_id = o.order_id " +
-                     "WHERE o.payment_status = 'PAID' " +
-                     "GROUP BY p.product_id, p.name, p.price, p.stock, p.description, p.image_url, p.category_id " +
-                     "ORDER BY SUM(od.quantity) DESC";
+                     "INNER JOIN ( " +
+                     "    SELECT od.product_id, SUM(od.quantity) AS total_quantity " +
+                     "    FROM OrderDetails od " +
+                     "    INNER JOIN Orders o ON od.order_id = o.order_id " +
+                     "    WHERE o.payment_status = 'PAID' " +
+                     "    GROUP BY od.product_id " +
+                     ") sales ON p.product_id = sales.product_id " +
+                     "WHERE p.stock > 0 " +
+                     "ORDER BY sales.total_quantity DESC";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, limit);
+            stmt.setInt(1, safeLimit);
+            System.out.println("[ProductDB] Executing getBestSellingProducts query with limit: " + safeLimit);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     productList.add(createProductWithImages(rs));
                 }
             }
         } catch (SQLException e) {
+            System.err.println("[ProductDB] Error in getBestSellingProducts: " + e.getMessage());
             e.printStackTrace();
         }
+        System.out.println("[ProductDB] getBestSellingProducts returned " + productList.size() + " products");
         return productList;
     }
 
-    // Lấy sản phẩm khuyến mại (demo) - fix cứng các sản phẩm có product_id chẵn
+    // Lấy sản phẩm khuyến mại dựa trên các mã giảm giá còn hiệu lực
     public List<Product> getPromotionalProducts(int limit) {
         List<Product> productList = new ArrayList<>();
         int safeLimit = Math.max(1, Math.min(limit, 50));
-        String sql = "SELECT TOP " + safeLimit + " * FROM Products " +
-                     "WHERE stock > 0 AND product_id % 2 = 0 " +
-                     "ORDER BY price ASC";
+        String sql =
+            "SELECT TOP (?) p.* " +
+            "FROM Products p " +
+            "CROSS APPLY ( " +
+            "    SELECT TOP 1 " +
+            "        CASE " +
+            "            WHEN d.discount_type = 'PERCENTAGE' THEN " +
+            "                CASE " +
+            "                    WHEN d.max_discount_amount IS NOT NULL " +
+            "                         AND (p.price * d.discount_value / 100.0) > d.max_discount_amount " +
+            "                    THEN d.max_discount_amount " +
+            "                    ELSE (p.price * d.discount_value / 100.0) " +
+            "                END " +
+            "            ELSE d.discount_value " +
+            "        END AS best_discount_value, " +
+            "        dp.assigned_at AS latest_assigned " +
+            "    FROM DiscountProducts dp " +
+            "    JOIN Discounts d ON d.discount_id = dp.discount_id " +
+            "    WHERE dp.product_id = p.product_id " +
+            "      AND d.is_active = 1 " +
+            "      AND (d.start_date IS NULL OR d.start_date <= GETDATE()) " +
+            "      AND (d.end_date IS NULL OR d.end_date >= GETDATE()) " +
+            "    ORDER BY " +
+            "        CASE " +
+            "            WHEN d.discount_type = 'PERCENTAGE' THEN " +
+            "                CASE " +
+            "                    WHEN d.max_discount_amount IS NOT NULL " +
+            "                         AND (p.price * d.discount_value / 100.0) > d.max_discount_amount " +
+            "                    THEN d.max_discount_amount " +
+            "                    ELSE (p.price * d.discount_value / 100.0) " +
+            "                END " +
+            "            ELSE d.discount_value " +
+            "        END DESC, " +
+            "        dp.assigned_at DESC, " +
+            "        d.discount_id DESC " +
+            ") best " +
+            "WHERE best.best_discount_value IS NOT NULL " +
+            "  AND p.stock > 0 " +
+            "ORDER BY best.best_discount_value DESC, best.latest_assigned DESC, p.product_id DESC";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, safeLimit);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     productList.add(createProductWithImages(rs));
@@ -668,25 +714,6 @@ public class ProductDB {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        if (productList.size() < safeLimit) {
-            int remaining = safeLimit - productList.size();
-            String fallbackSql = "SELECT TOP " + remaining + " * FROM Products " +
-                                 "WHERE stock > 0 AND product_id NOT IN ( " +
-                                 "    SELECT TOP " + safeLimit + " product_id FROM Products " +
-                                 "    WHERE stock > 0 AND product_id % 2 = 0 ORDER BY price ASC " +
-                                 ") ORDER BY price ASC";
-            try (PreparedStatement stmt = conn.prepareStatement(fallbackSql)) {
-                try (ResultSet rs = stmt.executeQuery()) {
-                    while (rs.next()) {
-                        productList.add(createProductWithImages(rs));
-                    }
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-
         return productList;
     }
 

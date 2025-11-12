@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
+import jakarta.servlet.ServletContext;
 
 public class ProductDiscountDB {
     private final DBConnect db = new DBConnect();
@@ -12,10 +13,16 @@ public class ProductDiscountDB {
     // Tạo mapping bảng DiscountProducts(discount_id, product_id)
     // Gán một mã giảm giá cho danh sách sản phẩm (bỏ qua trùng lặp)
     public int assignDiscountToProducts(int discountId, List<Integer> productIds) {
+        return assignDiscountToProducts(discountId, productIds, null);
+    }
+    
+    // Overload với ServletContext để gửi thông báo
+    public int assignDiscountToProducts(int discountId, List<Integer> productIds, ServletContext context) {
         if (productIds == null || productIds.isEmpty()) return 0;
         String sql = "IF NOT EXISTS (SELECT 1 FROM DiscountProducts WHERE discount_id = ? AND product_id = ?) " +
                      "INSERT INTO DiscountProducts(discount_id, product_id, assigned_at) VALUES(?, ?, GETDATE())";
         int affected = 0;
+        java.util.List<Integer> successfullyAssigned = new java.util.ArrayList<>();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             for (Integer pid : productIds) {
                 if (pid == null || pid <= 0) continue;
@@ -23,11 +30,27 @@ public class ProductDiscountDB {
                 ps.setInt(2, pid);
                 ps.setInt(3, discountId);
                 ps.setInt(4, pid);
-                affected += ps.executeUpdate();
+                int result = ps.executeUpdate();
+                if (result > 0) {
+                    affected++;
+                    successfullyAssigned.add(pid);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        
+        // Gửi thông báo cho user có sản phẩm trong wishlist
+        if (affected > 0 && !successfullyAssigned.isEmpty() && context != null) {
+            try {
+                Util.WishlistNotificationUtil.notifyUsersAboutWishlistDiscounts(successfullyAssigned, discountId, context);
+            } catch (Exception e) {
+                System.err.println("[ProductDiscountDB] Lỗi khi gửi thông báo wishlist: " + e.getMessage());
+                e.printStackTrace();
+                // Không throw exception để không ảnh hưởng đến việc gán discount
+            }
+        }
+        
         return affected;
     }
 

@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
     <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
         <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+        <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
             <!DOCTYPE html>
             <html lang="en">
@@ -10,9 +11,15 @@
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>PinkyCloud - Bộ sưu tập</title>
 
+                <!-- Preconnect để tối ưu tải font và CDN -->
+                <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+                <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+                
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
-                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" 
+                      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+                      crossorigin="anonymous" referrerpolicy="no-referrer">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/collection.css">
                 
             </head>
@@ -228,9 +235,23 @@
                                                                 </c:choose>
                                                             </div>
                                                         </c:if>
-                                                        <img src="${pageContext.request.contextPath}${product.imageUrl}"
-                                                            alt="${product.name}" loading="lazy"
-                                                            onerror="this.src='${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png'">
+                                                        <c:choose>
+                                                            <c:when test="${not empty product.imageUrl and product.imageUrl != ''}">
+                                                                <img src="${pageContext.request.contextPath}${product.imageUrl}"
+                                                                    alt="${fn:escapeXml(product.name)}" 
+                                                                    loading="lazy"
+                                                                    decoding="async"
+                                                                    onerror="this.onerror=null; this.src='${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png';"
+                                                                    style="background-color: #f8f9fa;">
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <img src="${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png"
+                                                                    alt="${fn:escapeXml(product.name)}" 
+                                                                    loading="lazy"
+                                                                    decoding="async"
+                                                                    style="background-color: #f8f9fa;">
+                                                            </c:otherwise>
+                                                        </c:choose>
                                                         <div class="product-card-body">
                                                             <h5>
                                                                 <c:out value="${product.name}" />
@@ -263,6 +284,15 @@
                                                                     onclick="event.stopPropagation();">
                                                                     <i class="fas fa-shopping-bag"></i> Mua ngay
                                                                 </a>
+                                                                <c:if test="${not empty sessionScope.user}">
+                                                                    <button type="button" 
+                                                                            class="btn btn-sm ${wishlistProductIds.contains(product.productId) ? 'btn-danger' : 'btn-outline-danger'}" 
+                                                                            onclick="event.stopPropagation(); toggleWishlist(${product.productId}, this);"
+                                                                            data-product-id="${product.productId}"
+                                                                            title="${wishlistProductIds.contains(product.productId) ? 'Xóa khỏi wishlist' : 'Thêm vào wishlist'}">
+                                                                        <i class="${wishlistProductIds.contains(product.productId) ? 'fas' : 'far'} fa-heart"></i>
+                                                                    </button>
+                                                                </c:if>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -460,6 +490,79 @@
                                 }
                             });
                         });
+                        
+                        // Wishlist toggle function cho danh sách sản phẩm (phải ở global scope để onclick có thể gọi)
+                        function toggleWishlist(productId, buttonElement) {
+                            if (!buttonElement) {
+                                console.error('Button element not found');
+                                return;
+                            }
+                            
+                            const icon = buttonElement.querySelector('i');
+                            
+                            const params = new URLSearchParams();
+                            params.append('action', 'toggle');
+                            params.append('productId', productId.toString());
+                            
+                            // Debug: Log request contents
+                            console.log('Sending wishlist request:', {
+                                action: 'toggle',
+                                productId: productId
+                            });
+                            
+                            // Disable button during request
+                            buttonElement.disabled = true;
+                            
+                            fetch('${pageContext.request.contextPath}/wishlist', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                },
+                                body: params.toString()
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('HTTP error! status: ' + response.status);
+                                }
+                                return response.text().then(text => {
+                                    try {
+                                        return JSON.parse(text);
+                                    } catch (e) {
+                                        console.error('Response is not JSON:', text);
+                                        throw new Error('Invalid JSON response');
+                                    }
+                                });
+                            })
+                            .then(data => {
+                                if (data.success) {
+                                    // Toggle button state
+                                    if (data.inWishlist) {
+                                        buttonElement.classList.remove('btn-outline-danger');
+                                        buttonElement.classList.add('btn-danger');
+                                        if (icon) {
+                                            icon.classList.remove('far');
+                                            icon.classList.add('fas');
+                                        }
+                                    } else {
+                                        buttonElement.classList.remove('btn-danger');
+                                        buttonElement.classList.add('btn-outline-danger');
+                                        if (icon) {
+                                            icon.classList.remove('fas');
+                                            icon.classList.add('far');
+                                        }
+                                    }
+                                } else {
+                                    alert(data.message || 'Có lỗi xảy ra');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('Có lỗi xảy ra khi cập nhật wishlist: ' + error.message);
+                            })
+                            .finally(() => {
+                                buttonElement.disabled = false;
+                            });
+                        }
                     </script>
             </body>
 

@@ -188,6 +188,14 @@
                     <div class="action-description">Khôi phục mật khẩu qua email</div>
                 </div>
 
+                <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/wishlist'">
+                    <div class="action-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div class="action-title">Wishlist</div>
+                    <div class="action-description">Xem danh sách sản phẩm yêu thích của bạn</div>
+                </div>
+
                 <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/my-orders'">
                     <div class="action-icon">
                         <i class="fas fa-receipt"></i>

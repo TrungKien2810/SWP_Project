@@ -501,7 +501,7 @@ public class Admin extends HttpServlet {
                         return;
                     }
                     
-                    int affected = new DAO.ProductDiscountDB().assignDiscountToProducts(discountId, productIds);
+                    int affected = new DAO.ProductDiscountDB().assignDiscountToProducts(discountId, productIds, request.getServletContext());
                     if (affected < 0) {
                         String msg = java.net.URLEncoder.encode("Lỗi khi gán mã giảm giá", "UTF-8");
                         response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
@@ -596,7 +596,7 @@ public class Admin extends HttpServlet {
                         return;
                     }
                     
-                    int affected = new DAO.ProductDiscountDB().assignDiscountToProducts(discountId, productIds);
+                    int affected = new DAO.ProductDiscountDB().assignDiscountToProducts(discountId, productIds, request.getServletContext());
                     if (affected == 0) {
                         String msg = java.net.URLEncoder.encode("Không có sản phẩm nào để gán (có thể tất cả sản phẩm đã có mã này)", "UTF-8");
                         response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
@@ -679,7 +679,7 @@ public class Admin extends HttpServlet {
                         return;
                     }
                     
-                    int affected = new DAO.ProductDiscountDB().assignDiscountToProducts(discountId, productIds);
+                    int affected = new DAO.ProductDiscountDB().assignDiscountToProducts(discountId, productIds, request.getServletContext());
                     if (affected == 0) {
                         String msg = java.net.URLEncoder.encode("Không có sản phẩm nào để gán (có thể tất cả sản phẩm đã có mã này)", "UTF-8");
                         response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
@@ -781,7 +781,7 @@ public class Admin extends HttpServlet {
                         return;
                     }
                     
-                    int affected = new DAO.ProductDiscountDB().assignDiscountToProducts(discountId, productIds);
+                    int affected = new DAO.ProductDiscountDB().assignDiscountToProducts(discountId, productIds, request.getServletContext());
                     if (affected == 0) {
                         String msg = java.net.URLEncoder.encode("Không có sản phẩm nào để gán (có thể tất cả sản phẩm đã có mã này)", "UTF-8");
                         response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);

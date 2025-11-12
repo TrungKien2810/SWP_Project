@@ -56,10 +56,14 @@ public class productdetail extends HttpServlet {
                 
                 // Kiểm tra xem user đã mua sản phẩm chưa (và order có status COMPLETED)
                 boolean canComment = false;
+                boolean inWishlist = false;
                 HttpSession session = request.getSession(false);
                 if (session != null && session.getAttribute("user") != null) {
                     user currentUser = (user) session.getAttribute("user");
                     canComment = commentDB.hasUserPurchasedProduct(currentUser.getUser_id(), id);
+                    // Kiểm tra sản phẩm có trong wishlist không
+                    DAO.WishlistDB wishlistDB = new DAO.WishlistDB();
+                    inWishlist = wishlistDB.isInWishlist(currentUser.getUser_id(), id);
                     // Ưu tiên hiển thị bình luận của user lên đầu và lọc theo rating nếu có
                     if (ratingFilter != null) {
                         comments = commentDB.getCommentsByProductIdAndRatingPrioritizeUser(id, ratingFilter, currentUser.getUser_id());
@@ -88,6 +92,7 @@ public class productdetail extends HttpServlet {
                 request.setAttribute("avgRating", avgRating);
                 request.setAttribute("commentCount", commentCount);
                 request.setAttribute("canComment", canComment);
+                request.setAttribute("inWishlist", inWishlist);
                 request.setAttribute("ratingFilter", ratingFilter);
                 request.setAttribute("rating5Count", rating5Count);
                 request.setAttribute("rating4Count", rating4Count);

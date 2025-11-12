@@ -314,6 +314,18 @@
                                     <div class="promotional-badge">
                                         <i class="fas fa-percentage"></i> Giá tốt
                                     </div>
+                                    <c:if test="${product.discountActive}">
+                                        <div class="discount-flag" style="left: auto; right: 12px; top: 52px;">
+                                            <c:choose>
+                                                <c:when test="${product.activeDiscount.type == 'PERCENTAGE'}">
+                                                    -<fmt:formatNumber value="${product.activeDiscount.value}" maxFractionDigits="0"/>%
+                                                </c:when>
+                                                <c:otherwise>
+                                                    -<fmt:formatNumber value="${product.activeDiscount.value}" type="number" maxFractionDigits="0" /> VNĐ
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </div>
+                                    </c:if>
                                     <c:choose>
                                         <c:when test="${not empty product.imageUrl}">
                                             <img src="${pageContext.request.contextPath}${product.imageUrl}"
@@ -329,9 +341,28 @@
                                     </c:choose>
                                     <div class="product-card-body">
                                         <h5>${fn:escapeXml(product.name)}</h5>
-                                        <p class="price">
-                                            <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> VNĐ
-                                        </p>
+                                        <c:choose>
+                                            <c:when test="${product.discountActive}">
+                                                <div class="price-wrapper">
+                                                    <span class="price-old">
+                                                        <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> VNĐ
+                                                    </span>
+                                                    <span class="price-new">
+                                                        <fmt:formatNumber value="${product.discountedPrice}" type="number" maxFractionDigits="0" /> VNĐ
+                                                    </span>
+                                                    <c:if test="${product.discountAmount > 0}">
+                                                        <span class="price-save">
+                                                            Tiết kiệm <fmt:formatNumber value="${product.discountAmount}" type="number" maxFractionDigits="0" /> VNĐ
+                                                        </span>
+                                                    </c:if>
+                                                </div>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <p class="price">
+                                                    <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> VNĐ
+                                                </p>
+                                            </c:otherwise>
+                                        </c:choose>
                                         <div class="action-buttons">
                                             <a href="${pageContext.request.contextPath}/addToCart?id=${product.productId}&buyNow=true"
                                                class="btn btn-sm btn-buy-now"

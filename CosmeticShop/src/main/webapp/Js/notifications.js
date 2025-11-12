@@ -107,7 +107,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Navigate to link if available
                 if (linkUrl) {
-                    window.location.href = linkUrl;
+                    // Đảm bảo linkUrl có context path nếu cần
+                    let finalUrl = linkUrl;
+                    if (linkUrl.startsWith('/')) {
+                        // Relative path từ root - thêm context path nếu có
+                        finalUrl = contextPath + linkUrl;
+                    } else if (!linkUrl.startsWith('http://') && !linkUrl.startsWith('https://')) {
+                        // Relative path - thêm context path và dấu /
+                        finalUrl = contextPath + '/' + linkUrl;
+                    }
+                    window.location.href = finalUrl;
                 }
             });
         });
