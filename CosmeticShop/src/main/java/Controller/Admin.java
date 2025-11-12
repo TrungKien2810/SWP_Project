@@ -507,6 +507,11 @@ public class Admin extends HttpServlet {
                         response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
                         return;
                     }
+                    if (affected == 0) {
+                        String msg = java.net.URLEncoder.encode("Không có sản phẩm nào để gán (có thể tất cả sản phẩm đã có mã này)", "UTF-8");
+                        response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                        return;
+                    }
                     String msg = java.net.URLEncoder.encode("Gán mã thành công: " + affected + " sản phẩm", "UTF-8");
                     response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
                     return;
@@ -533,6 +538,11 @@ public class Admin extends HttpServlet {
                     }
                     
                     int affected = new DAO.ProductDiscountDB().unassignDiscountFromProducts(discountId, productIds);
+                    if (affected == 0) {
+                        String msg = java.net.URLEncoder.encode("Không có sản phẩm nào để bỏ gán (có thể sản phẩm không có mã này)", "UTF-8");
+                        response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                        return;
+                    }
                     String msg = java.net.URLEncoder.encode("Bỏ gán mã thành công: " + affected + " sản phẩm", "UTF-8");
                     response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
                     return;
@@ -587,6 +597,11 @@ public class Admin extends HttpServlet {
                     }
                     
                     int affected = new DAO.ProductDiscountDB().assignDiscountToProducts(discountId, productIds);
+                    if (affected == 0) {
+                        String msg = java.net.URLEncoder.encode("Không có sản phẩm nào để gán (có thể tất cả sản phẩm đã có mã này)", "UTF-8");
+                        response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                        return;
+                    }
                     String msg = java.net.URLEncoder.encode("Gán theo danh mục thành công: " + affected + " sản phẩm", "UTF-8");
                     response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
                     return;
@@ -665,6 +680,11 @@ public class Admin extends HttpServlet {
                     }
                     
                     int affected = new DAO.ProductDiscountDB().assignDiscountToProducts(discountId, productIds);
+                    if (affected == 0) {
+                        String msg = java.net.URLEncoder.encode("Không có sản phẩm nào để gán (có thể tất cả sản phẩm đã có mã này)", "UTF-8");
+                        response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                        return;
+                    }
                     String msg = java.net.URLEncoder.encode("Gán theo mức giá thành công: " + affected + " sản phẩm", "UTF-8");
                     response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
                     return;
@@ -689,6 +709,11 @@ public class Admin extends HttpServlet {
                     }
                     
                     int affected = new DAO.ProductDiscountDB().unassignDiscountFromProducts(discountId, productIds);
+                    if (affected == 0) {
+                        String msg = java.net.URLEncoder.encode("Không có sản phẩm nào để bỏ gán (có thể sản phẩm không có mã này)", "UTF-8");
+                        response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                        return;
+                    }
                     String msg = java.net.URLEncoder.encode("Bỏ gán theo mức giá thành công: " + affected + " sản phẩm", "UTF-8");
                     response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
                     return;
@@ -714,6 +739,11 @@ public class Admin extends HttpServlet {
                     }
                     
                     int affected = new DAO.ProductDiscountDB().unassignAllDiscountsFromProducts(productIds);
+                    if (affected == 0) {
+                        String msg = java.net.URLEncoder.encode("Không có mã giảm giá nào để xóa (các sản phẩm đã chọn không có mã giảm giá)", "UTF-8");
+                        response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                        return;
+                    }
                     String msg = java.net.URLEncoder.encode("Đã xóa tất cả mã của " + affected + " sản phẩm", "UTF-8");
                     response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
                     return;
@@ -752,6 +782,11 @@ public class Admin extends HttpServlet {
                     }
                     
                     int affected = new DAO.ProductDiscountDB().assignDiscountToProducts(discountId, productIds);
+                    if (affected == 0) {
+                        String msg = java.net.URLEncoder.encode("Không có sản phẩm nào để gán (có thể tất cả sản phẩm đã có mã này)", "UTF-8");
+                        response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                        return;
+                    }
                     String msg = java.net.URLEncoder.encode("Gán mã cho tất cả sản phẩm thành công: " + affected + " sản phẩm", "UTF-8");
                     response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
                     return;
@@ -774,6 +809,11 @@ public class Admin extends HttpServlet {
                     }
                     
                     int affected = new DAO.ProductDiscountDB().unassignDiscountFromProducts(discountId, productIds);
+                    if (affected == 0) {
+                        String msg = java.net.URLEncoder.encode("Không có sản phẩm nào để bỏ gán (có thể sản phẩm không có mã này)", "UTF-8");
+                        response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                        return;
+                    }
                     String msg = java.net.URLEncoder.encode("Bỏ gán mã khỏi tất cả sản phẩm thành công: " + affected + " sản phẩm", "UTF-8");
                     response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
                     return;
@@ -781,6 +821,80 @@ public class Admin extends HttpServlet {
                     e.printStackTrace();
                 }
                 String msg = java.net.URLEncoder.encode("Bỏ gán mã khỏi tất cả sản phẩm thất bại", "UTF-8");
+                response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                return;
+            } else if ("unassignAllDiscountsFromAllProducts".equals(op)) {
+                try {
+                    int affected = new DAO.ProductDiscountDB().unassignAllDiscountsFromAllProducts();
+                    if (affected == 0) {
+                        String msg = java.net.URLEncoder.encode("Không có mã giảm giá nào để xóa", "UTF-8");
+                        response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                        return;
+                    }
+                    String msg = java.net.URLEncoder.encode("Đã xóa tất cả mã giảm giá khỏi tất cả sản phẩm: " + affected + " bản ghi", "UTF-8");
+                    response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                    return;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                String msg = java.net.URLEncoder.encode("Xóa tất cả mã giảm giá thất bại", "UTF-8");
+                response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                return;
+            } else if ("unassignAllDiscountsByCategory".equals(op)) {
+                try {
+                    String[] categoryNames = request.getParameterValues("categoryNames");
+                    java.util.List<Integer> categoryIds = new java.util.ArrayList<>();
+                    
+                    if (categoryNames != null && categoryNames.length > 0) {
+                        for (String catName : categoryNames) {
+                            if (catName != null && !catName.trim().isEmpty()) {
+                                java.util.List<Integer> catIds = new DAO.CategoryDB().getCategoryIdsByName(catName.trim());
+                                categoryIds.addAll(catIds);
+                            }
+                        }
+                    }
+                    
+                    if (categoryIds.isEmpty()) {
+                        String msg = java.net.URLEncoder.encode("Không có danh mục nào được chọn", "UTF-8");
+                        response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                        return;
+                    }
+                    
+                    int affected = new DAO.ProductDiscountDB().unassignAllDiscountsFromProductsByCategoryIds(categoryIds);
+                    if (affected == 0) {
+                        String msg = java.net.URLEncoder.encode("Không có mã giảm giá nào để xóa (sản phẩm trong danh mục đã chọn không có mã giảm giá)", "UTF-8");
+                        response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                        return;
+                    }
+                    String msg = java.net.URLEncoder.encode("Đã xóa tất cả mã giảm giá khỏi sản phẩm theo danh mục: " + affected + " bản ghi", "UTF-8");
+                    response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                    return;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                String msg = java.net.URLEncoder.encode("Xóa tất cả mã giảm giá theo danh mục thất bại", "UTF-8");
+                response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                return;
+            } else if ("unassignAllDiscountsByPrice".equals(op)) {
+                try {
+                    double minPrice = 0;
+                    double maxPrice = Double.MAX_VALUE;
+                    try { String s = request.getParameter("minPrice"); if (s != null && !s.isBlank()) minPrice = Double.parseDouble(s); } catch (Exception ignored) {}
+                    try { String s = request.getParameter("maxPrice"); if (s != null && !s.isBlank()) maxPrice = Double.parseDouble(s); } catch (Exception ignored) {}
+                    
+                    int affected = new DAO.ProductDiscountDB().unassignAllDiscountsFromProductsByPriceRange(minPrice, maxPrice);
+                    if (affected == 0) {
+                        String msg = java.net.URLEncoder.encode("Không có mã giảm giá nào để xóa (sản phẩm trong khoảng giá đã chọn không có mã giảm giá)", "UTF-8");
+                        response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                        return;
+                    }
+                    String msg = java.net.URLEncoder.encode("Đã xóa tất cả mã giảm giá khỏi sản phẩm theo khoảng giá: " + affected + " bản ghi", "UTF-8");
+                    response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
+                    return;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                String msg = java.net.URLEncoder.encode("Xóa tất cả mã giảm giá theo khoảng giá thất bại", "UTF-8");
                 response.sendRedirect(request.getContextPath() + "/admin?action=discountAssign&msg=" + msg);
                 return;
             }
