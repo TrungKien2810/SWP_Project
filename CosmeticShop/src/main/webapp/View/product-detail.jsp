@@ -132,6 +132,11 @@
                                 <i class="fas fa-shopping-cart me-2"></i>
                                 Thêm vào giỏ hàng
                             </button>
+                            <c:if test="${not empty sessionScope.user}">
+                                <button type="button" id="wishlistBtn" class="btn ${inWishlist ? 'btn-danger' : 'btn-outline-danger'}" onclick="toggleWishlist(<%=p.getProductId()%>)" title="${inWishlist ? 'Xóa khỏi wishlist' : 'Thêm vào wishlist'}">
+                                    <i class="${inWishlist ? 'fas' : 'far'} fa-heart" id="wishlistIcon"></i>
+                                </button>
+                            </c:if>
                         </form>
                         <small class="qty-hint <%= p.getStock() <= 5 ? "low" : "ok" %>">
                             <i class="fas fa-info-circle"></i>
@@ -1007,6 +1012,76 @@
             const commentId = replyForm.id.replace('replyForm_', '');
             setupReplyMediaPreview(commentId);
         });
+        
+        // Wishlist toggle function
+        function toggleWishlist(productId) {
+            const btn = document.getElementById('wishlistBtn');
+            const icon = document.getElementById('wishlistIcon');
+            
+            if (!btn) {
+                console.error('Wishlist button not found');
+                return;
+            }
+            
+            const params = new URLSearchParams();
+            params.append('action', 'toggle');
+            params.append('productId', productId.toString());
+            
+            // Debug: Log request contents
+            console.log('Sending wishlist request:', {
+                action: 'toggle',
+                productId: productId
+            });
+            
+            // Disable button during request
+            btn.disabled = true;
+            
+            fetch('${pageContext.request.contextPath}/wishlist', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: params.toString()
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('HTTP error! status: ' + response.status);
+                }
+                return response.text().then(text => {
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        console.error('Response is not JSON:', text);
+                        throw new Error('Invalid JSON response');
+                    }
+                });
+            })
+            .then(data => {
+                if (data.success) {
+                    // Toggle button state
+                    if (data.inWishlist) {
+                        btn.classList.remove('btn-outline-danger');
+                        btn.classList.add('btn-danger');
+                        icon.classList.remove('far');
+                        icon.classList.add('fas');
+                    } else {
+                        btn.classList.remove('btn-danger');
+                        btn.classList.add('btn-outline-danger');
+                        icon.classList.remove('fas');
+                        icon.classList.add('far');
+                    }
+                } else {
+                    alert(data.message || 'Có lỗi xảy ra');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi cập nhật wishlist: ' + error.message);
+            })
+            .finally(() => {
+                btn.disabled = false;
+            });
+        }
     </script>
 </body>
 

@@ -127,8 +127,21 @@ public class ProductController extends HttpServlet {
         // Lấy danh sách categories để hiển thị trong dropdown
         List<String> categories = db().getAllCategories();
         
+        // Lấy danh sách product IDs trong wishlist của user (nếu đã đăng nhập)
+        java.util.Set<Integer> wishlistProductIds = new java.util.HashSet<>();
+        jakarta.servlet.http.HttpSession session = request.getSession(false);
+        if (session != null && session.getAttribute("user") != null) {
+            Model.user user = (Model.user) session.getAttribute("user");
+            DAO.WishlistDB wishlistDB = new DAO.WishlistDB();
+            java.util.List<Model.Wishlist> wishlistItems = wishlistDB.getWishlistByUserId(user.getUser_id());
+            for (Model.Wishlist item : wishlistItems) {
+                wishlistProductIds.add(item.getProductId());
+            }
+        }
+        
         request.setAttribute("productList", productList);
         request.setAttribute("categories", categories);
+        request.setAttribute("wishlistProductIds", wishlistProductIds);
         request.setAttribute("searchTerm", searchTerm);
         request.setAttribute("selectedCategory", categoryName);
         request.setAttribute("minPrice", minPriceStr);
