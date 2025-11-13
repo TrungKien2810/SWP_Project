@@ -202,15 +202,30 @@ function removeFromWishlist(productId) {
         return;
     }
     
-    const formData = new FormData();
-    formData.append('action', 'remove');
-    formData.append('productId', productId);
+    const params = new URLSearchParams();
+    params.append('action', 'remove');
+    params.append('productId', productId.toString());
     
     fetch('${pageContext.request.contextPath}/wishlist', {
         method: 'POST',
-        body: formData
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params.toString()
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('HTTP error! status: ' + response.status);
+        }
+        return response.text().then(text => {
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                console.error('Response is not JSON:', text);
+                throw new Error('Invalid JSON response');
+            }
+        });
+    })
     .then(data => {
         if (data.success) {
             location.reload();
@@ -220,7 +235,7 @@ function removeFromWishlist(productId) {
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Có lỗi xảy ra khi xóa sản phẩm');
+        alert('Có lỗi xảy ra khi xóa sản phẩm: ' + error.message);
     });
 }
 </script>

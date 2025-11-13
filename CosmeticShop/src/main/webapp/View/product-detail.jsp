@@ -133,7 +133,7 @@
                                 Thêm vào giỏ hàng
                             </button>
                             <c:if test="${not empty sessionScope.user}">
-                                <button type="button" id="wishlistBtn" class="btn ${inWishlist ? 'btn-danger' : 'btn-outline-danger'}" onclick="toggleWishlist(<%=p.getProductId()%>)" title="${inWishlist ? 'Xóa khỏi wishlist' : 'Thêm vào wishlist'}">
+                                <button type="button" id="wishlistBtn" class="btn ${inWishlist ? 'btn-danger' : 'btn-outline-danger'}" onclick="toggleWishlist(<%=p.getProductId()%>, event); return false;" title="${inWishlist ? 'Xóa khỏi wishlist' : 'Thêm vào wishlist'}">
                                     <i class="${inWishlist ? 'fas' : 'far'} fa-heart" id="wishlistIcon"></i>
                                 </button>
                             </c:if>
@@ -1014,13 +1014,25 @@
         });
         
         // Wishlist toggle function
-        function toggleWishlist(productId) {
+        function toggleWishlist(productId, event) {
+            // Prevent default form submission if event is provided
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
             const btn = document.getElementById('wishlistBtn');
             const icon = document.getElementById('wishlistIcon');
             
             if (!btn) {
                 console.error('Wishlist button not found');
-                return;
+                return false;
+            }
+            
+            // Prevent multiple clicks
+            if (btn.disabled) {
+                console.log('Button is already processing, ignoring click');
+                return false;
             }
             
             const params = new URLSearchParams();
@@ -1035,6 +1047,8 @@
             
             // Disable button during request
             btn.disabled = true;
+            btn.style.opacity = '0.6';
+            btn.style.cursor = 'not-allowed';
             
             fetch('${pageContext.request.contextPath}/wishlist', {
                 method: 'POST',
@@ -1048,6 +1062,7 @@
                     throw new Error('HTTP error! status: ' + response.status);
                 }
                 return response.text().then(text => {
+                    console.log('Raw response:', text);
                     try {
                         return JSON.parse(text);
                     } catch (e) {
@@ -1057,20 +1072,29 @@
                 });
             })
             .then(data => {
+                console.log('Wishlist response:', data);
                 if (data.success) {
                     // Toggle button state
                     if (data.inWishlist) {
                         btn.classList.remove('btn-outline-danger');
                         btn.classList.add('btn-danger');
-                        icon.classList.remove('far');
-                        icon.classList.add('fas');
+                        if (icon) {
+                            icon.classList.remove('far');
+                            icon.classList.add('fas');
+                        }
+                        btn.title = 'Xóa khỏi wishlist';
                     } else {
                         btn.classList.remove('btn-danger');
                         btn.classList.add('btn-outline-danger');
-                        icon.classList.remove('fas');
-                        icon.classList.add('far');
+                        if (icon) {
+                            icon.classList.remove('fas');
+                            icon.classList.add('far');
+                        }
+                        btn.title = 'Thêm vào wishlist';
                     }
+                    console.log('Wishlist updated successfully. inWishlist:', data.inWishlist);
                 } else {
+                    console.error('Wishlist update failed:', data.message);
                     alert(data.message || 'Có lỗi xảy ra');
                 }
             })
@@ -1080,6 +1104,8 @@
             })
             .finally(() => {
                 btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
             });
         }
     </script>
