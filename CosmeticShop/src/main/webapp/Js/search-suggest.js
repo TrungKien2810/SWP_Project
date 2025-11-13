@@ -40,12 +40,19 @@ function debounce(fn, delay) {
         var html = items.map(function (item) {
             var img = (item.imageUrl && item.imageUrl.length) ? (contextPath + item.imageUrl) : (contextPath + '/IMG/hinhnen-placeholder.png');
             var price = new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 0 }).format(item.price);
+            var originalPrice = new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 0 }).format(item.originalPrice || item.price);
+            var hasDiscount = !!item.hasDiscount && item.originalPrice && item.originalPrice > item.price;
+            var priceHtml = '<div class="suggest-price"><span class="suggest-price-current">' + price + ' VNĐ</span>';
+            if (hasDiscount) {
+                priceHtml += '<span class="suggest-price-original">' + originalPrice + ' VNĐ</span>';
+            }
+            priceHtml += '</div>';
             return '' +
                 '<a class="suggest-item" href="' + item.url + '">' +
                 '  <img class="suggest-img" src="' + img + '" alt="">' +
                 '  <div class="suggest-meta">' +
                 '    <div class="suggest-name">' + item.name + '</div>' +
-                '    <div class="suggest-price">' + price + ' VNĐ</div>' +
+                '    ' + priceHtml +
                 '  </div>' +
                 '</a>';
         }).join('');

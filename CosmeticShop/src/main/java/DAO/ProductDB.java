@@ -68,10 +68,15 @@ public class ProductDB {
             stmt.setString(3, starts);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
+                    int productId = rs.getInt("product_id");
+                    double originalPrice = rs.getDouble("price");
+                    Discount activeDiscount = fetchActiveDiscount(productId);
+                    double finalPrice = calculateDiscountedPrice(originalPrice, activeDiscount);
                     list.add(new Suggestion(
-                            rs.getInt("product_id"),
+                            productId,
                             rs.getString("name"),
-                            rs.getDouble("price"),
+                            originalPrice,
+                            finalPrice,
                             rs.getString("image_url")
                     ));
                 }
@@ -83,22 +88,50 @@ public class ProductDB {
     }
 
     // Kiểu dữ liệu rút gọn cho gợi ý
+    private double calculateDiscountedPrice(double price, Discount discount) {
+        if (discount == null) {
+            return price;
+        }
+        double discountedPrice = price;
+        if ("PERCENTAGE".equalsIgnoreCase(discount.getType())) {
+            discountedPrice = price * (1 - (discount.getValue() / 100.0));
+        } else if ("FIXED_AMOUNT".equalsIgnoreCase(discount.getType())) {
+            discountedPrice = price - discount.getValue();
+        }
+        if (discount.getMaxDiscountAmount() != null && "PERCENTAGE".equalsIgnoreCase(discount.getType())) {
+            double maxDiscount = discount.getMaxDiscountAmount();
+            double actualDiscount = price - discountedPrice;
+            if (actualDiscount > maxDiscount) {
+                discountedPrice = price - maxDiscount;
+            }
+        }
+        if (discountedPrice < 0) {
+            discountedPrice = 0;
+        }
+        return discountedPrice;
+    }
+
     public static class Suggestion {
         private final int productId;
         private final String name;
-        private final double price;
+        private final double originalPrice;
+        private final double finalPrice;
         private final String imageUrl;
 
-        public Suggestion(int productId, String name, double price, String imageUrl) {
+        public Suggestion(int productId, String name, double originalPrice, double finalPrice, String imageUrl) {
             this.productId = productId;
             this.name = name;
-            this.price = price;
+            this.originalPrice = originalPrice;
+            this.finalPrice = finalPrice;
             this.imageUrl = imageUrl;
         }
 
         public int getProductId() { return productId; }
         public String getName() { return name; }
-        public double getPrice() { return price; }
+        public double getPrice() { return finalPrice; }
+        public double getFinalPrice() { return finalPrice; }
+        public double getOriginalPrice() { return originalPrice; }
+        public boolean isDiscounted() { return originalPrice - finalPrice > 0.0001; }
         public String getImageUrl() { return imageUrl; }
     }
 

@@ -49,10 +49,15 @@ public class ProductCategoryDB {
 
     // Gán categories cho product (xóa cũ, thêm mới)
     public boolean assignCategoriesToProduct(int productId, List<Integer> categoryIds) {
-        if (categoryIds == null) {
-            categoryIds = new ArrayList<>();
+        java.util.LinkedHashSet<Integer> uniqueCategoryIds = new java.util.LinkedHashSet<>();
+        if (categoryIds != null) {
+            for (Integer categoryId : categoryIds) {
+                if (categoryId != null && categoryId > 0) {
+                    uniqueCategoryIds.add(categoryId);
+                }
+            }
         }
-        
+
         try {
             conn.setAutoCommit(false);
             
@@ -64,19 +69,15 @@ public class ProductCategoryDB {
             }
             
             // Thêm categories mới
-            if (!categoryIds.isEmpty()) {
+            if (!uniqueCategoryIds.isEmpty()) {
                 String insertSql = "INSERT INTO ProductCategories (product_id, category_id) VALUES (?, ?)";
                 try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
-                    for (Integer categoryId : categoryIds) {
-                        if (categoryId != null && categoryId > 0) {
-                            ps.setInt(1, productId);
-                            ps.setInt(2, categoryId);
-                            ps.addBatch();
-                        }
+                    for (Integer categoryId : uniqueCategoryIds) {
+                        ps.setInt(1, productId);
+                        ps.setInt(2, categoryId);
+                        ps.addBatch();
                     }
-                    if (categoryIds.stream().anyMatch(id -> id != null && id > 0)) {
-                        ps.executeBatch();
-                    }
+                    ps.executeBatch();
                 }
             }
             

@@ -904,15 +904,28 @@ public class Admin extends HttpServlet {
             if ("create".equals(op)) {
                 String name = request.getParameter("name");
                 String desc = request.getParameter("description");
+                String redirectBase = request.getContextPath() + "/admin?action=categories";
+                String trimmedName = (name != null) ? name.trim() : null;
+                if (trimmedName == null || trimmedName.isEmpty()) {
+                    String msg = java.net.URLEncoder.encode("Tên danh mục không được để trống", "UTF-8");
+                    response.sendRedirect(redirectBase + "&error=" + msg);
+                    return;
+                }
+                if (categoryDb().existsByName(trimmedName)) {
+                    String msg = java.net.URLEncoder.encode("Danh mục '" + trimmedName + "' đã tồn tại", "UTF-8");
+                    response.sendRedirect(redirectBase + "&error=" + msg);
+                    return;
+                }
                 Part imagePart = request.getPart("categoryImage");
                 String imageUrl = null;
                 if (imagePart != null && imagePart.getSize() > 0) {
                     imageUrl = saveCategoryImage(imagePart);
                 }
-                if (name != null && !name.isBlank()) {
-                    categoryDb().create(name.trim(), (desc != null ? desc.trim() : null), imageUrl);
-                }
-                response.sendRedirect(request.getContextPath() + "/admin?action=categories");
+                boolean created = categoryDb().create(trimmedName, (desc != null ? desc.trim() : null), imageUrl);
+                String messageKey = created ? "msg" : "error";
+                String messageVal = created ? "Đã tạo danh mục mới thành công" : "Không thể tạo danh mục";
+                String msg = java.net.URLEncoder.encode(messageVal, "UTF-8");
+                response.sendRedirect(redirectBase + "&" + messageKey + "=" + msg);
                 return;
             }
             if ("update".equals(op)) {
@@ -921,16 +934,37 @@ public class Admin extends HttpServlet {
                     String name = request.getParameter("name");
                     String desc = request.getParameter("description");
                     Part imagePart = request.getPart("categoryImage");
-                    if (name != null && !name.isBlank()) {
+                    String redirectBase = request.getContextPath() + "/admin?action=categories";
+                    String trimmedName = (name != null) ? name.trim() : null;
+                    if (trimmedName == null || trimmedName.isEmpty()) {
+                        String msg = java.net.URLEncoder.encode("Tên danh mục không được để trống", "UTF-8");
+                        response.sendRedirect(redirectBase + "&error=" + msg);
+                        return;
+                    }
+                    if (categoryDb().existsByNameExcludingId(trimmedName, id)) {
+                        String msg = java.net.URLEncoder.encode("Tên danh mục '" + trimmedName + "' đã tồn tại", "UTF-8");
+                        response.sendRedirect(redirectBase + "&error=" + msg);
+                        return;
+                    }
+                    boolean updated = false;
+                    if (trimmedName != null) {
                         if (imagePart != null && imagePart.getSize() > 0) {
                             String imageUrl = saveCategoryImage(imagePart);
-                            categoryDb().update(id, name.trim(), (desc != null ? desc.trim() : null), imageUrl);
+                            updated = categoryDb().update(id, trimmedName, (desc != null ? desc.trim() : null), imageUrl);
                         } else {
-                            categoryDb().updateWithoutImage(id, name.trim(), (desc != null ? desc.trim() : null));
+                            updated = categoryDb().updateWithoutImage(id, trimmedName, (desc != null ? desc.trim() : null));
                         }
                     }
-                } catch (Exception ignored) {}
-                response.sendRedirect(request.getContextPath() + "/admin?action=categories");
+                    String msgKey = updated ? "msg" : "error";
+                    String msgValue = updated ? "Đã cập nhật danh mục thành công" : "Không thể cập nhật danh mục";
+                    String msg = java.net.URLEncoder.encode(msgValue, "UTF-8");
+                    response.sendRedirect(redirectBase + "&" + msgKey + "=" + msg);
+                    return;
+                } catch (Exception ignored) {
+                    String redirectBase = request.getContextPath() + "/admin?action=categories";
+                    String msg = java.net.URLEncoder.encode("Không thể cập nhật danh mục", "UTF-8");
+                    response.sendRedirect(redirectBase + "&error=" + msg);
+                }
                 return;
             }
             if ("delete".equals(op)) {
@@ -1450,5 +1484,6 @@ public class Admin extends HttpServlet {
         return discounts;
     }
 }
+
 
 

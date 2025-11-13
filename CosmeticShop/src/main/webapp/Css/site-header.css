@@ -645,5 +645,20 @@
   font-size: 12px;
   color: #f76c85;
   font-weight: 700;
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.suggest-price-current {
+  color: #f76c85;
+  font-weight: 700;
+}
+
+.suggest-price-original {
+  font-size: 11px;
+  color: #888;
+  font-weight: 400;
+  text-decoration: line-through;
 }
 
