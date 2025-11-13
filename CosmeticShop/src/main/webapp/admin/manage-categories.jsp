@@ -7,6 +7,19 @@
     <h5 class="mb-0">Quản lý danh mục</h5>
   </div>
 
+  <c:if test="${not empty param.msg}">
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      ${param.msg}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </c:if>
+  <c:if test="${not empty param.error}">
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      ${param.error}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </c:if>
+
   <div class="card mb-3" style="max-width:720px;">
     <div class="card-body">
       <form action="${pageContext.request.contextPath}/admin" method="post" enctype="multipart/form-data" class="row g-2 align-items-end">

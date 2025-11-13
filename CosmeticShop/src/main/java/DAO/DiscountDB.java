@@ -13,6 +13,32 @@ public class DiscountDB {
     private final DBConnect db = new DBConnect();
     private final Connection conn = db.conn;
 
+    public boolean existsByCode(String code) {
+        return existsByCode(code, null);
+    }
+
+    public boolean existsByCode(String code, Integer excludeId) {
+        if (code == null || code.trim().isEmpty()) {
+            return false;
+        }
+        StringBuilder sql = new StringBuilder("SELECT 1 FROM Discounts WHERE LOWER(code) = LOWER(?)");
+        if (excludeId != null) {
+            sql.append(" AND discount_id <> ?");
+        }
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            ps.setString(1, code.trim());
+            if (excludeId != null) {
+                ps.setInt(2, excludeId);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public Discount validateAndGetDiscount(String code) {
         if (code == null || code.trim().isEmpty()) return null;
         String sql = "SELECT discount_id, code, name, discount_type, discount_value, ISNULL(min_order_amount, 0) AS min_order_amount, max_discount_amount " +

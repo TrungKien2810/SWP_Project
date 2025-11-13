@@ -95,6 +95,16 @@ public class signup extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/signup");
             return;
         }
+        if (ud.getUserByEmail(email) != null) {
+            session.setAttribute("signupErrorMsg", "Email đã được sử dụng. Vui lòng chọn email khác!");
+            response.sendRedirect(request.getContextPath() + "/signup");
+            return;
+        }
+        if (ud.isFullNameTaken(username)) {
+            session.setAttribute("signupErrorMsg", "Tên hiển thị đã được sử dụng. Vui lòng chọn tên khác!");
+            response.sendRedirect(request.getContextPath() + "/signup");
+            return;
+        }
         if (ud.signup(username, email, password)) {
             session.setAttribute("user", ud.getUserByEmail(email));
             session.setAttribute("signupSuccessMsg", "Đăng ký thành công! Chào mừng " + username + " đến với PinkyCloud!");
