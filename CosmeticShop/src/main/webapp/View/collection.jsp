@@ -498,6 +498,12 @@
                                 return;
                             }
                             
+                            // Prevent multiple clicks
+                            if (buttonElement.disabled) {
+                                console.log('Button is already processing, ignoring click');
+                                return;
+                            }
+                            
                             const icon = buttonElement.querySelector('i');
                             
                             const params = new URLSearchParams();
@@ -512,6 +518,8 @@
                             
                             // Disable button during request
                             buttonElement.disabled = true;
+                            buttonElement.style.opacity = '0.6';
+                            buttonElement.style.cursor = 'not-allowed';
                             
                             fetch('${pageContext.request.contextPath}/wishlist', {
                                 method: 'POST',
@@ -525,6 +533,7 @@
                                     throw new Error('HTTP error! status: ' + response.status);
                                 }
                                 return response.text().then(text => {
+                                    console.log('Raw response:', text);
                                     try {
                                         return JSON.parse(text);
                                     } catch (e) {
@@ -534,6 +543,7 @@
                                 });
                             })
                             .then(data => {
+                                console.log('Wishlist response:', data);
                                 if (data.success) {
                                     // Toggle button state
                                     if (data.inWishlist) {
@@ -543,6 +553,7 @@
                                             icon.classList.remove('far');
                                             icon.classList.add('fas');
                                         }
+                                        buttonElement.title = 'Xóa khỏi wishlist';
                                     } else {
                                         buttonElement.classList.remove('btn-danger');
                                         buttonElement.classList.add('btn-outline-danger');
@@ -550,8 +561,11 @@
                                             icon.classList.remove('fas');
                                             icon.classList.add('far');
                                         }
+                                        buttonElement.title = 'Thêm vào wishlist';
                                     }
+                                    console.log('Wishlist updated successfully. inWishlist:', data.inWishlist);
                                 } else {
+                                    console.error('Wishlist update failed:', data.message);
                                     alert(data.message || 'Có lỗi xảy ra');
                                 }
                             })
@@ -561,6 +575,8 @@
                             })
                             .finally(() => {
                                 buttonElement.disabled = false;
+                                buttonElement.style.opacity = '1';
+                                buttonElement.style.cursor = 'pointer';
                             });
                         }
                     </script>

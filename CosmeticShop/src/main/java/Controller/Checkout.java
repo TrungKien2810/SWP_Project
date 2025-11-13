@@ -1,5 +1,6 @@
 package Controller;
 import DAO.CartDB;
+import DAO.NotificationDB;
 import DAO.OrderDB;
 import DAO.ShippingAddressDB;
 import DAO.ShippingMethodDB;
@@ -197,6 +198,19 @@ public class Checkout extends HttpServlet {
             }
             resp.sendRedirect(req.getContextPath() + "/checkout?error=details");
             return;
+        }
+        
+        // Gửi thông báo cho admin về đơn hàng mới
+        try {
+            NotificationDB notificationDB = new NotificationDB();
+            String title = "Đơn hàng mới #" + orderId;
+            String formattedTotal = String.format("%,.0f", totalAmount);
+            String message = String.format("Khách hàng %s vừa tạo đơn #%d với tổng giá trị %s đ.", 
+                    currentUser.getUsername(), orderId, formattedTotal);
+            String linkUrl = req.getContextPath() + "/admin?action=orderDetail&orderId=" + orderId + "&fullPage=true";
+            notificationDB.createNotificationsForAdmins("NEW_ORDER", title, message, linkUrl);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         
         // Nếu có discount được áp dụng, đánh dấu đã sử dụng

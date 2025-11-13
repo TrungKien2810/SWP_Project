@@ -105,7 +105,9 @@ public class WishlistController extends HttpServlet {
             int wishlistCount = wishlistDB.getWishlistCount(user.getUser_id());
             Map<String, Object> data = new HashMap<>();
             data.put("wishlistCount", wishlistCount);
-            data.put("inWishlist", action.equals("add") || (action.equals("toggle") && success));
+            // Kiểm tra trạng thái thực tế sau khi thực hiện action
+            boolean inWishlist = wishlistDB.isInWishlist(user.getUser_id(), productId);
+            data.put("inWishlist", inWishlist);
             
             sendJsonResponse(response, success, message, data);
             

@@ -111,6 +111,22 @@ public class NotificationController extends HttpServlet {
                 } else {
                     out.print("{\"success\":false,\"error\":\"Missing notificationId\"}");
                 }
+            } else if ("delete".equals(action)) {
+                String notificationIdStr = request.getParameter("notificationId");
+                if (notificationIdStr != null) {
+                    int notificationId = Integer.parseInt(notificationIdStr);
+                    boolean allowAdminGlobal = "ADMIN".equalsIgnoreCase(currentUser.getRole());
+                    boolean success = notificationDB.deleteNotificationForUser(notificationId, currentUser.getUser_id(), allowAdminGlobal);
+                    int unreadCount = notificationDB.getUnreadCount(currentUser.getUser_id(), false);
+
+                    JSONObject json = new JSONObject();
+                    json.put("success", success);
+                    json.put("notificationId", notificationId);
+                    json.put("unreadCount", unreadCount);
+                    out.print(json.toString());
+                } else {
+                    out.print("{\"success\":false,\"error\":\"Missing notificationId\"}");
+                }
             } else if ("markAllRead".equals(action)) {
                 // Đánh dấu tất cả thông báo là đã đọc
                 // Không đánh dấu read cho thông báo global (admin) để tránh ảnh hưởng tới người khác
