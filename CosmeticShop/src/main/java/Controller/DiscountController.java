@@ -89,6 +89,8 @@ public class DiscountController extends HttpServlet {
         String code = req.getParameter("code");
         String name = req.getParameter("name");
         String type = req.getParameter("type");
+        int currentId = update ? parseInt(req.getParameter("id"), -1) : -1;
+        String trimmedCode = (code != null) ? code.trim() : null;
         double value = parseDouble(req.getParameter("value"), 0);
         Double minOrder = parseNullableDouble(req.getParameter("minOrder"));
         Double maxDiscount = parseNullableDouble(req.getParameter("maxDiscount"));
@@ -140,13 +142,20 @@ public class DiscountController extends HttpServlet {
             conditionValue = null;
             conditionDescription = null;
         }
+        Integer excludeId = update && currentId > 0 ? currentId : null;
 
         // Validation
-        if (code == null || code.trim().isEmpty()) {
+        if (trimmedCode == null || trimmedCode.isEmpty()) {
             req.setAttribute("error", "Code không được để trống");
             forwardToForm(req, resp, update);
             return false;
         }
+        if (db().existsByCode(trimmedCode, excludeId)) {
+            req.setAttribute("error", "Mã giảm giá đã tồn tại");
+            forwardToForm(req, resp, update);
+            return false;
+        }
+        code = trimmedCode;
         if (name == null || name.trim().isEmpty()) {
             req.setAttribute("error", "Tên không được để trống");
             forwardToForm(req, resp, update);
@@ -179,8 +188,7 @@ public class DiscountController extends HttpServlet {
 
         boolean success;
         if (update) {
-            int id = parseInt(req.getParameter("id"), -1);
-            success = db().update(id, code, name, type, value, minOrder, maxDiscount, finalStart, end, active,
+            success = db().update(currentId, code, name, type, value, minOrder, maxDiscount, finalStart, end, active,
                     description, usageLimit, conditionType, conditionValue, conditionDescription, specialEvent, autoAssignAll, assignDate);
         } else {
             success = db().create(code, name, type, value, minOrder, maxDiscount, finalStart, end, active,

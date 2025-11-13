@@ -30,8 +30,9 @@ public class productdetail extends HttpServlet {
             Product product = dao.getProductById(id);
 
             if (product != null) {
-                // Lấy tên danh mục theo category_id
-                String categoryName = dao.getCategoryNameById(product.getCategoryId());
+                // Lấy danh sách tên danh mục (nhiều categories)
+                List<String> categoryNames = product.getCategoryNames();
+                String categoryName = categoryNames.isEmpty() ? null : String.join(", ", categoryNames);
                 
                 // Lấy bình luận và thống kê
                 CommentDB commentDB = new CommentDB();
@@ -55,10 +56,14 @@ public class productdetail extends HttpServlet {
                 
                 // Kiểm tra xem user đã mua sản phẩm chưa (và order có status COMPLETED)
                 boolean canComment = false;
+                boolean inWishlist = false;
                 HttpSession session = request.getSession(false);
                 if (session != null && session.getAttribute("user") != null) {
                     user currentUser = (user) session.getAttribute("user");
                     canComment = commentDB.hasUserPurchasedProduct(currentUser.getUser_id(), id);
+                    // Kiểm tra sản phẩm có trong wishlist không
+                    DAO.WishlistDB wishlistDB = new DAO.WishlistDB();
+                    inWishlist = wishlistDB.isInWishlist(currentUser.getUser_id(), id);
                     // Ưu tiên hiển thị bình luận của user lên đầu và lọc theo rating nếu có
                     if (ratingFilter != null) {
                         comments = commentDB.getCommentsByProductIdAndRatingPrioritizeUser(id, ratingFilter, currentUser.getUser_id());
@@ -82,10 +87,12 @@ public class productdetail extends HttpServlet {
                 
                 request.setAttribute("product", product);
                 request.setAttribute("categoryName", categoryName);
+                request.setAttribute("categoryNames", categoryNames);
                 request.setAttribute("comments", comments);
                 request.setAttribute("avgRating", avgRating);
                 request.setAttribute("commentCount", commentCount);
                 request.setAttribute("canComment", canComment);
+                request.setAttribute("inWishlist", inWishlist);
                 request.setAttribute("ratingFilter", ratingFilter);
                 request.setAttribute("rating5Count", rating5Count);
                 request.setAttribute("rating4Count", rating4Count);

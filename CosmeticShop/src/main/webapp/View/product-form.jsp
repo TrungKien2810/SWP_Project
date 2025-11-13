@@ -225,19 +225,25 @@
             </div>
 
             <div class="mb-3">
-                <label for="categoryName" class="form-label">Danh mục</label>
-                <select class="form-control" name="categoryName" id="categoryName" required>
-                    <option value="">-- Chọn danh mục --</option>
+                <label for="categoryIds" class="form-label">Danh mục <span class="text-muted">(có thể chọn nhiều)</span></label>
+                <select class="form-control" name="categoryIds" id="categoryIds" multiple size="5" style="min-height: 120px;">
                     <c:forEach var="category" items="${categories}">
-                        <option value="${category}" 
-                                <c:if test="${category == currentCategoryName}">selected</c:if>>
-                            ${category}
+                        <c:set var="isSelected" value="false" />
+                        <c:if test="${product != null && not empty currentCategoryIds}">
+                            <c:forEach var="catId" items="${currentCategoryIds}">
+                                <c:if test="${catId == category.categoryId}">
+                                    <c:set var="isSelected" value="true" />
+                                </c:if>
+                            </c:forEach>
+                        </c:if>
+                        <option value="${category.categoryId}" <c:if test="${isSelected}">selected</c:if>>
+                            ${category.name}
                         </option>
                     </c:forEach>
                 </select>
-                <c:if test="${product != null}">
-                    <input type="hidden" name="currentCategoryId" value="${product.categoryId}" />
-                </c:if>
+                <small class="form-text text-muted">
+                    <i class="fas fa-info-circle"></i> Giữ <kbd>Ctrl</kbd> (Windows) hoặc <kbd>Cmd</kbd> (Mac) để chọn nhiều danh mục
+                </small>
             </div>
 
             <div class="d-grid gap-2 d-md-flex justify-content-md-end">

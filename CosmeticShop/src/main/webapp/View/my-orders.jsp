@@ -9,6 +9,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <title>Lịch sử mua hàng</title>
     <style>
         .status-badge { padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
@@ -17,6 +19,7 @@
         .status-PROCESSING { background: #d1ecf1; color: #0c5460; }
         .status-SHIPPING { background: #cfe2ff; color: #084298; }
         .status-DELIVERED { background: #d4edda; color: #155724; }
+        .status-COMPLETED { background: #d4edda; color: #155724; }
         .status-CANCELLED { background: #f8d7da; color: #721c24; }
         .status-RETURNED { background: #fbe7c6; color: #8a6d3b; }
         .status-FAILED { background: #f8d7da; color: #842029; }
@@ -24,6 +27,12 @@
         .pay-PENDING { background:#fff3cd; color:#856404; }
         .pay-FAILED { background:#f8d7da; color:#842029; }
         .pay-REFUNDED { background:#e2e3e5; color:#41464b; }
+        .order-products { display:flex; gap:16px; align-items:flex-start; }
+        .order-thumb-list { display:flex; flex-wrap:wrap; gap:8px; max-width:150px; }
+        .order-thumb-list img { flex:0 0 auto; }
+        .order-thumb { width:50px; height:50px; object-fit:cover; border-radius:8px; }
+        .order-items-list { display:flex; flex-direction:column; gap:6px; }
+        .order-items-list div { line-height:1.3; }
     </style>
 </head>
 <body>
@@ -53,12 +62,12 @@
                                 <tr>
                                     <td>#${r.orderId}</td>
                                     <td>
-                                        <div class="d-flex" style="gap:12px;">
-                                            <div class="d-flex flex-column" style="gap:8px;">
+                                        <div class="order-products">
+                                            <div class="order-thumb-list">
                                                 <c:choose>
                                                     <c:when test="${empty r.images}">
                                                         <c:url var="imgSrc" value="/IMG/placeholder.png"/>
-                                                        <img src="${imgSrc}" alt="thumb" style="width:44px;height:44px;object-fit:cover;border-radius:6px;">
+                                                        <img src="${imgSrc}" alt="thumb" class="order-thumb">
                                                     </c:when>
                                                     <c:otherwise>
                                                         <c:forEach var="img" items="${r.images}">
@@ -67,12 +76,12 @@
                                                                 <c:set var="imgRel" value="/${imgRel}"/>
                                                             </c:if>
                                                             <c:url var="imgSrc" value="${imgRel}"/>
-                                                            <img src="${imgSrc}" alt="thumb" style="width:44px;height:44px;object-fit:cover;border-radius:6px;">
+                                                            <img src="${imgSrc}" alt="thumb" class="order-thumb">
                                                         </c:forEach>
                                                     </c:otherwise>
                                                 </c:choose>
                                             </div>
-                                            <div class="d-flex flex-column" style="row-gap:8px;">
+                                            <div class="order-items-list">
                                                 <c:forEach var="nq" items="${r.nameQtys}">
                                                     <div>${nq.name} <span style="color:#888;font-size:0.9em">x${nq.quantity}</span></div>
                                                 </c:forEach>

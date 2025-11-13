@@ -127,8 +127,21 @@ public class ProductController extends HttpServlet {
         // Lấy danh sách categories để hiển thị trong dropdown
         List<String> categories = db().getAllCategories();
         
+        // Lấy danh sách product IDs trong wishlist của user (nếu đã đăng nhập)
+        java.util.Set<Integer> wishlistProductIds = new java.util.HashSet<>();
+        jakarta.servlet.http.HttpSession session = request.getSession(false);
+        if (session != null && session.getAttribute("user") != null) {
+            Model.user user = (Model.user) session.getAttribute("user");
+            DAO.WishlistDB wishlistDB = new DAO.WishlistDB();
+            java.util.List<Model.Wishlist> wishlistItems = wishlistDB.getWishlistByUserId(user.getUser_id());
+            for (Model.Wishlist item : wishlistItems) {
+                wishlistProductIds.add(item.getProductId());
+            }
+        }
+        
         request.setAttribute("productList", productList);
         request.setAttribute("categories", categories);
+        request.setAttribute("wishlistProductIds", wishlistProductIds);
         request.setAttribute("searchTerm", searchTerm);
         request.setAttribute("selectedCategory", categoryName);
         request.setAttribute("minPrice", minPriceStr);
@@ -145,7 +158,9 @@ public class ProductController extends HttpServlet {
 
     private void showNewForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        List<String> categories = db().getAllCategories();
+        // Load Category objects để có categoryId
+        DAO.CategoryDB categoryDB = new DAO.CategoryDB();
+        List<Model.Category> categories = categoryDB.listAll();
         request.setAttribute("categories", categories);
         request.getRequestDispatcher("/View/product-form.jsp").forward(request, response);
     }
@@ -154,8 +169,11 @@ public class ProductController extends HttpServlet {
             throws ServletException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
         Product existingProduct = db().getProductById(id);
-        List<String> categories = db().getAllCategories();
-        String currentCategoryName = db().getCategoryNameById(existingProduct.getCategoryId());
+        // Load Category objects để có categoryId
+        DAO.CategoryDB categoryDB = new DAO.CategoryDB();
+        List<Model.Category> categories = categoryDB.listAll();
+        // Lấy categoryIds hiện tại của product
+        List<Integer> currentCategoryIds = existingProduct.getCategoryIds();
         
         // Lấy danh sách ảnh phụ hiện có
         List<ProductDB.ImageInfo> existingImages = db().getProductImagesWithDetails(id);
@@ -165,7 +183,7 @@ public class ProductController extends HttpServlet {
         
         request.setAttribute("product", existingProduct);
         request.setAttribute("categories", categories);
-        request.setAttribute("currentCategoryName", currentCategoryName);
+        request.setAttribute("currentCategoryIds", currentCategoryIds);
         request.setAttribute("existingImages", existingImages);
         request.setAttribute("productDescriptionSections", productDescriptionSections);
         request.getRequestDispatcher("/View/product-form.jsp").forward(request, response);
@@ -189,22 +207,41 @@ public class ProductController extends HttpServlet {
         // Xử lý mô tả nhiều mục
         String description = buildDescriptionFromSections(request);
         
-        // Resolve category by name, fallback to numeric legacy field or NULL
-        String categoryName = request.getParameter("categoryName");
-        Integer categoryIdObj = db().getCategoryIdByName(categoryName);
-        int categoryId = 0;
-        if (categoryIdObj != null) {
-            categoryId = categoryIdObj;
+        // Resolve categories: có thể nhận nhiều categoryIds hoặc categoryNames
+        List<Integer> categoryIds = new ArrayList<>();
+        String[] categoryIdParams = request.getParameterValues("categoryIds");
+        if (categoryIdParams != null && categoryIdParams.length > 0) {
+            // Nhận từ multi-select categoryIds
+            for (String catIdStr : categoryIdParams) {
+                try {
+                    int catId = Integer.parseInt(catIdStr);
+                    if (catId > 0) categoryIds.add(catId);
+                } catch (NumberFormatException ignored) {}
+            }
         } else {
-            String legacyCat = request.getParameter("categoryId");
-            if (legacyCat != null && !legacyCat.isEmpty()) {
-                try { categoryId = Integer.parseInt(legacyCat); } catch (NumberFormatException ignored) {}
+            // Fallback: nhận từ categoryName hoặc categoryId (backward compatibility)
+            String categoryName = request.getParameter("categoryName");
+            if (categoryName != null && !categoryName.isEmpty()) {
+                Integer categoryIdObj = db().getCategoryIdByName(categoryName);
+                if (categoryIdObj != null) {
+                    categoryIds.add(categoryIdObj);
+                }
+            }
+            if (categoryIds.isEmpty()) {
+                String legacyCat = request.getParameter("categoryId");
+                if (legacyCat != null && !legacyCat.isEmpty()) {
+                    try {
+                        int catId = Integer.parseInt(legacyCat);
+                        if (catId > 0) categoryIds.add(catId);
+                    } catch (NumberFormatException ignored) {}
+                }
             }
         }
 
         String imageUrl = handleImageUpload(request, null);
 
-        Product newProduct = new Product(0, name, price, stock, description, imageUrl, categoryId);
+        Product newProduct = new Product(0, name, price, stock, description, imageUrl, 0);
+        newProduct.setCategoryIds(categoryIds);
         boolean success = db().addProduct(newProduct);
         
         if (!success) {
@@ -231,20 +268,41 @@ public class ProductController extends HttpServlet {
         // Xử lý mô tả nhiều mục
         String description = buildDescriptionFromSections(request);
         
-        // Resolve category by name, fallback to current or legacy numeric
-        String categoryName = request.getParameter("categoryName");
-        Integer categoryIdObj = db().getCategoryIdByName(categoryName);
-        int categoryId = 0;
-        if (categoryIdObj != null) {
-            categoryId = categoryIdObj;
+        // Resolve categories: có thể nhận nhiều categoryIds hoặc categoryNames
+        List<Integer> categoryIds = new ArrayList<>();
+        String[] categoryIdParams = request.getParameterValues("categoryIds");
+        if (categoryIdParams != null && categoryIdParams.length > 0) {
+            // Nhận từ multi-select categoryIds
+            for (String catIdStr : categoryIdParams) {
+                try {
+                    int catId = Integer.parseInt(catIdStr);
+                    if (catId > 0) categoryIds.add(catId);
+                } catch (NumberFormatException ignored) {}
+            }
         } else {
-            String currentCat = request.getParameter("currentCategoryId");
-            if (currentCat != null && !currentCat.isEmpty()) {
-                try { categoryId = Integer.parseInt(currentCat); } catch (NumberFormatException ignored) {}
-            } else {
-                String legacyCat = request.getParameter("categoryId");
-                if (legacyCat != null && !legacyCat.isEmpty()) {
-                    try { categoryId = Integer.parseInt(legacyCat); } catch (NumberFormatException ignored) {}
+            // Fallback: nhận từ categoryName hoặc categoryId (backward compatibility)
+            String categoryName = request.getParameter("categoryName");
+            if (categoryName != null && !categoryName.isEmpty()) {
+                Integer categoryIdObj = db().getCategoryIdByName(categoryName);
+                if (categoryIdObj != null) {
+                    categoryIds.add(categoryIdObj);
+                }
+            }
+            if (categoryIds.isEmpty()) {
+                String currentCat = request.getParameter("currentCategoryId");
+                if (currentCat != null && !currentCat.isEmpty()) {
+                    try {
+                        int catId = Integer.parseInt(currentCat);
+                        if (catId > 0) categoryIds.add(catId);
+                    } catch (NumberFormatException ignored) {}
+                } else {
+                    String legacyCat = request.getParameter("categoryId");
+                    if (legacyCat != null && !legacyCat.isEmpty()) {
+                        try {
+                            int catId = Integer.parseInt(legacyCat);
+                            if (catId > 0) categoryIds.add(catId);
+                        } catch (NumberFormatException ignored) {}
+                    }
                 }
             }
         }
@@ -252,7 +310,8 @@ public class ProductController extends HttpServlet {
         String currentImageUrl = request.getParameter("currentImageUrl");
         String imageUrl = handleImageUpload(request, currentImageUrl);
 
-        Product product = new Product(id, name, price, stock, description, imageUrl, categoryId);
+        Product product = new Product(id, name, price, stock, description, imageUrl, 0);
+        product.setCategoryIds(categoryIds);
         db().updateProduct(product);
         
         // Xử lý ảnh phụ - chỉ xóa ảnh được đánh dấu xóa và thêm ảnh mới

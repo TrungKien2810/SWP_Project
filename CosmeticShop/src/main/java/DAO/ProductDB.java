@@ -1,14 +1,17 @@
 package DAO;
 
+import Model.Discount;
 import Model.Product;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
-import java.sql.Types;
 
 public class ProductDB {
     private final DBConnect db = new DBConnect();
@@ -31,6 +34,105 @@ public class ProductDB {
             e.printStackTrace();
         }
         return productList;
+    }
+
+    // Lấy danh sách tất cả product IDs
+    public List<Integer> getAllProductIds() {
+        List<Integer> productIds = new ArrayList<>();
+        String sql = "SELECT product_id FROM Products";
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                productIds.add(rs.getInt("product_id"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return productIds;
+    }
+
+    // Gợi ý tìm kiếm: trả về danh sách sản phẩm rút gọn theo tên
+    public List<Suggestion> suggestProducts(String term, int limit) {
+        List<Suggestion> list = new ArrayList<>();
+        if (term == null || term.trim().isEmpty()) return list;
+        int safeLimit = Math.max(1, Math.min(limit, 20));
+        String sql = "SELECT TOP " + safeLimit + " product_id, name, price, image_url " +
+                     "FROM Products " +
+                     "WHERE name LIKE ? OR description LIKE ? " +
+                     "ORDER BY CASE WHEN name LIKE ? THEN 0 ELSE 1 END, product_id DESC";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            String like = "%" + term + "%";
+            String starts = term + "%";
+            stmt.setString(1, like);
+            stmt.setString(2, like);
+            stmt.setString(3, starts);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    int productId = rs.getInt("product_id");
+                    double originalPrice = rs.getDouble("price");
+                    Discount activeDiscount = fetchActiveDiscount(productId);
+                    double finalPrice = calculateDiscountedPrice(originalPrice, activeDiscount);
+                    list.add(new Suggestion(
+                            productId,
+                            rs.getString("name"),
+                            originalPrice,
+                            finalPrice,
+                            rs.getString("image_url")
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    // Kiểu dữ liệu rút gọn cho gợi ý
+    private double calculateDiscountedPrice(double price, Discount discount) {
+        if (discount == null) {
+            return price;
+        }
+        double discountedPrice = price;
+        if ("PERCENTAGE".equalsIgnoreCase(discount.getType())) {
+            discountedPrice = price * (1 - (discount.getValue() / 100.0));
+        } else if ("FIXED_AMOUNT".equalsIgnoreCase(discount.getType())) {
+            discountedPrice = price - discount.getValue();
+        }
+        if (discount.getMaxDiscountAmount() != null && "PERCENTAGE".equalsIgnoreCase(discount.getType())) {
+            double maxDiscount = discount.getMaxDiscountAmount();
+            double actualDiscount = price - discountedPrice;
+            if (actualDiscount > maxDiscount) {
+                discountedPrice = price - maxDiscount;
+            }
+        }
+        if (discountedPrice < 0) {
+            discountedPrice = 0;
+        }
+        return discountedPrice;
+    }
+
+    public static class Suggestion {
+        private final int productId;
+        private final String name;
+        private final double originalPrice;
+        private final double finalPrice;
+        private final String imageUrl;
+
+        public Suggestion(int productId, String name, double originalPrice, double finalPrice, String imageUrl) {
+            this.productId = productId;
+            this.name = name;
+            this.originalPrice = originalPrice;
+            this.finalPrice = finalPrice;
+            this.imageUrl = imageUrl;
+        }
+
+        public int getProductId() { return productId; }
+        public String getName() { return name; }
+        public double getPrice() { return finalPrice; }
+        public double getFinalPrice() { return finalPrice; }
+        public double getOriginalPrice() { return originalPrice; }
+        public boolean isDiscounted() { return originalPrice - finalPrice > 0.0001; }
+        public String getImageUrl() { return imageUrl; }
     }
 
     // Lấy sản phẩm theo ID (Read)
@@ -68,20 +170,33 @@ public class ProductDB {
     
     // Helper method để tạo Product object với ảnh bổ sung
     private Product createProductWithImages(ResultSet rs) throws SQLException {
+        int productId = rs.getInt("product_id");
         Product product = new Product(
-                rs.getInt("product_id"),
+                productId,
                 rs.getString("name"),
                 rs.getDouble("price"),
                 rs.getInt("stock"),
                 rs.getString("description"),
                 rs.getString("image_url"),
-                rs.getInt("category_id")
+                0  // Không dùng category_id từ Products nữa, set = 0
         );
+        
+        // Load categories từ ProductCategories
+        ProductCategoryDB pcDB = new ProductCategoryDB();
+        List<Integer> categoryIds = pcDB.getCategoryIdsByProductId(productId);
+        product.setCategoryIds(categoryIds);
+        
+        // Load category names (optional, để cache)
+        List<String> categoryNames = pcDB.getCategoryNamesByProductId(productId);
+        product.setCategoryNames(categoryNames);
+        
         // Lấy danh sách ảnh bổ sung
-        List<String> additionalImages = getProductImages(rs.getInt("product_id"));
+        List<String> additionalImages = getProductImages(productId);
         for (String imageUrl : additionalImages) {
             product.addImageUrl(imageUrl);
         }
+        Discount discount = fetchActiveDiscount(productId);
+        product.setActiveDiscount(discount);
         return product;
     }
 
@@ -94,6 +209,66 @@ public class ProductDB {
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt("category_id");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private Discount fetchActiveDiscount(int productId) {
+        String sql = "SELECT TOP 1 d.*, dp.assigned_at, p.price FROM DiscountProducts dp " +
+                     "JOIN Discounts d ON dp.discount_id = d.discount_id " +
+                     "JOIN Products p ON p.product_id = dp.product_id " +
+                     "WHERE dp.product_id = ? AND d.is_active = 1 " +
+                     "AND (d.start_date IS NULL OR d.start_date <= GETDATE()) " +
+                     "AND (d.end_date IS NULL OR d.end_date >= GETDATE()) " +
+                     "ORDER BY " +
+                     // 1) ưu tiên mức giảm thực tế lớn nhất (đã tính cap nếu là %)
+                     "CASE WHEN d.discount_type = 'PERCENTAGE' THEN " +
+                     "       CASE WHEN d.max_discount_amount IS NOT NULL " +
+                     "             THEN CASE WHEN (p.price * d.discount_value / 100.0) > d.max_discount_amount " +
+                     "                        THEN d.max_discount_amount " +
+                     "                        ELSE (p.price * d.discount_value / 100.0) END " +
+                     "             ELSE (p.price * d.discount_value / 100.0) END " +
+                     "     ELSE d.discount_value END DESC, " +
+                     // 2) nếu bằng nhau, ưu tiên mã còn hạn lâu hơn
+                     "DATEDIFF(SECOND, GETDATE(), d.end_date) DESC, " +
+                     // 3) cuối cùng, ưu tiên mã mới gán hơn
+                     "dp.assigned_at DESC";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Discount discount = new Discount();
+                    discount.setDiscountId(rs.getInt("discount_id"));
+                    discount.setCode(rs.getString("code"));
+                    discount.setName(rs.getString("name"));
+                    discount.setType(rs.getString("discount_type"));
+                    discount.setValue(rs.getDouble("discount_value"));
+                    BigDecimal minOrder = rs.getBigDecimal("min_order_amount");
+                    discount.setMinOrderAmount(minOrder != null ? minOrder.doubleValue() : 0);
+                    BigDecimal maxDiscount = rs.getBigDecimal("max_discount_amount");
+                    discount.setMaxDiscountAmount(maxDiscount != null ? maxDiscount.doubleValue() : null);
+                    discount.setActive(rs.getBoolean("is_active"));
+                    Timestamp startDate = rs.getTimestamp("start_date");
+                    Timestamp endDate = rs.getTimestamp("end_date");
+                    discount.setStartDate(startDate);
+                    discount.setEndDate(endDate);
+                    discount.setDescription(rs.getString("description"));
+                    Integer usageLimit = rs.getObject("usage_limit") != null ? rs.getInt("usage_limit") : null;
+                    Integer usedCount = rs.getObject("used_count") != null ? rs.getInt("used_count") : null;
+                    discount.setUsageLimit(usageLimit);
+                    discount.setUsedCount(usedCount);
+                    discount.setConditionType(rs.getString("condition_type"));
+                    BigDecimal conditionValue = rs.getBigDecimal("condition_value");
+                    discount.setConditionValue(conditionValue != null ? conditionValue.doubleValue() : null);
+                    discount.setConditionDescription(rs.getString("condition_description"));
+                    discount.setSpecialEvent(rs.getObject("special_event") != null ? rs.getBoolean("special_event") : null);
+                    discount.setAutoAssignAll(rs.getObject("auto_assign_all") != null ? rs.getBoolean("auto_assign_all") : null);
+                    discount.setAssignDate(rs.getTimestamp("assign_date"));
+                    return discount;
                 }
             }
         } catch (SQLException e) {
@@ -117,6 +292,41 @@ public class ProductDB {
         return categories;
     }
 
+    // Lấy danh sách product_id theo tên danh mục
+    public List<Integer> getProductIdsByCategoryName(String categoryName) {
+        // Dùng ProductCategoryDB thay vì query trực tiếp
+        ProductCategoryDB pcDB = new ProductCategoryDB();
+        return pcDB.getProductIdsByCategoryName(categoryName);
+    }
+
+    // Lấy danh sách product_id theo khoảng giá
+    public List<Integer> getProductIdsByPriceRange(double minPrice, double maxPrice) {
+        List<Integer> ids = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT product_id FROM Products WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+        if (minPrice > 0) {
+            sql.append(" AND price >= ?");
+            params.add(minPrice);
+        }
+        if (maxPrice < Double.MAX_VALUE) {
+            sql.append(" AND price <= ?");
+            params.add(maxPrice);
+        }
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ids.add(rs.getInt(1));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return ids;
+    }
+
     // Lấy tên danh mục theo ID
     public String getCategoryNameById(int categoryId) {
         String sql = "SELECT name FROM Categories WHERE category_id = ?";
@@ -135,23 +345,29 @@ public class ProductDB {
 
     // Thêm sản phẩm mới (Create)
     public boolean addProduct(Product product) {
-        String sql = "INSERT INTO Products (name, price, stock, description, image_url, category_id) VALUES (?, ?, ?, ?, ?, ?)";
+        // Không insert category_id vào Products nữa
+        String sql = "INSERT INTO Products (name, price, stock, description, image_url) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, product.getName());
             stmt.setDouble(2, product.getPrice());
             stmt.setInt(3, product.getStock());
             stmt.setString(4, product.getDescription());
             stmt.setString(5, product.getImageUrl());
-            if (product.getCategoryId() <= 0) {
-                stmt.setNull(6, Types.INTEGER);
-            } else {
-                stmt.setInt(6, product.getCategoryId());
+            
+            if (stmt.executeUpdate() > 0) {
+                // Lấy product_id vừa insert
+                int productId = getLastInsertedProductId();
+                if (productId > 0) {
+                    // Gán categories vào ProductCategories
+                    ProductCategoryDB pcDB = new ProductCategoryDB();
+                    return pcDB.assignCategoriesToProduct(productId, product.getCategoryIds());
+                }
+                return true;
             }
-            return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
         }
+        return false;
     }
     
     // Lấy ID của sản phẩm vừa được thêm
@@ -170,24 +386,25 @@ public class ProductDB {
 
     // Cập nhật sản phẩm (Update)
     public boolean updateProduct(Product product) {
-        String sql = "UPDATE Products SET name = ?, price = ?, stock = ?, description = ?, image_url = ?, category_id = ? WHERE product_id = ?";
+        // Không update category_id vào Products nữa
+        String sql = "UPDATE Products SET name = ?, price = ?, stock = ?, description = ?, image_url = ? WHERE product_id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, product.getName());
             stmt.setDouble(2, product.getPrice());
             stmt.setInt(3, product.getStock());
             stmt.setString(4, product.getDescription());
             stmt.setString(5, product.getImageUrl());
-            if (product.getCategoryId() <= 0) {
-                stmt.setNull(6, Types.INTEGER);
-            } else {
-                stmt.setInt(6, product.getCategoryId());
+            stmt.setInt(6, product.getProductId());
+            
+            if (stmt.executeUpdate() > 0) {
+                // Cập nhật categories trong ProductCategories
+                ProductCategoryDB pcDB = new ProductCategoryDB();
+                return pcDB.assignCategoriesToProduct(product.getProductId(), product.getCategoryIds());
             }
-            stmt.setInt(7, product.getProductId());
-            return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
         }
+        return false;
     }
 
     // Xóa sản phẩm (Delete)
@@ -224,7 +441,11 @@ public class ProductDB {
     // Lọc sản phẩm theo danh mục
     public List<Product> getProductsByCategory(String categoryName) {
         List<Product> productList = new ArrayList<>();
-        String sql = "SELECT p.* FROM Products p JOIN Categories c ON p.category_id = c.category_id WHERE c.name = ?";
+        // JOIN với ProductCategories thay vì Products.category_id
+        String sql = "SELECT DISTINCT p.* FROM Products p " +
+                     "JOIN ProductCategories pc ON p.product_id = pc.product_id " +
+                     "JOIN Categories c ON pc.category_id = c.category_id " +
+                     "WHERE c.name = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, categoryName);
             try (ResultSet rs = stmt.executeQuery()) {
@@ -296,19 +517,30 @@ public class ProductDB {
     // Tìm kiếm và lọc kết hợp (cập nhật để hỗ trợ lọc giá cố định và sắp xếp)
     public List<Product> searchAndFilterProducts(String searchTerm, String categoryName, double minPrice, double maxPrice, String fixedPriceRange, String sortBy) {
         List<Product> productList = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT p.* FROM Products p JOIN Categories c ON p.category_id = c.category_id WHERE 1=1");
+        // Dùng LEFT JOIN để hiển thị cả sản phẩm không có category
+        // Khi filter category thì thêm điều kiện WHERE
+        StringBuilder sql;
+        if (categoryName != null && !categoryName.trim().isEmpty() && !categoryName.equals("all")) {
+            // Có filter category: dùng INNER JOIN
+            sql = new StringBuilder("SELECT DISTINCT p.* FROM Products p " +
+                                 "JOIN ProductCategories pc ON p.product_id = pc.product_id " +
+                                 "JOIN Categories c ON pc.category_id = c.category_id " +
+                                 "WHERE c.name = ?");
+        } else {
+            // Không filter category: query Products trực tiếp
+            sql = new StringBuilder("SELECT DISTINCT p.* FROM Products p WHERE 1=1");
+        }
         List<Object> parameters = new ArrayList<>();
+        
+        if (categoryName != null && !categoryName.trim().isEmpty() && !categoryName.equals("all")) {
+            parameters.add(categoryName);
+        }
         
         if (searchTerm != null && !searchTerm.trim().isEmpty()) {
             sql.append(" AND (p.name LIKE ? OR p.description LIKE ?)");
             String searchPattern = "%" + searchTerm + "%";
             parameters.add(searchPattern);
             parameters.add(searchPattern);
-        }
-        
-        if (categoryName != null && !categoryName.trim().isEmpty() && !categoryName.equals("all")) {
-            sql.append(" AND c.name = ?");
-            parameters.add(categoryName);
         }
         
         // Xử lý lọc giá cố định
@@ -416,9 +648,97 @@ public class ProductDB {
     // Lấy sản phẩm nổi bật (featured products) - top 8 sản phẩm mới nhất
     public List<Product> getFeaturedProducts(int limit) {
         List<Product> productList = new ArrayList<>();
-        String sql = "SELECT TOP (?) * FROM Products ORDER BY product_id DESC";
+        String sql = "SELECT TOP (?) * FROM Products WHERE stock > 0 ORDER BY product_id DESC";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, limit);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    productList.add(createProductWithImages(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return productList;
+    }
+
+    // Lấy sản phẩm bán chạy nhất (best selling products) - top sản phẩm theo số lượng bán
+    // Chỉ tính các đơn hàng đã thanh toán (payment_status = 'PAID')
+    public List<Product> getBestSellingProducts(int limit) {
+        List<Product> productList = new ArrayList<>();
+        int safeLimit = Math.max(1, Math.min(limit, 50));
+        String sql = "SELECT TOP (?) p.* " +
+                     "FROM Products p " +
+                     "INNER JOIN ( " +
+                     "    SELECT od.product_id, SUM(od.quantity) AS total_quantity " +
+                     "    FROM OrderDetails od " +
+                     "    INNER JOIN Orders o ON od.order_id = o.order_id " +
+                     "    WHERE o.payment_status = 'PAID' " +
+                     "    GROUP BY od.product_id " +
+                     ") sales ON p.product_id = sales.product_id " +
+                     "WHERE p.stock > 0 " +
+                     "ORDER BY sales.total_quantity DESC";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, safeLimit);
+            System.out.println("[ProductDB] Executing getBestSellingProducts query with limit: " + safeLimit);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    productList.add(createProductWithImages(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("[ProductDB] Error in getBestSellingProducts: " + e.getMessage());
+            e.printStackTrace();
+        }
+        System.out.println("[ProductDB] getBestSellingProducts returned " + productList.size() + " products");
+        return productList;
+    }
+
+    // Lấy sản phẩm khuyến mại dựa trên các mã giảm giá còn hiệu lực
+    public List<Product> getPromotionalProducts(int limit) {
+        List<Product> productList = new ArrayList<>();
+        int safeLimit = Math.max(1, Math.min(limit, 50));
+        String sql =
+            "SELECT TOP (?) p.* " +
+            "FROM Products p " +
+            "CROSS APPLY ( " +
+            "    SELECT TOP 1 " +
+            "        CASE " +
+            "            WHEN d.discount_type = 'PERCENTAGE' THEN " +
+            "                CASE " +
+            "                    WHEN d.max_discount_amount IS NOT NULL " +
+            "                         AND (p.price * d.discount_value / 100.0) > d.max_discount_amount " +
+            "                    THEN d.max_discount_amount " +
+            "                    ELSE (p.price * d.discount_value / 100.0) " +
+            "                END " +
+            "            ELSE d.discount_value " +
+            "        END AS best_discount_value, " +
+            "        dp.assigned_at AS latest_assigned " +
+            "    FROM DiscountProducts dp " +
+            "    JOIN Discounts d ON d.discount_id = dp.discount_id " +
+            "    WHERE dp.product_id = p.product_id " +
+            "      AND d.is_active = 1 " +
+            "      AND (d.start_date IS NULL OR d.start_date <= GETDATE()) " +
+            "      AND (d.end_date IS NULL OR d.end_date >= GETDATE()) " +
+            "    ORDER BY " +
+            "        CASE " +
+            "            WHEN d.discount_type = 'PERCENTAGE' THEN " +
+            "                CASE " +
+            "                    WHEN d.max_discount_amount IS NOT NULL " +
+            "                         AND (p.price * d.discount_value / 100.0) > d.max_discount_amount " +
+            "                    THEN d.max_discount_amount " +
+            "                    ELSE (p.price * d.discount_value / 100.0) " +
+            "                END " +
+            "            ELSE d.discount_value " +
+            "        END DESC, " +
+            "        dp.assigned_at DESC, " +
+            "        d.discount_id DESC " +
+            ") best " +
+            "WHERE best.best_discount_value IS NOT NULL " +
+            "  AND p.stock > 0 " +
+            "ORDER BY best.best_discount_value DESC, best.latest_assigned DESC, p.product_id DESC";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, safeLimit);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     productList.add(createProductWithImages(rs));
@@ -435,19 +755,30 @@ public class ProductDB {
             double minPrice, double maxPrice, String fixedPriceRange, String sortBy,
             int page, int pageSize) {
         List<Product> productList = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT p.* FROM Products p JOIN Categories c ON p.category_id = c.category_id WHERE 1=1");
+        // Dùng LEFT JOIN để hiển thị cả sản phẩm không có category
+        // Khi filter category thì thêm điều kiện WHERE
+        StringBuilder sql;
+        if (categoryName != null && !categoryName.trim().isEmpty() && !categoryName.equals("all")) {
+            // Có filter category: dùng INNER JOIN
+            sql = new StringBuilder("SELECT DISTINCT p.* FROM Products p " +
+                                 "JOIN ProductCategories pc ON p.product_id = pc.product_id " +
+                                 "JOIN Categories c ON pc.category_id = c.category_id " +
+                                 "WHERE c.name = ?");
+        } else {
+            // Không filter category: query Products trực tiếp
+            sql = new StringBuilder("SELECT DISTINCT p.* FROM Products p WHERE 1=1");
+        }
         List<Object> parameters = new ArrayList<>();
+
+        if (categoryName != null && !categoryName.trim().isEmpty() && !categoryName.equals("all")) {
+            parameters.add(categoryName);
+        }
 
         if (searchTerm != null && !searchTerm.trim().isEmpty()) {
             sql.append(" AND (p.name LIKE ? OR p.description LIKE ?)");
             String searchPattern = "%" + searchTerm + "%";
             parameters.add(searchPattern);
             parameters.add(searchPattern);
-        }
-
-        if (categoryName != null && !categoryName.trim().isEmpty() && !categoryName.equals("all")) {
-            sql.append(" AND c.name = ?");
-            parameters.add(categoryName);
         }
 
         if (fixedPriceRange != null && !fixedPriceRange.trim().isEmpty() && !fixedPriceRange.equals("all")) {
@@ -550,19 +881,30 @@ public class ProductDB {
 
     public int getFilteredProductsCount(String searchTerm, String categoryName,
             double minPrice, double maxPrice, String fixedPriceRange) {
-        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Products p JOIN Categories c ON p.category_id = c.category_id WHERE 1=1");
+        // Dùng LEFT JOIN để đếm cả sản phẩm không có category
+        // Khi filter category thì thêm điều kiện WHERE
+        StringBuilder sql;
+        if (categoryName != null && !categoryName.trim().isEmpty() && !categoryName.equals("all")) {
+            // Có filter category: dùng INNER JOIN
+            sql = new StringBuilder("SELECT COUNT(DISTINCT p.product_id) FROM Products p " +
+                                 "JOIN ProductCategories pc ON p.product_id = pc.product_id " +
+                                 "JOIN Categories c ON pc.category_id = c.category_id " +
+                                 "WHERE c.name = ?");
+        } else {
+            // Không filter category: query Products trực tiếp
+            sql = new StringBuilder("SELECT COUNT(*) FROM Products p WHERE 1=1");
+        }
         List<Object> parameters = new ArrayList<>();
+
+        if (categoryName != null && !categoryName.trim().isEmpty() && !categoryName.equals("all")) {
+            parameters.add(categoryName);
+        }
 
         if (searchTerm != null && !searchTerm.trim().isEmpty()) {
             sql.append(" AND (p.name LIKE ? OR p.description LIKE ?)");
             String searchPattern = "%" + searchTerm + "%";
             parameters.add(searchPattern);
             parameters.add(searchPattern);
-        }
-
-        if (categoryName != null && !categoryName.trim().isEmpty() && !categoryName.equals("all")) {
-            sql.append(" AND c.name = ?");
-            parameters.add(categoryName);
         }
 
         if (fixedPriceRange != null && !fixedPriceRange.trim().isEmpty() && !fixedPriceRange.equals("all")) {

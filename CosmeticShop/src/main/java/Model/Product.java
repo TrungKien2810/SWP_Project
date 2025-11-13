@@ -1,7 +1,7 @@
 package Model;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Product {
     private int productId;
@@ -11,7 +11,10 @@ public class Product {
     private String description;
     private String imageUrl;
     private List<String> imageUrls; // Danh sách nhiều ảnh
-    private int categoryId;
+    private int categoryId; // Giữ lại để backward compatibility
+    private List<Integer> categoryIds; // Danh sách nhiều category IDs
+    private List<String> categoryNames; // Danh sách category names (optional, để cache)
+    private Discount activeDiscount;
 
     public Product(int productId, String name, double price, int stock, String description, String imageUrl, int categoryId) {
         this.productId = productId;
@@ -90,11 +93,44 @@ public class Product {
     }
 
     public int getCategoryId() {
+        // Backward compatibility: trả về category đầu tiên nếu có
+        if (categoryIds != null && !categoryIds.isEmpty()) {
+            return categoryIds.get(0);
+        }
         return categoryId;
     }
 
     public void setCategoryId(int categoryId) {
         this.categoryId = categoryId;
+        // Nếu set categoryId cũ, tự động thêm vào categoryIds
+        if (categoryIds == null) {
+            categoryIds = new ArrayList<>();
+        }
+        if (categoryId > 0 && !categoryIds.contains(categoryId)) {
+            categoryIds.add(categoryId);
+        }
+    }
+    
+    public List<Integer> getCategoryIds() {
+        return categoryIds != null ? categoryIds : new ArrayList<>();
+    }
+
+    public void setCategoryIds(List<Integer> categoryIds) {
+        this.categoryIds = categoryIds;
+        // Cập nhật categoryId để backward compatibility
+        if (categoryIds != null && !categoryIds.isEmpty()) {
+            this.categoryId = categoryIds.get(0);
+        } else {
+            this.categoryId = 0;
+        }
+    }
+
+    public List<String> getCategoryNames() {
+        return categoryNames != null ? categoryNames : new ArrayList<>();
+    }
+
+    public void setCategoryNames(List<String> categoryNames) {
+        this.categoryNames = categoryNames;
     }
     
     public List<String> getImageUrls() {
@@ -117,5 +153,43 @@ public class Product {
             this.imageUrl = imageUrl;
         }
     }
-    
+
+    public Discount getActiveDiscount() {
+        return activeDiscount;
+    }
+
+    public void setActiveDiscount(Discount activeDiscount) {
+        this.activeDiscount = activeDiscount;
+    }
+
+    public double getDiscountedPrice() {
+        if (activeDiscount == null) {
+            return price;
+        }
+        double discountedPrice = price;
+        if ("PERCENTAGE".equalsIgnoreCase(activeDiscount.getType())) {
+            discountedPrice = price * (1 - (activeDiscount.getValue() / 100.0));
+        } else if ("FIXED_AMOUNT".equalsIgnoreCase(activeDiscount.getType())) {
+            discountedPrice = price - activeDiscount.getValue();
+        }
+        if (activeDiscount.getMaxDiscountAmount() != null && "PERCENTAGE".equalsIgnoreCase(activeDiscount.getType())) {
+            double maxDiscount = activeDiscount.getMaxDiscountAmount();
+            double actualDiscount = price - discountedPrice;
+            if (actualDiscount > maxDiscount) {
+                discountedPrice = price - maxDiscount;
+            }
+        }
+        if (discountedPrice < 0) {
+            discountedPrice = 0;
+        }
+        return discountedPrice;
+    }
+
+    public boolean isDiscountActive() {
+        return activeDiscount != null && getDiscountedPrice() < price;
+    }
+
+    public double getDiscountAmount() {
+        return Math.max(0, price - getDiscountedPrice());
+    }
 }

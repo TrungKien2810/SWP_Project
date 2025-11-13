@@ -78,6 +78,9 @@ public class UserDB {
             if (check != null) {
                 return false;
             }
+            if (isFullNameTaken(username)) {
+                return false;
+            }
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, username);
             stmt.setString(2, email);
@@ -288,6 +291,22 @@ public class UserDB {
         }
         return users;
     }
+
+    // Lấy danh sách user_id của tất cả tài khoản ADMIN
+    public java.util.List<Integer> getAdminUserIds() {
+        java.util.List<Integer> adminIds = new java.util.ArrayList<>();
+        String sql = "SELECT user_id FROM Users WHERE role = 'ADMIN'";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                adminIds.add(rs.getInt("user_id"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return adminIds;
+    }
     
     // Cập nhật role của user
     public boolean updateRole(int userId, String newRole) {
@@ -301,5 +320,21 @@ public class UserDB {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public boolean isFullNameTaken(String fullName) {
+        if (fullName == null || fullName.trim().isEmpty()) {
+            return false;
+        }
+        String sql = "SELECT 1 FROM Users WHERE LOWER(full_name) = LOWER(?)";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, fullName.trim());
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

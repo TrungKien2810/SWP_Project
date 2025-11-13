@@ -8,7 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-…" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <title>PinkyCloud - Account Management</title>
     <style>
         .account-container {
@@ -119,8 +120,8 @@
 </head>
 <body>
     <%@ include file="includes/header.jspf" %>
-    <!-- Account Management -->
-    <div class="account-container">
+
+    <main class="account-container" style="margin-top: 30px;">
         <div class="account-card">
             <div class="account-header">
                 <h2>Account Management</h2>
@@ -187,6 +188,14 @@
                     <div class="action-description">Khôi phục mật khẩu qua email</div>
                 </div>
 
+                <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/wishlist'">
+                    <div class="action-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div class="action-title">Wishlist</div>
+                    <div class="action-description">Xem danh sách sản phẩm yêu thích của bạn</div>
+                </div>
+
                 <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/my-orders'">
                     <div class="action-icon">
                         <i class="fas fa-receipt"></i>
@@ -238,59 +247,9 @@
               </div>
             </div>
         </div>
-    </div>
+    </main>
 
-    <!-- Footer -->
-    <footer class="text-white py-4 w-100" style="background-color:#f76c85;">
-        <div class="container-fluid text-center">
-            <div class="row">
-                <div class="col-md-3">
-                    <h5 class="fw-bold">PINKYCLOUD OFFICE</h5>
-                    <p>Địa chỉ: Số 31, đường Nguyễn Thị Minh Khai, Phường Quy Nhơn, Gia Lai</p>
-                    <p>Mail: <a href="mailto:pinkycloudvietnam@gmail.com" class="text-white">pinkycloudvietnam@gmail.com</a></p>
-                    <p>Website: <a href="${pageContext.request.contextPath}/View/home.jsp" class="text-white">www.pinkycloud.vn</a></p>
-                </div>
-                <div class="col-md-3">
-                    <h5 class="fw-bold">DANH MỤC</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="${pageContext.request.contextPath}/View/collection.jsp" class="text-white text-decoration-none">Sức khỏe và làm đẹp</a></li>
-                        <li><a href="${pageContext.request.contextPath}/View/collection.jsp" class="text-white text-decoration-none">Chăm sóc cơ thể</a></li>
-                        <li><a href="${pageContext.request.contextPath}/View/collection.jsp" class="text-white text-decoration-none">Chăm sóc da mặt</a></li>
-                        <li><a href="${pageContext.request.contextPath}/View/collection.jsp" class="text-white text-decoration-none">Chăm sóc tóc</a></li>
-                        <li><a href="${pageContext.request.contextPath}/View/collection.jsp" class="text-white text-decoration-none">Clinic & Spa</a></li>
-                        <li><a href="${pageContext.request.contextPath}/View/collection.jsp" class="text-white text-decoration-none">Trang điểm</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-3">
-                    <h5 class="fw-bold">CHÍNH SÁCH HỖ TRỢ</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="#" class="text-white text-decoration-none">Hỗ trợ đặt hàng</a></li>
-                        <li><a href="#" class="text-white text-decoration-none">Chính sách trả hàng</a></li>
-                        <li><a href="#" class="text-white text-decoration-none">Chính sách bảo hành</a></li>
-                        <li><a href="#" class="text-white text-decoration-none">Chính sách người dùng</a></li>
-                        <li><a href="#" class="text-white text-decoration-none">Chính sách mua hàng</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-3">
-                    <h5 class="fw-bold">THEO DÕI CHÚNG TÔI</h5>
-                    <div class="d-flex info">
-                        <a href="" class="me-3"><img src="${pageContext.request.contextPath}/IMG/fbf.png" alt="Facebook" width="32"></a>
-                        <a href="#" class="me-3"><img src="${pageContext.request.contextPath}/IMG/linkedin-54890.png" alt="instagram" width="32"></a>
-                        <a href="" class="me-3"><img src="${pageContext.request.contextPath}/IMG/tiktok-56510.png" alt="LinkedIn" width="32"></a>
-                        <a href="#" class="me-3"><img src="${pageContext.request.contextPath}/IMG/youtube-11341.png" alt="YouTube" width="32"></a>
-                        <a href="#" class="me-3"><img src="${pageContext.request.contextPath}/IMG/twitter.png" alt="Twitter" width="32"></a>
-                    </div>
-                    <div class="mt-2">
-                        <img src="${pageContext.request.contextPath}/IMG/bocongthuong.png" alt="Bộ Công Thương" width="120">
-                    </div>
-                </div>
-            </div>
-            <hr class="border-white my-3">
-            <div class="text-center">
-                <p class="mb-0">2023 Copyright PinkyCloud.vn - Sản phẩm chăm sóc da, Mỹ phẩm trang điểm, Mỹ phẩm chính hãng</p>
-            </div>
-        </div>
-    </footer>
+    <%@ include file="includes/footer.jspf" %>
 
     <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
     <script src="${pageContext.request.contextPath}/Js/home.js"></script>

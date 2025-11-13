@@ -17,11 +17,12 @@ public class CategoryDB {
         c.setCategoryId(rs.getInt("category_id"));
         c.setName(rs.getString("name"));
         c.setDescription(rs.getString("description"));
+        c.setImageUrl(rs.getString("image_url"));
         return c;
     }
 
     public List<Category> listAll() {
-        String sql = "SELECT category_id, name, description FROM Categories ORDER BY name";
+        String sql = "SELECT category_id, name, description, image_url FROM Categories ORDER BY name";
         List<Category> list = new ArrayList<>();
         try (PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) list.add(mapRow(rs));
@@ -32,7 +33,7 @@ public class CategoryDB {
     }
 
     public Category getById(int id) {
-        String sql = "SELECT category_id, name, description FROM Categories WHERE category_id = ?";
+        String sql = "SELECT category_id, name, description, image_url FROM Categories WHERE category_id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
@@ -44,11 +45,19 @@ public class CategoryDB {
         return null;
     }
 
-    public boolean create(String name, String description) {
-        String sql = "INSERT INTO Categories(name, description) VALUES(?, ?)";
+    public boolean create(String name, String description, String imageUrl) {
+        String normalizedName = (name != null) ? name.trim() : null;
+        if (normalizedName == null || normalizedName.isEmpty()) {
+            return false;
+        }
+        if (existsByName(normalizedName)) {
+            return false;
+        }
+        String sql = "INSERT INTO Categories(name, description, image_url) VALUES(?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, name);
+            ps.setString(1, normalizedName);
             if (description == null || description.isBlank()) ps.setNull(2, java.sql.Types.NVARCHAR); else ps.setString(2, description);
+            if (imageUrl == null || imageUrl.isBlank()) ps.setNull(3, java.sql.Types.NVARCHAR); else ps.setString(3, imageUrl);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -56,7 +65,28 @@ public class CategoryDB {
         }
     }
 
-    public boolean update(int id, String name, String description) {
+    public boolean update(int id, String name, String description, String imageUrl) {
+        String normalizedName = (name != null) ? name.trim() : null;
+        if (normalizedName == null || normalizedName.isEmpty()) {
+            return false;
+        }
+        if (existsByNameExcludingId(normalizedName, id)) {
+            return false;
+        }
+        String sql = "UPDATE Categories SET name = ?, description = ?, image_url = ? WHERE category_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, normalizedName);
+            if (description == null || description.isBlank()) ps.setNull(2, java.sql.Types.NVARCHAR); else ps.setString(2, description);
+            if (imageUrl == null || imageUrl.isBlank()) ps.setNull(3, java.sql.Types.NVARCHAR); else ps.setString(3, imageUrl);
+            ps.setInt(4, id);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updateWithoutImage(int id, String name, String description) {
         String sql = "UPDATE Categories SET name = ?, description = ? WHERE category_id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, name);
@@ -79,6 +109,52 @@ public class CategoryDB {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public List<Integer> getCategoryIdsByName(String name) {
+        List<Integer> ids = new ArrayList<>();
+        String sql = "SELECT category_id FROM Categories WHERE name = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, name);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ids.add(rs.getInt("category_id"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return ids;
+    }
+
+    public boolean existsByName(String name) {
+        return existsByNameInternal(name, null);
+    }
+
+    public boolean existsByNameExcludingId(String name, int excludeId) {
+        return existsByNameInternal(name, excludeId);
+    }
+
+    private boolean existsByNameInternal(String name, Integer excludeId) {
+        if (name == null || name.trim().isEmpty()) {
+            return false;
+        }
+        StringBuilder sql = new StringBuilder("SELECT 1 FROM Categories WHERE LOWER(name) = LOWER(?)");
+        if (excludeId != null) {
+            sql.append(" AND category_id <> ?");
+        }
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            ps.setString(1, name.trim());
+            if (excludeId != null) {
+                ps.setInt(2, excludeId);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }
 

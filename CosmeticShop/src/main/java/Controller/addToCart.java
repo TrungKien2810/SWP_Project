@@ -92,7 +92,7 @@ public class addToCart extends HttpServlet {
                 int id = Integer.parseInt(idStr);
                 for (Map.Entry<Product, Integer> entry : cart.entrySet()) {
                     if (entry.getKey().getProductId() == id) {
-                        cartTotalSelected += entry.getKey().getPrice() * entry.getValue();
+                        cartTotalSelected += entry.getKey().getDiscountedPrice() * entry.getValue();
                     }
                 }
             }
@@ -144,6 +144,8 @@ public class addToCart extends HttpServlet {
         int addQuantity = 1;
         String idRaw = request.getParameter("id");
         String qtyRaw = request.getParameter("quantity");
+        String buyNow = request.getParameter("buyNow"); // Kiểm tra xem có phải "Mua ngay" không
+        
         try {
             p_id = Integer.parseInt(idRaw);
         } catch (NumberFormatException e) {
@@ -209,24 +211,27 @@ public class addToCart extends HttpServlet {
                 if (createQty > maxAvailable) {
                     createQty = maxAvailable;
                 }
-                cd.addCartItems(cart.getCart_id(), p_id, createQty, product.getPrice());
+                cd.addCartItems(cart.getCart_id(), p_id, createQty, product.getDiscountedPrice());
             }
             cartItems.clear();
             cartItems = cd.getCartItemsByCartId(cart.getCart_id());
             session.setAttribute("cartItems", cartItems);
-            request.setAttribute("msg", "Thêm sản phẩm thành công");
-            //Tìm xem trang nào gửi request để điều hướng về lại
-//            String referer = request.getHeader("referer");
-//            String pageName = "";
-//
-//            if (referer != null && !referer.isEmpty()) {
-//                pageName = referer.substring(referer.lastIndexOf("/") + 1);
-//            }
-//            if(pageName == "products"){
-//                pageName = "product-detail.jsp";
-//                request.getRequestDispatcher("/View/" + pageName).forward(request, response);
-//            }
-            request.getRequestDispatcher("/products").forward(request, response);
+            
+            // Nếu là "Mua ngay", chuyển hướng đến giỏ hàng
+            if ("true".equals(buyNow)) {
+                session.setAttribute("cartSuccessMsg", "Đã thêm sản phẩm vào giỏ hàng!");
+                response.sendRedirect(request.getContextPath() + "/cart");
+                return;
+            }
+            
+            // Nếu là "Thêm vào giỏ" thông thường, quay lại trang trước
+            session.setAttribute("cartSuccessMsg", "Đã thêm vào giỏ hàng thành công!");
+            String referer = request.getHeader("referer");
+            if (referer != null && !referer.isEmpty()) {
+                response.sendRedirect(referer);
+            } else {
+                response.sendRedirect(request.getContextPath() + "/products");
+            }
         } else {
             // Guest user: store to cookie
             // Validate product exists
@@ -238,11 +243,25 @@ public class addToCart extends HttpServlet {
             }
             // Read cookie map, increment, write back
             java.util.Map<Integer, Integer> cookieCart = CartCookieUtil.readCartMap(request);
-            int newQty = cookieCart.getOrDefault(p_id, 0) + 1;
+            int newQty = cookieCart.getOrDefault(p_id, 0) + addQuantity;
             cookieCart.put(p_id, newQty);
             CartCookieUtil.writeCartMap(response, cookieCart);
-            request.setAttribute("msg", "Thêm sản phẩm thành công");
-            request.getRequestDispatcher("/products").forward(request, response);
+            
+            // Nếu là "Mua ngay", chuyển hướng đến giỏ hàng
+            if ("true".equals(buyNow)) {
+                session.setAttribute("cartSuccessMsg", "Đã thêm sản phẩm vào giỏ hàng!");
+                response.sendRedirect(request.getContextPath() + "/cart");
+                return;
+            }
+            
+            // Nếu là "Thêm vào giỏ" thông thường, quay lại trang trước
+            session.setAttribute("cartSuccessMsg", "Đã thêm vào giỏ hàng thành công!");
+            String referer = request.getHeader("referer");
+            if (referer != null && !referer.isEmpty()) {
+                response.sendRedirect(referer);
+            } else {
+                response.sendRedirect(request.getContextPath() + "/products");
+            }
         }
 
     }

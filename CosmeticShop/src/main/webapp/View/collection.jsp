@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
     <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
         <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+        <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
             <!DOCTYPE html>
             <html lang="en">
@@ -10,24 +11,27 @@
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>PinkyCloud - Bộ sưu tập</title>
 
+                <!-- Preconnect để tối ưu tải font và CDN -->
+                <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+                <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+                
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
-                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" 
+                      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+                      crossorigin="anonymous" referrerpolicy="no-referrer">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/collection.css">
                 
             </head>
 
-            <body>
+            <body 
+                <c:if test="${not empty sessionScope.cartSuccessMsg}">data-success-msg="${sessionScope.cartSuccessMsg}"</c:if>
+                <c:if test="${not empty sessionScope.cartErrorMsg}">data-error-msg="${sessionScope.cartErrorMsg}"</c:if>
+            >
+              <c:remove var="cartSuccessMsg" scope="session" />
+              <c:remove var="cartErrorMsg" scope="session" />
               <%@ include file="/View/includes/header.jspf" %>
                     <main class="container-fluid my-5">
-                        <!-- Hiển thị thông báo -->
-                        <c:if test="${not empty requestScope.msg}">
-                            <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin-bottom: 20px;">
-                                <i class="fas fa-check-circle me-2"></i>
-                                ${requestScope.msg}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        </c:if>
                         
                         <div class="text-center mb-4">
                             <h2 class="fw-bold" style="color: #f76c85; font-family: 'Times New Roman', Times, serif;">BỘ
@@ -47,30 +51,15 @@
 
                                     <form method="GET" action="${pageContext.request.contextPath}/products"
                                         class="filter-form">
-                                        <!-- Tìm kiếm -->
-                                        <div class="filter-section mb-4">
-                                            <label for="search" class="form-label">
-                                                <i class="fas fa-search me-2"></i>Tìm kiếm
-                                            </label>
-                                            <div class="input-group">
-                                                <input type="text" class="form-control" id="search" name="search"
-                                                    placeholder="Nhập tên sản phẩm..." value="${searchTerm}">
-                                                <button class="btn btn-outline-secondary" type="submit">
-                                                    <i class="fas fa-search"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-
                                         <!-- Danh mục -->
-                                        <div class="filter-section mb-4">
+                                        <div class="filter-section mb-3">
                                             <label for="category" class="form-label">
-                                                <i class="fas fa-tags me-2"></i>Danh mục
+                                                <i class="fas fa-tags me-1"></i>Danh mục
                                             </label>
-                                            <select class="form-select" id="category" name="category">
-                                                <option value="">Tất cả danh mục</option>
+                                            <select class="form-select form-select-sm" id="category" name="category">
+                                                <option value="">Tất cả</option>
                                                 <c:forEach var="category" items="${categories}">
-                                                    <option value="${category}" ${selectedCategory==category
-                                                        ? 'selected' : '' }>
+                                                    <option value="${category}" ${selectedCategory==category ? 'selected' : '' }>
                                                         ${category}
                                                     </option>
                                                 </c:forEach>
@@ -78,92 +67,61 @@
                                         </div>
 
                                         <!-- Khoảng giá -->
-                                        <div class="filter-section mb-4">
+                                        <div class="filter-section mb-3">
                                             <label for="fixedPriceRange" class="form-label">
-                                                <i class="fas fa-money-bill-wave me-2"></i>Khoảng giá
+                                                <i class="fas fa-money-bill-wave me-1"></i>Khoảng giá
                                             </label>
-                                            <select class="form-select" id="fixedPriceRange" name="fixedPriceRange">
-                                                <option value="">Tất cả mức giá</option>
-                                                <option value="under-100k" ${selectedFixedPriceRange=='under-100k'
-                                                    ? 'selected' : '' }>
-                                                    💰 Dưới 100.000 VNĐ
-                                                </option>
-                                                <option value="100k-300k" ${selectedFixedPriceRange=='100k-300k'
-                                                    ? 'selected' : '' }>
-                                                    💰 100.000 - 300.000 VNĐ
-                                                </option>
-                                                <option value="300k-500k" ${selectedFixedPriceRange=='300k-500k'
-                                                    ? 'selected' : '' }>
-                                                    💰 300.000 - 500.000 VNĐ
-                                                </option>
-                                                <option value="500k-1m" ${selectedFixedPriceRange=='500k-1m'
-                                                    ? 'selected' : '' }>
-                                                    💰 500.000 - 1.000.000 VNĐ
-                                                </option>
-                                                <option value="over-1m" ${selectedFixedPriceRange=='over-1m'
-                                                    ? 'selected' : '' }>
-                                                    💰 Trên 1.000.000 VNĐ
-                                                </option>
+                                            <select class="form-select form-select-sm" id="fixedPriceRange" name="fixedPriceRange">
+                                                <option value="">Tất cả</option>
+                                                <option value="under-100k" ${selectedFixedPriceRange=='under-100k' ? 'selected' : '' }>Dưới 100k</option>
+                                                <option value="100k-300k" ${selectedFixedPriceRange=='100k-300k' ? 'selected' : '' }>100k - 300k</option>
+                                                <option value="300k-500k" ${selectedFixedPriceRange=='300k-500k' ? 'selected' : '' }>300k - 500k</option>
+                                                <option value="500k-1m" ${selectedFixedPriceRange=='500k-1m' ? 'selected' : '' }>500k - 1tr</option>
+                                                <option value="over-1m" ${selectedFixedPriceRange=='over-1m' ? 'selected' : '' }>Trên 1tr</option>
                                             </select>
                                         </div>
 
                                         <!-- Giá tùy chỉnh -->
-                                        <div class="filter-section mb-4">
+                                        <div class="filter-section mb-3">
                                             <label class="form-label">
-                                                <i class="fas fa-sliders-h me-2"></i>Giá tùy chỉnh
+                                                <i class="fas fa-sliders-h me-1"></i>Giá tùy chỉnh
                                             </label>
                                             <div class="row g-2">
                                                 <div class="col-6">
-                                                    <input type="number" class="form-control" id="minPrice"
+                                                    <input type="number" class="form-control form-control-sm" id="minPrice"
                                                         name="minPrice" placeholder="Từ" min="0" value="${minPrice}">
                                                 </div>
                                                 <div class="col-6">
-                                                    <input type="number" class="form-control" id="maxPrice"
+                                                    <input type="number" class="form-control form-control-sm" id="maxPrice"
                                                         name="maxPrice" placeholder="Đến" min="0" value="${maxPrice}">
                                                 </div>
                                             </div>
                                         </div>
 
                                         <!-- Sắp xếp -->
-                                        <div class="filter-section mb-4">
+                                        <div class="filter-section mb-3">
                                             <label for="sortBy" class="form-label">
-                                                <i class="fas fa-sort me-2"></i>Sắp xếp
+                                                <i class="fas fa-sort me-1"></i>Sắp xếp
                                             </label>
-                                            <select class="form-select" id="sortBy" name="sortBy">
+                                            <select class="form-select form-select-sm" id="sortBy" name="sortBy">
                                                 <option value="">Mặc định</option>
-                                                <option value="price-asc" ${selectedSortBy=='price-asc' ? 'selected'
-                                                    : '' }>
-                                                    💰 Giá: Thấp → Cao
-                                                </option>
-                                                <option value="price-desc" ${selectedSortBy=='price-desc' ? 'selected'
-                                                    : '' }>
-                                                    💰 Giá: Cao → Thấp
-                                                </option>
-                                                <option value="name-asc" ${selectedSortBy=='name-asc' ? 'selected' : ''
-                                                    }>
-                                                    📝 Tên: A → Z
-                                                </option>
-                                                <option value="name-desc" ${selectedSortBy=='name-desc' ? 'selected'
-                                                    : '' }>
-                                                    📝 Tên: Z → A
-                                                </option>
-                                                <option value="newest" ${selectedSortBy=='newest' ? 'selected' : '' }>
-                                                    🆕 Mới nhất
-                                                </option>
-                                                <option value="oldest" ${selectedSortBy=='oldest' ? 'selected' : '' }>
-                                                    📅 Cũ nhất
-                                                </option>
+                                                <option value="price-asc" ${selectedSortBy=='price-asc' ? 'selected' : '' }>Giá tăng</option>
+                                                <option value="price-desc" ${selectedSortBy=='price-desc' ? 'selected' : '' }>Giá giảm</option>
+                                                <option value="name-asc" ${selectedSortBy=='name-asc' ? 'selected' : '' }>Tên A-Z</option>
+                                                <option value="name-desc" ${selectedSortBy=='name-desc' ? 'selected' : '' }>Tên Z-A</option>
+                                                <option value="newest" ${selectedSortBy=='newest' ? 'selected' : '' }>Mới nhất</option>
+                                                <option value="oldest" ${selectedSortBy=='oldest' ? 'selected' : '' }>Cũ nhất</option>
                                             </select>
                                         </div>
 
                                         <!-- Nút lọc -->
                                         <div class="filter-actions">
-                                            <button type="submit" class="btn btn-primary w-100 mb-2">
-                                                <i class="fas fa-filter me-2"></i>Áp dụng bộ lọc
+                                            <button type="submit" class="btn btn-primary btn-sm w-100 mb-2">
+                                                <i class="fas fa-check me-1"></i>Áp dụng
                                             </button>
                                             <a href="${pageContext.request.contextPath}/products"
-                                                class="btn btn-outline-secondary w-100">
-                                                <i class="fas fa-refresh me-2"></i>Xóa bộ lọc
+                                                class="btn btn-outline-secondary btn-sm w-100">
+                                                <i class="fas fa-redo me-1"></i>Đặt lại
                                             </a>
                                         </div>
 
@@ -265,22 +223,76 @@
                                                     <div class="product-card"
                                                         onclick="window.location.href='${pageContext.request.contextPath}/product-detail?id=${product.productId}'"
                                                         style="cursor: pointer;">
-                                                        <img src="${pageContext.request.contextPath}${product.imageUrl}"
-                                                            alt="${product.name}" loading="lazy">
+                                                        <c:if test="${product.discountActive}">
+                                                            <div class="discount-flag">
+                                                                <c:choose>
+                                                                    <c:when test="${product.activeDiscount.type == 'PERCENTAGE'}">
+                                                                        -<fmt:formatNumber value="${product.activeDiscount.value}" maxFractionDigits="0" />%
+                                                                    </c:when>
+                                                                    <c:otherwise>
+                                                                        -<fmt:formatNumber value="${product.activeDiscount.value}" type="number" maxFractionDigits="0" /> VNĐ
+                                                                    </c:otherwise>
+                                                                </c:choose>
+                                                            </div>
+                                                        </c:if>
+                                                        <c:choose>
+                                                            <c:when test="${not empty product.imageUrl and product.imageUrl != ''}">
+                                                                <img src="${pageContext.request.contextPath}${product.imageUrl}"
+                                                                    alt="${fn:escapeXml(product.name)}" 
+                                                                    loading="lazy"
+                                                                    decoding="async"
+                                                                    onerror="this.onerror=null; this.src='${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png';"
+                                                                    style="background-color: #f8f9fa;">
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <img src="${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png"
+                                                                    alt="${fn:escapeXml(product.name)}" 
+                                                                    loading="lazy"
+                                                                    decoding="async"
+                                                                    style="background-color: #f8f9fa;">
+                                                            </c:otherwise>
+                                                        </c:choose>
                                                         <div class="product-card-body">
                                                             <h5>
                                                                 <c:out value="${product.name}" />
                                                             </h5>
-                                                            <p class="price">
-                                                                <%-- Định dạng giá tiền cho dễ đọc --%>
-                                                                    ${String.format("%,.0f", product.price)} VNĐ
-                                                            </p>
+                                                            <c:choose>
+                                                                <c:when test="${product.discountActive}">
+                                                                    <div class="price-wrapper">
+                                                                        <span class="price-old">
+                                                                            <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> VNĐ
+                                                                        </span>
+                                                                        <span class="price-new">
+                                                                            <fmt:formatNumber value="${product.discountedPrice}" type="number" maxFractionDigits="0" /> VNĐ
+                                                                        </span>
+                                                                        <c:if test="${product.discountAmount > 0}">
+                                                                            <span class="price-save">
+                                                                                Tiết kiệm <fmt:formatNumber value="${product.discountAmount}" type="number" maxFractionDigits="0" /> VNĐ
+                                                                            </span>
+                                                                        </c:if>
+                                                                    </div>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    <p class="price">
+                                                                        <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> VNĐ
+                                                                    </p>
+                                                                </c:otherwise>
+                                                            </c:choose>
                                                             <div class="action-buttons">
-                                                                <a href="${pageContext.request.contextPath}/addToCart?id=${product.productId}"
+                                                                <a href="${pageContext.request.contextPath}/addToCart?id=${product.productId}&buyNow=true"
                                                                     class="btn btn-sm btn-buy-now"
                                                                     onclick="event.stopPropagation();">
                                                                     <i class="fas fa-shopping-bag"></i> Mua ngay
                                                                 </a>
+                                                                <c:if test="${not empty sessionScope.user}">
+                                                                    <button type="button" 
+                                                                            class="btn btn-sm ${wishlistProductIds.contains(product.productId) ? 'btn-danger' : 'btn-outline-danger'}" 
+                                                                            onclick="event.stopPropagation(); toggleWishlist(${product.productId}, this);"
+                                                                            data-product-id="${product.productId}"
+                                                                            title="${wishlistProductIds.contains(product.productId) ? 'Xóa khỏi wishlist' : 'Thêm vào wishlist'}">
+                                                                        <i class="${wishlistProductIds.contains(product.productId) ? 'fas' : 'far'} fa-heart"></i>
+                                                                    </button>
+                                                                </c:if>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -478,6 +490,95 @@
                                 }
                             });
                         });
+                        
+                        // Wishlist toggle function cho danh sách sản phẩm (phải ở global scope để onclick có thể gọi)
+                        function toggleWishlist(productId, buttonElement) {
+                            if (!buttonElement) {
+                                console.error('Button element not found');
+                                return;
+                            }
+                            
+                            // Prevent multiple clicks
+                            if (buttonElement.disabled) {
+                                console.log('Button is already processing, ignoring click');
+                                return;
+                            }
+                            
+                            const icon = buttonElement.querySelector('i');
+                            
+                            const params = new URLSearchParams();
+                            params.append('action', 'toggle');
+                            params.append('productId', productId.toString());
+                            
+                            // Debug: Log request contents
+                            console.log('Sending wishlist request:', {
+                                action: 'toggle',
+                                productId: productId
+                            });
+                            
+                            // Disable button during request
+                            buttonElement.disabled = true;
+                            buttonElement.style.opacity = '0.6';
+                            buttonElement.style.cursor = 'not-allowed';
+                            
+                            fetch('${pageContext.request.contextPath}/wishlist', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                },
+                                body: params.toString()
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('HTTP error! status: ' + response.status);
+                                }
+                                return response.text().then(text => {
+                                    console.log('Raw response:', text);
+                                    try {
+                                        return JSON.parse(text);
+                                    } catch (e) {
+                                        console.error('Response is not JSON:', text);
+                                        throw new Error('Invalid JSON response');
+                                    }
+                                });
+                            })
+                            .then(data => {
+                                console.log('Wishlist response:', data);
+                                if (data.success) {
+                                    // Toggle button state
+                                    if (data.inWishlist) {
+                                        buttonElement.classList.remove('btn-outline-danger');
+                                        buttonElement.classList.add('btn-danger');
+                                        if (icon) {
+                                            icon.classList.remove('far');
+                                            icon.classList.add('fas');
+                                        }
+                                        buttonElement.title = 'Xóa khỏi wishlist';
+                                    } else {
+                                        buttonElement.classList.remove('btn-danger');
+                                        buttonElement.classList.add('btn-outline-danger');
+                                        if (icon) {
+                                            icon.classList.remove('fas');
+                                            icon.classList.add('far');
+                                        }
+                                        buttonElement.title = 'Thêm vào wishlist';
+                                    }
+                                    console.log('Wishlist updated successfully. inWishlist:', data.inWishlist);
+                                } else {
+                                    console.error('Wishlist update failed:', data.message);
+                                    alert(data.message || 'Có lỗi xảy ra');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('Có lỗi xảy ra khi cập nhật wishlist: ' + error.message);
+                            })
+                            .finally(() => {
+                                buttonElement.disabled = false;
+                                buttonElement.style.opacity = '1';
+                                buttonElement.style.cursor = 'pointer';
+                            });
+                        }
                     </script>
             </body>
 

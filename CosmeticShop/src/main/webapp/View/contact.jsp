@@ -9,8 +9,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/contact.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-              integrity="sha512-…" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
         <title>Pinky Cloud</title>
     </head>
@@ -18,56 +18,7 @@
     <body>
         <%@ include file="/View/includes/header.jspf" %>
 
-        <c:if test="${not empty param.msg}">
-            <div class="container mt-3">
-                <div class="alert alert-success">${param.msg}</div>
-            </div>
-        </c:if>
-
-        <!-- MODAL LOGIN -->
-        <!-- Modal Đăng Nhập -->
-        <!--<div class="modal" id="loginModal">
-                <div class="modal-content">
-                    <span class="close">&times;</span>
-                    <h2>Đăng nhập</h2>
-                    <form>
-                        <div class="input-group">
-                            <label for="email">Email</label>
-                            <input type="email" id="email" placeholder="Nhập email của bạn" required>
-                        </div>
-                        <div class="input-group">
-                            <label for="password">Mật khẩu</label>
-                            <input type="password" id="password" placeholder="Nhập mật khẩu" required>
-                        </div>
-                        <button type="submit">Đăng nhập</button>
-                    </form>
-                    <p>Chưa có tài khoản? <a href="#" id="showRegister">Đăng ký ngay</a></p>
-                </div>
-            </div> -->
-
-        <!-- Modal Đăng Ký -->
-        <div class="modal" id="registerModal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h2>Đăng ký</h2>
-                <form>
-                    <div class="input-group">
-                        <label for="fullname">Họ và tên</label>
-                        <input type="text" id="fullname" placeholder="Nhập họ và tên" required>
-                    </div>
-                    <div class="input-group">
-                        <label for="emailReg">Email</label>
-                        <input type="email" id="emailReg" placeholder="Nhập email của bạn" required>
-                    </div>
-                    <div class="input-group">
-                        <label for="passwordReg">Mật khẩu</label>
-                        <input type="password" id="passwordReg" placeholder="Tạo mật khẩu" required>
-                    </div>
-                    <button type="submit">Đăng ký</button>
-                </form>
-                <p>Đã có tài khoản? <a href="#" id="showLogin">Đăng nhập</a></p>
-            </div>
-        </div>
+        <main class="container-fluid" style="margin-top: 20px;">
         <div class="row">
             <div class="contact">
                 <div class="contact-info">
@@ -147,6 +98,7 @@
                 src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d15501.010015694377!2d109.1995276787998!3d13.763640667669454!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1shasaki!5e0!3m2!1svi!2s!4v1761183316788!5m2!1svi!2s"
                 width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"
                 referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </main>
                 <%@ include file="/View/includes/footer.jspf" %>
             <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
             <script src="${pageContext.request.contextPath}/Js/home.js"></script>

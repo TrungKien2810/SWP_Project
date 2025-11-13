@@ -104,21 +104,19 @@ public class login extends HttpServlet {
             response.addCookie(cPass);
         }
         if (!email.matches("^[A-Za-z0-9._%+-]+@gmail\\.com$")) {
-            request.setAttribute("error", "Sai cú pháp email");
-            request.getRequestDispatcher("/View/log.jsp").forward(request, response);
+            session.setAttribute("loginErrorMsg", "Email không hợp lệ! Vui lòng nhập địa chỉ Gmail.");
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
         if (email.equals("") || password.equals("")) {
-            request.setAttribute("error", "Không thể để trống thông tin");
-            request.getRequestDispatcher("/View/log.jsp").forward(request, response);
+            session.setAttribute("loginErrorMsg", "Vui lòng nhập đầy đủ email và mật khẩu!");
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
-
         }
         if (ud.getUserByEmail(email) == null) {
-            request.setAttribute("error", "Tài khoản không tồn tại, bạn đã đăng ký chưa?");
-            request.getRequestDispatcher("/View/log.jsp").forward(request, response);
+            session.setAttribute("loginErrorMsg", "Tài khoản không tồn tại. Bạn đã đăng ký chưa?");
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
-
         }
         if (ud.login(email, password)) {
             user user = ud.getUserByEmail(email);
@@ -151,7 +149,7 @@ public class login extends HttpServlet {
                     } else {
                         Product p = pd.getProductById(pid);
                         if (p != null) {
-                            cd.addCartItems(cart.getCart_id(), pid, addQty, p.getPrice());
+                            cd.addCartItems(cart.getCart_id(), pid, addQty, p.getDiscountedPrice());
                         }
                     }
                 }
@@ -161,14 +159,14 @@ public class login extends HttpServlet {
             // Reload cart items to session
             List<CartItems> cartItems = cd.getCartItemsByCartId(cart.getCart_id());
             session.setAttribute("cartItems", cartItems);
-            request.getRequestDispatcher("/View/home.jsp").forward(request, response);
+            session.setAttribute("loginSuccessMsg", "Đăng nhập thành công! Chào mừng " + user.getUsername() + "!");
+            response.sendRedirect(request.getContextPath() + "/View/home.jsp");
             return;
 
         } else {
-            request.setAttribute("error", "Email hoặc mật khẩu không đúng");
-            request.getRequestDispatcher("/View/log.jsp").forward(request, response);
+            session.setAttribute("loginErrorMsg", "Email hoặc mật khẩu không chính xác!");
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
-
         }
     }
 

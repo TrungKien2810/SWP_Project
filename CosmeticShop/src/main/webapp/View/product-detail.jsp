@@ -10,6 +10,8 @@
 <%
     Product p = (Product) request.getAttribute("product");
     String categoryName = (String) request.getAttribute("categoryName");
+    java.util.List<String> categoryNames = (java.util.List<String>) request.getAttribute("categoryNames");
+    if (categoryNames == null) categoryNames = new java.util.ArrayList<>();
 %>
 
 <!DOCTYPE html>
@@ -24,7 +26,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
 </head>
-<body>
+<body 
+    <c:if test="${not empty sessionScope.cartSuccessMsg}">data-success-msg="${sessionScope.cartSuccessMsg}"</c:if>
+    <c:if test="${not empty sessionScope.cartErrorMsg}">data-error-msg="${sessionScope.cartErrorMsg}"</c:if>
+>
+    <c:remove var="cartSuccessMsg" scope="session" />
+    <c:remove var="cartErrorMsg" scope="session" />
     <%@ include file="/View/includes/header.jspf" %>
 
     <div class="container" style="margin-top: 20px;">
@@ -68,12 +75,41 @@
                 <!-- Product Details -->
                 <div class="product-details">
                     <h2><%= p.getName() %></h2>
+                    <%
+                        Model.Discount activeDiscount = p.getActiveDiscount();
+                        double originalPrice = p.getPrice();
+                        double discountedPrice = p.getDiscountedPrice();
+                        boolean hasDiscount = p.isDiscountActive();
+                    %>
                     <div class="price-section">
-                        <span class="price"><%= String.format("%,.0f", p.getPrice()) %> VND</span>
+                        <% if (hasDiscount) { %>
+                            <span class="price-original"><%= String.format("%,.0f", originalPrice) %> VND</span>
+                            <span class="price-discounted"><%= String.format("%,.0f", discountedPrice) %> VND</span>
+                            <span class="price-badge">
+                                <% if (activeDiscount != null && "PERCENTAGE".equalsIgnoreCase(activeDiscount.getType())) { %>
+                                    -<%= String.format("%.0f", activeDiscount.getValue()) %>%
+                                <% } else if (activeDiscount != null) { %>
+                                    -<%= String.format("%,.0f", activeDiscount.getValue()) %> VND
+                                <% } %>
+                            </span>
+                        <% } else { %>
+                            <span class="price"><%= String.format("%,.0f", originalPrice) %> VND</span>
+                        <% } %>
                     </div>
                     <div class="product-info">
                         <p><b>Số lượng:</b> <%= p.getStock() %> sản phẩm có sẵn</p>
-                        <p><b>Danh mục:</b> <%= categoryName != null ? categoryName : "Không xác định" %></p>
+                        <p><b>Danh mục:</b> 
+                            <c:choose>
+                                <c:when test="${not empty categoryNames}">
+                                    <c:forEach var="catName" items="${categoryNames}" varStatus="loop">
+                                        ${catName}<c:if test="${!loop.last}">, </c:if>
+                                    </c:forEach>
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="text-muted">Chưa phân loại</span>
+                                </c:otherwise>
+                            </c:choose>
+                        </p>
                     </div>
                     
                     <!-- Nút thêm vào giỏ hàng + số lượng -->
@@ -96,6 +132,11 @@
                                 <i class="fas fa-shopping-cart me-2"></i>
                                 Thêm vào giỏ hàng
                             </button>
+                            <c:if test="${not empty sessionScope.user}">
+                                <button type="button" id="wishlistBtn" class="btn ${inWishlist ? 'btn-danger' : 'btn-outline-danger'}" onclick="toggleWishlist(<%=p.getProductId()%>, event); return false;" title="${inWishlist ? 'Xóa khỏi wishlist' : 'Thêm vào wishlist'}">
+                                    <i class="${inWishlist ? 'fas' : 'far'} fa-heart" id="wishlistIcon"></i>
+                                </button>
+                            </c:if>
                         </form>
                         <small class="qty-hint <%= p.getStock() <= 5 ? "low" : "ok" %>">
                             <i class="fas fa-info-circle"></i>
@@ -775,25 +816,74 @@
 
         // Delete comment via AJAX
         const ctx = '${pageContext.request.contextPath}';
+
+        function updateCommentMeta() {
+            const commentItems = document.querySelectorAll('.comment-item');
+            const commentCountEl = document.querySelector('.comment-count span');
+            if (commentCountEl) {
+                const newCount = commentItems.length;
+                commentCountEl.textContent = `${newCount} đánh giá`;
+            }
+
+            const totalFilterLink = document.querySelector('.rating-filter .filter-buttons a');
+            if (totalFilterLink) {
+                const newCount = commentItems.length;
+                totalFilterLink.innerHTML = totalFilterLink.innerHTML.replace(/\(\d+\)/, `(${newCount})`);
+            }
+
+            const commentsListEl = document.querySelector('.comments-list');
+            if (commentsListEl && commentItems.length === 0) {
+                commentsListEl.innerHTML = '<div class="notification-empty">Chưa có bình luận nào.</div>';
+            }
+        }
+
         document.querySelectorAll('.delete-comment-btn').forEach(btn => {
             btn.addEventListener('click', function() {
+                const button = this;
+                if (button.dataset.deleting === 'true') return; // chặn double-click
                 if (!confirm('Bạn có chắc muốn xóa bình luận này?')) return;
-                const commentId = this.getAttribute('data-comment-id');
+                const commentId = button.getAttribute('data-comment-id');
+                const itemEl = button.closest('.comment-item');
+                button.dataset.deleting = 'true';
+                button.setAttribute('aria-busy', 'true');
+                button.disabled = true;
+                // Optimistic UI: remove ngay trên UI để không cần reload
+                if (itemEl) {
+                    itemEl.style.opacity = '0.5';
+                    itemEl.style.pointerEvents = 'none';
+                }
                 fetch(ctx + '/addComment', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: 'action=delete&commentId=' + encodeURIComponent(commentId)
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+                    body: 'action=delete&commentId=' + encodeURIComponent(commentId),
+                    cache: 'no-store'
                 })
-                .then(res => res.text())
+                .then(res => res.text().catch(() => ''))
                 .then(text => {
-                    if (text === 'ok') {
-                        const item = document.querySelector(`.comment-item[data-comment-id="${commentId}"]`);
-                        if (item) item.remove();
-                    } else {
-                        alert('Không thể xóa bình luận.');
+                    const normalized = (text || '').trim().toLowerCase();
+                    // Nếu server báo 'ok' hoặc 'forbidden'/'not_found' (đã xóa), xóa hoàn toàn khỏi UI
+                    if (normalized === 'ok' || normalized === 'forbidden' || normalized === 'not_found') {
+                        if (itemEl && itemEl.isConnected) {
+                            itemEl.remove();
+                        }
+                        updateCommentMeta();
+                        return;
                     }
+                    // Nếu phản hồi không như mong đợi (HTML/redirect), fallback reload để đồng bộ UI
+                    if (itemEl && itemEl.isConnected) {
+                        itemEl.remove();
+                        updateCommentMeta();
+                    }
+                    setTimeout(() => {
+                        location.reload();
+                    }, 50);
                 })
-                .catch(() => alert('Có lỗi xảy ra khi xóa.'));
+                .catch(() => alert('Có lỗi xảy ra khi xóa.'))
+                .finally(() => {
+                    button.dataset.deleting = 'false';
+                    button.removeAttribute('aria-busy');
+                    button.disabled = false;
+                });
             });
         });
         
@@ -922,6 +1012,102 @@
             const commentId = replyForm.id.replace('replyForm_', '');
             setupReplyMediaPreview(commentId);
         });
+        
+        // Wishlist toggle function
+        function toggleWishlist(productId, event) {
+            // Prevent default form submission if event is provided
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
+            const btn = document.getElementById('wishlistBtn');
+            const icon = document.getElementById('wishlistIcon');
+            
+            if (!btn) {
+                console.error('Wishlist button not found');
+                return false;
+            }
+            
+            // Prevent multiple clicks
+            if (btn.disabled) {
+                console.log('Button is already processing, ignoring click');
+                return false;
+            }
+            
+            const params = new URLSearchParams();
+            params.append('action', 'toggle');
+            params.append('productId', productId.toString());
+            
+            // Debug: Log request contents
+            console.log('Sending wishlist request:', {
+                action: 'toggle',
+                productId: productId
+            });
+            
+            // Disable button during request
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+            btn.style.cursor = 'not-allowed';
+            
+            fetch('${pageContext.request.contextPath}/wishlist', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: params.toString()
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('HTTP error! status: ' + response.status);
+                }
+                return response.text().then(text => {
+                    console.log('Raw response:', text);
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        console.error('Response is not JSON:', text);
+                        throw new Error('Invalid JSON response');
+                    }
+                });
+            })
+            .then(data => {
+                console.log('Wishlist response:', data);
+                if (data.success) {
+                    // Toggle button state
+                    if (data.inWishlist) {
+                        btn.classList.remove('btn-outline-danger');
+                        btn.classList.add('btn-danger');
+                        if (icon) {
+                            icon.classList.remove('far');
+                            icon.classList.add('fas');
+                        }
+                        btn.title = 'Xóa khỏi wishlist';
+                    } else {
+                        btn.classList.remove('btn-danger');
+                        btn.classList.add('btn-outline-danger');
+                        if (icon) {
+                            icon.classList.remove('fas');
+                            icon.classList.add('far');
+                        }
+                        btn.title = 'Thêm vào wishlist';
+                    }
+                    console.log('Wishlist updated successfully. inWishlist:', data.inWishlist);
+                } else {
+                    console.error('Wishlist update failed:', data.message);
+                    alert(data.message || 'Có lỗi xảy ra');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi cập nhật wishlist: ' + error.message);
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+            });
+        }
     </script>
 </body>
 
