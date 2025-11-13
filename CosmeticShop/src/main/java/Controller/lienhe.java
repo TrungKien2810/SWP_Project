@@ -39,7 +39,7 @@ public class lienhe extends HttpServlet {
                     String notificationMessage = String.format("Khách hàng %s (%s) đã gửi phản hồi với chủ đề: %s", 
                         name, email, subject);
                     String linkUrl = request.getContextPath() + "/admin?action=contact";
-                    notificationDB.createAdminNotification("CUSTOMER_FEEDBACK", title, notificationMessage, linkUrl);
+                    notificationDB.createNotificationsForAdmins("CUSTOMER_FEEDBACK", title, notificationMessage, linkUrl);
                 } catch (Exception e) {
                     e.printStackTrace();
                     // Không làm gián đoạn flow nếu tạo thông báo thất bại

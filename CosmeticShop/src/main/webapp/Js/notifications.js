@@ -258,8 +258,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (viewAllNotifications) {
         viewAllNotifications.addEventListener('click', function(e) {
             e.preventDefault();
-            // You can implement a full notifications page here
-            window.location.href = contextPath + '/notifications?action=list';
+            window.location.href = contextPath + '/notification-center';
         });
     }
     

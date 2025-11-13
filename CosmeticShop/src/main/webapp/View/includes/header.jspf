@@ -67,7 +67,7 @@
                                                     <div class="notification-loading">Đang tải...</div>
                                                 </div>
                                                 <div class="notification-footer">
-                                                    <a href="#" id="viewAllNotifications">Xem tất cả</a>
+                                                    <a href="${pageContext.request.contextPath}/notification-center" id="viewAllNotifications">Xem tất cả</a>
                                                 </div>
                                             </div>
                         </div>

@@ -195,11 +195,17 @@ public class NotificationDB {
         return false;
     }
 
-    // Xóa thông báo
-    public boolean deleteNotification(int notificationId) {
-        String sql = "DELETE FROM Notifications WHERE notification_id = ?";
+    // Xóa thông báo theo quyền sở hữu
+    public boolean deleteNotificationForUser(int notificationId, int userId, boolean allowAdminGlobal) {
+        String sql;
+        if (allowAdminGlobal) {
+            sql = "DELETE FROM Notifications WHERE notification_id = ? AND (user_id = ? OR user_id IS NULL)";
+        } else {
+            sql = "DELETE FROM Notifications WHERE notification_id = ? AND user_id = ?";
+        }
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, notificationId);
+            ps.setInt(2, userId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
