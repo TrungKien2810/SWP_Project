@@ -62,10 +62,15 @@ public class SearchSuggestions extends HttpServlet {
                     .replace("\"", "\\\""));
             String productUrl = request.getContextPath() + "/product-detail?id=" + s.getProductId();
             String productUrlEscaped = productUrl.replace("\\", "\\\\").replace("\"", "\\\"");
+            String priceFormatted = String.format(java.util.Locale.US, "%.0f", s.getPrice());
+            String originalPriceFormatted = String.format(java.util.Locale.US, "%.0f", s.getOriginalPrice());
+            boolean hasDiscount = s.isDiscounted();
             json.append("{")
                 .append("\"id\":").append(s.getProductId()).append(",")
                 .append("\"name\":\"").append(nameEscaped).append("\",")
-                .append("\"price\":").append(String.format(java.util.Locale.US, "%.0f", s.getPrice())).append(",")
+                .append("\"price\":").append(priceFormatted).append(",")
+                .append("\"originalPrice\":").append(originalPriceFormatted).append(",")
+                .append("\"hasDiscount\":").append(hasDiscount).append(",")
                 .append("\"imageUrl\":\"").append(imageEscaped).append("\",")
                 .append("\"url\":\"").append(productUrlEscaped).append("\"")
                 .append("}");
