@@ -1,6 +1,33 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ include file="/admin/includes/header.jspf" %>
 
+<style>
+.category-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: 250px;
+}
+
+.category-badges .badge {
+  font-size: 11px;
+  padding: 4px 8px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.category-badges .badge.bg-info {
+  cursor: help;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  transition: all 0.2s;
+}
+
+.category-badges .badge.bg-info:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+</style>
+
 <div class="container-fluid">
   <div class="d-flex justify-content-between align-items-center mb-3 gap-2">
     <h5 class="mb-0">Quản lý sản phẩm</h5>
@@ -50,12 +77,35 @@
                   <td>
                     <c:choose>
                       <c:when test="${not empty productCategoryMap[p.productId]}">
-                        <c:forEach var="catName" items="${productCategoryMap[p.productId]}" varStatus="loop">
-                          <span class="badge bg-secondary me-1">${catName}</span>
-                        </c:forEach>
+                        <div class="category-badges">
+                          <c:set var="categories" value="${productCategoryMap[p.productId]}" />
+                          <c:set var="categoryCount" value="${categories.size()}" />
+                          
+                          <c:choose>
+                            <c:when test="${categoryCount <= 2}">
+                              <!-- Hiển thị tất cả nếu <= 2 danh mục -->
+                              <c:forEach var="catName" items="${categories}">
+                                <span class="badge bg-secondary me-1 mb-1">${catName}</span>
+                              </c:forEach>
+                            </c:when>
+                            <c:otherwise>
+                              <!-- Hiển thị 2 danh mục đầu + badge số lượng còn lại -->
+                              <c:forEach var="catName" items="${categories}" begin="0" end="1">
+                                <span class="badge bg-secondary me-1 mb-1">${catName}</span>
+                              </c:forEach>
+                              <span class="badge bg-info me-1 mb-1" 
+                                    data-bs-toggle="tooltip" 
+                                    data-bs-placement="top"
+                                    data-bs-html="true"
+                                    title="<c:forEach var='catName' items='${categories}' varStatus='status'>${catName}<c:if test='${!status.last}'>, </c:if></c:forEach>">
+                                +${categoryCount - 2}
+                              </span>
+                            </c:otherwise>
+                          </c:choose>
+                        </div>
                       </c:when>
                       <c:otherwise>
-                        <span class="text-muted">(Chưa phân loại)</span>
+                        <span class="text-muted small">(Chưa phân loại)</span>
                       </c:otherwise>
                     </c:choose>
                   </td>
@@ -76,6 +126,16 @@
     </c:otherwise>
   </c:choose>
 </div>
+
+<script>
+// Khởi tạo Bootstrap tooltips
+document.addEventListener('DOMContentLoaded', function() {
+  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+});
+</script>
 
 <%@ include file="/admin/includes/footer.jspf" %>
 

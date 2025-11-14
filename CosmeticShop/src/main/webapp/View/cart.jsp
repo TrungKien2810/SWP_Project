@@ -75,7 +75,7 @@
                         <div class="item-info">
                             <h5><%=product.getName()%></h5>
                             <p class="item-price"><%=String.format("%,.0f", p.getPrice())%>₫ x <span class="item-qty"><%=p.getQuantity()%></span></p>
-                            <input type="number" value="<%=p.getQuantity()%>" min="1" class="form-control quantity-input" data-product-id="<%=p.getProduct_id()%>">
+                            <input type="number" value="<%=p.getQuantity()%>" min="1" max="<%=product.getStock()%>" class="form-control quantity-input" data-product-id="<%=p.getProduct_id()%>" data-stock="<%=product.getStock()%>">
                         </div>
                         <div class="item-total">
                             <p class="item-total-text"><%=String.format("%,.0f", p.getPrice() * p.getQuantity())%>₫</p>
@@ -237,18 +237,46 @@
 
     // Event checkbox & quantity input
     document.querySelectorAll('.quantity-input').forEach(input => {
+        var oldValue = parseInt(input.value); // Lưu giá trị cũ
+        
         input.addEventListener('input', updateTotal);
+        input.addEventListener('focus', function() {
+            oldValue = parseInt(this.value); // Cập nhật giá trị cũ khi focus
+        });
         input.addEventListener('change', function(){
             var qty = parseInt(this.value);
-            if (!qty || qty < 1) { qty = 1; this.value = 1; }
+            if (!qty || qty < 1) { 
+                qty = 1; 
+                this.value = 1; 
+                oldValue = 1;
+            }
             var productId = this.getAttribute('data-product-id');
             fetch('${pageContext.request.contextPath}/cart/update-quantity', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: 'productId=' + encodeURIComponent(productId) + '&quantity=' + encodeURIComponent(qty)
-            }).then(r => r.json()).then(function(){
-                // server refreshed session cart; totals already updated client-side
-            }).catch(function(){ /* ignore */ });
+            }).then(r => r.json()).then(function(data){
+                if (data.ok === false && data.error) {
+                    // Hiển thị thông báo lỗi
+                    if (typeof showErrorToast === 'function') {
+                        showErrorToast(data.error);
+                    } else {
+                        alert(data.error);
+                    }
+                    // Khôi phục giá trị cũ
+                    input.value = oldValue;
+                    updateTotal();
+                } else {
+                    // Cập nhật giá trị cũ thành công
+                    oldValue = qty;
+                    // server refreshed session cart; totals already updated client-side
+                }
+            }).catch(function(err){ 
+                console.error('Error updating cart quantity:', err);
+                // Khôi phục giá trị cũ nếu có lỗi network
+                input.value = oldValue;
+                updateTotal();
+            });
         });
     });
     document.querySelectorAll('.cart-item-checkbox').forEach(cb => {

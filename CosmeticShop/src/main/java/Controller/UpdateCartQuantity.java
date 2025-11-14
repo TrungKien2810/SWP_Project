@@ -53,6 +53,25 @@ public class UpdateCartQuantity extends HttpServlet {
             return;
         }
 
+        // Kiểm tra tồn kho trước khi cập nhật
+        try {
+            DAO.ProductDB pd = new DAO.ProductDB();
+            Model.Product product = pd.getProductById(productId);
+            if (product != null) {
+                int maxAvailable = product.getStock() > 0 ? product.getStock() : Integer.MAX_VALUE;
+                if (quantity > maxAvailable) {
+                    resp.setContentType("application/json;charset=UTF-8");
+                    try (PrintWriter out = resp.getWriter()) {
+                        out.print("{\"ok\":false,\"error\":\"Số lượng yêu cầu (" + quantity + ") vượt quá tồn kho hiện có (" + maxAvailable + "). Vui lòng chọn số lượng nhỏ hơn.\"}");
+                    }
+                    return;
+                }
+            }
+        } catch (Exception e) {
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            return;
+        }
+
         boolean ok = cartDB.updateQuantityAddToCart(cart.getCart_id(), productId, quantity);
 
         // Refresh session cart items after update & sync current prices (include discount)
