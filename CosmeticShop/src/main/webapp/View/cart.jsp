@@ -67,20 +67,20 @@
                     ProductDB pd = new ProductDB();
                     product = pd.getProductById(p.getProduct_id());
                     %>
-                    <div class="cart-item d-flex align-items-center mb-4 p-3 border rounded shadow-sm">
-                        <input type="checkbox" class="cart-item-checkbox me-2" checked
+                    <div class="cart-item">
+                        <input type="checkbox" class="cart-item-checkbox" checked
                                data-price="<%=p.getPrice()%>" data-quantity="<%=p.getQuantity()%>">
                         <img src="${pageContext.request.contextPath}<%=product.getImageUrl()%>"
-                             alt="<%=product.getName()%>" class="me-3" style="width:100px; height:100px; object-fit:cover;">
-                        <div class="item-info flex-grow-1">
+                             alt="<%=product.getName()%>">
+                        <div class="item-info">
                             <h5><%=product.getName()%></h5>
-                            <p class="item-price"><%=p.getPrice()%>₫ x <span class="item-qty"><%=p.getQuantity()%></span></p>
-                            <input type="number" value="<%=p.getQuantity()%>" min="1" class="form-control w-25 text-center quantity-input" data-product-id="<%=p.getProduct_id()%>">
+                            <p class="item-price"><%=String.format("%,.0f", p.getPrice())%>₫ x <span class="item-qty"><%=p.getQuantity()%></span></p>
+                            <input type="number" value="<%=p.getQuantity()%>" min="1" class="form-control quantity-input" data-product-id="<%=p.getProduct_id()%>">
                         </div>
-                        <div class="item-total ms-3">
-                            <p class="fw-bold item-total-text"><%=String.format("%,.0f", p.getPrice() * p.getQuantity())%>₫</p>
+                        <div class="item-total">
+                            <p class="item-total-text"><%=String.format("%,.0f", p.getPrice() * p.getQuantity())%>₫</p>
                             <a href="${pageContext.request.contextPath}/removeFromCart?productId=<%=p.getProduct_id()%>">
-                            <button class="btn btn-sm btn-outline-danger mt-2 delete-btn">Xóa</button>
+                                <button class="btn delete-btn"><i class="fas fa-trash-alt"></i> Xóa</button>
                             </a>
                         </div>
                     </div>
@@ -88,8 +88,8 @@
                 </div>
 
                 <!-- CART SUMMARY -->
-                <div class="col-md-4 cart-summary bg-light p-4 rounded shadow-sm">
-                    <h4 class="fw-bold mb-3">Tổng cộng</h4>
+                <div class="col-md-4 cart-summary">
+                    <h4>Tổng cộng</h4>
                     <div class="d-flex justify-content-between mb-2">
                         <span>Tạm tính:</span>
                         <span id="subtotalDisplay"><%=String.format("%,.0f", totalPrice)%>₫</span>
@@ -101,8 +101,8 @@
                     <hr>
 
                     <div class="mb-3">
-                        <form id="promoForm" class="d-flex" method="post" action="${pageContext.request.contextPath}/apply-promo">
-                            <select class="form-select me-2" id="promoSelect" onchange="onSelectPromo(this)">
+                        <form id="promoForm" method="post" action="${pageContext.request.contextPath}/apply-promo">
+                            <select class="form-select" id="promoSelect" onchange="onSelectPromo(this)">
                                 <option value="">-- Chọn mã của bạn (nếu có) --</option>
                                 <c:forEach var="d" items="${requestScope.assignedDiscounts}">
                                     <option value="${d.code}" ${sessionScope.appliedDiscountCode eq d.code ? 'selected' : ''}>${d.code}</option>
@@ -132,18 +132,20 @@
                                     </c:if>
                                 </c:if>
                             </select>
-                            <input type="text" name="promoCode" id="promoCodeInput" class="form-control me-2" placeholder="Nhập mã khuyến mãi" value="${sessionScope.appliedDiscountCode}">
-                            <button type="submit" class="btn btn-outline-danger me-2">Áp dụng</button>
-                            <c:if test="${not empty sessionScope.appliedDiscountCode}">
-                                <button type="button" class="btn btn-outline-secondary" onclick="removeDiscount()">Xóa mã</button>
-                            </c:if>
+                            <input type="text" name="promoCode" id="promoCodeInput" class="form-control" placeholder="Nhập mã khuyến mãi" value="${sessionScope.appliedDiscountCode}">
+                            <div class="promo-buttons">
+                                <button type="submit" class="btn btn-outline-danger">Áp dụng</button>
+                                <c:if test="${not empty sessionScope.appliedDiscountCode}">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="removeDiscount()">Xóa mã</button>
+                                </c:if>
+                            </div>
                         </form>
                         <div class="mt-2 d-flex justify-content-between">
-                            <a class="small" href="${pageContext.request.contextPath}/my-promos">My Vouchers</a>
-                            <a class="small" href="${pageContext.request.contextPath}/products">Tiếp tục mua sắm</a>
+                            <a href="${pageContext.request.contextPath}/my-promos"><i class="fas fa-ticket-alt"></i> My Vouchers</a>
+                            <a href="${pageContext.request.contextPath}/products"><i class="fas fa-shopping-bag"></i> Tiếp tục mua sắm</a>
                         </div>
                         <c:if test="${not empty sessionScope.appliedDiscountCode}">
-                            <small class="text-success">Đã áp dụng: ${sessionScope.appliedDiscountCode} (-<fmt:formatNumber value="${sessionScope.appliedDiscountAmount}" type="number" maxFractionDigits="0" /> ₫)</small>
+                            <small class="text-success"><i class="fas fa-check-circle"></i> Đã áp dụng: ${sessionScope.appliedDiscountCode} (-<fmt:formatNumber value="${sessionScope.appliedDiscountAmount}" type="number" maxFractionDigits="0" /> ₫)</small>
                         </c:if>
                     </div>
 
@@ -160,12 +162,12 @@
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <span class="fw-bold">Tổng thanh toán:</span>
-                        <strong style="color:#f76c85;" id="totalDisplay"><%=
+                        <span id="totalDisplay"><%=
                             String.format("%,.0f", (totalPrice - appliedDiscount) > 0 ? (totalPrice - appliedDiscount) : 0)
-                        %>₫</strong>
+                        %>₫</span>
                     </div>
 
-                    <a href="${pageContext.request.contextPath}/checkout" class="btn btn-danger w-100 fw-bold">THANH TOÁN NGAY</a>
+                    <a href="${pageContext.request.contextPath}/checkout" id="checkoutBtn" class="btn btn-danger w-100"><i class="fas fa-credit-card"></i> THANH TOÁN NGAY</a>
                 </div>
             </div>
         <% } %>
@@ -194,6 +196,18 @@
         return isNaN(num) ? 0 : num;
     }
 
+    function hasSelectedItems() {
+        return Array.from(document.querySelectorAll('.cart-item-checkbox')).some(cb => cb.checked);
+    }
+
+    function toggleCheckoutButton() {
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        if (!checkoutBtn) return;
+        const hasItem = hasSelectedItems();
+        checkoutBtn.classList.toggle('disabled', !hasItem);
+        checkoutBtn.setAttribute('aria-disabled', !hasItem);
+    }
+
     function updateTotal() {
         let subtotal = 0;
         document.querySelectorAll('.cart-item').forEach(item => {
@@ -218,6 +232,7 @@
         const discount = getServerDiscount();
         const total = Math.max(0, subtotal - discount);
         if (totalDisplay) totalDisplay.textContent = total.toLocaleString() + '₫';
+        toggleCheckoutButton();
     }
 
     // Event checkbox & quantity input
@@ -262,6 +277,21 @@
 
     // Khởi tạo tính tổng ban đầu
     updateTotal();
+    toggleCheckoutButton();
+
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', function(e) {
+            if (!hasSelectedItems()) {
+                e.preventDefault();
+                if (typeof showToast === 'function') {
+                    showToast('Vui lòng chọn ít nhất một sản phẩm để thanh toán.', 'error', 3500);
+                } else {
+                    alert('Vui lòng chọn ít nhất một sản phẩm để thanh toán.');
+                }
+            }
+        });
+    }
 
     // Mã giảm giá: xử lý phía server (không cập nhật client-side tại đây)
     function onSelectPromo(sel){
