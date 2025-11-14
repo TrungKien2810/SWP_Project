@@ -70,6 +70,20 @@
                 <p class="mb-0">Bạn có thể theo dõi trạng thái đơn hàng bên dưới hoặc trong trang <a href="${pageContext.request.contextPath}/my-orders" class="alert-link">Lịch sử mua hàng</a>.</p>
             </div>
         </c:if>
+        
+        <c:if test="${not empty param.msg}">
+            <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin-bottom: 20px;">
+                <i class="fas fa-check-circle"></i> ${param.msg}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </c:if>
+        
+        <c:if test="${not empty param.error}">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-bottom: 20px;">
+                <i class="fas fa-exclamation-circle"></i> ${param.error}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </c:if>
 
         <c:choose>
             <c:when test="${empty order}">
@@ -112,6 +126,18 @@
                             </p>
                             <c:if test="${not empty order.trackingNumber}">
                                 <p><strong>Số tracking:</strong> ${order.trackingNumber}</p>
+                            </c:if>
+                            <!-- Nút hủy đơn hàng -->
+                            <c:if test="${order.orderStatus == 'PENDING' || order.orderStatus == 'CONFIRMED'}">
+                                <div class="mt-3">
+                                    <form method="post" action="${pageContext.request.contextPath}/cancel-order" 
+                                          onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này?');">
+                                        <input type="hidden" name="orderId" value="${order.orderId}">
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            <i class="fas fa-times-circle"></i> Hủy đơn hàng
+                                        </button>
+                                    </form>
+                                </div>
                             </c:if>
                         </div>
                     </div>
@@ -179,8 +205,14 @@
                             <tfoot>
                                 <tr>
                                     <td colspan="4" class="text-end"><strong>Tổng tiền sản phẩm:</strong></td>
-                                    <td><strong><fmt:formatNumber value="${order.totalAmount - order.shippingCost}" type="number" maxFractionDigits="0"/> ₫</strong></td>
+                                    <td><strong><fmt:formatNumber value="${order.totalAmount - order.shippingCost + order.discountAmount}" type="number" maxFractionDigits="0"/> ₫</strong></td>
                                 </tr>
+                                <c:if test="${not empty order.discountCode && order.discountAmount > 0}">
+                                    <tr>
+                                        <td colspan="4" class="text-end"><strong>Giảm giá (${order.discountCode}):</strong></td>
+                                        <td><strong style="color:#198754;">-<fmt:formatNumber value="${order.discountAmount}" type="number" maxFractionDigits="0"/> ₫</strong></td>
+                                    </tr>
+                                </c:if>
                                 <c:if test="${not empty shippingMethod}">
                                     <tr>
                                         <td colspan="4" class="text-end"><strong>Phí vận chuyển:</strong></td>

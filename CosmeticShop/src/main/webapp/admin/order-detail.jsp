@@ -109,8 +109,14 @@
         <tfoot>
             <tr>
                 <td colspan="4" class="text-end"><strong>Tổng tiền sản phẩm:</strong></td>
-                <td><strong>${String.format("%,.0f", order.totalAmount - order.shippingCost)} ₫</strong></td>
+                <td><strong>${String.format("%,.0f", order.totalAmount - order.shippingCost + order.discountAmount)} ₫</strong></td>
             </tr>
+            <c:if test="${not empty order.discountCode && order.discountAmount > 0}">
+                <tr>
+                    <td colspan="4" class="text-end"><strong>Giảm giá (${order.discountCode}):</strong></td>
+                    <td><strong style="color:#198754;">-${String.format("%,.0f", order.discountAmount)} ₫</strong></td>
+                </tr>
+            </c:if>
             <c:if test="${not empty shippingMethod}">
                 <tr>
                     <td colspan="4" class="text-end"><strong>Phí vận chuyển:</strong></td>

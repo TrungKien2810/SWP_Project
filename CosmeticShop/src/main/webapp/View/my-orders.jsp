@@ -137,10 +137,22 @@
                                     <td><span class="status-badge status-${r.orderStatus}">${r.orderStatus}</span></td>
                                     <td><span class="status-badge pay-${r.paymentStatus}">${r.paymentStatus}</span></td>
                                     <td>
-                                        <a href="${pageContext.request.contextPath}/order-detail?orderId=${r.orderId}" 
-                                           class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-eye"></i> Chi tiết
-                                        </a>
+                                        <div class="d-flex gap-2">
+                                            <a href="${pageContext.request.contextPath}/order-detail?orderId=${r.orderId}" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i> Chi tiết
+                                            </a>
+                                            <c:if test="${r.orderStatus == 'PENDING' || r.orderStatus == 'CONFIRMED'}">
+                                                <form method="post" action="${pageContext.request.contextPath}/cancel-order" 
+                                                      onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng #${r.orderId}?');" 
+                                                      style="display: inline;">
+                                                    <input type="hidden" name="orderId" value="${r.orderId}">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                        <i class="fas fa-times"></i> Hủy
+                                                    </button>
+                                                </form>
+                                            </c:if>
+                                        </div>
                                     </td>
                                 </tr>
                             </c:forEach>

@@ -151,7 +151,7 @@
 
                     <div class="d-flex justify-content-between mb-2">
                         <span>Giảm giá:</span>
-                        <span id="discountDisplay">
+                        <span id="discountDisplay" data-discount-amount="<%= appliedDiscount != null ? appliedDiscount : 0.0 %>">
                             <c:choose>
                                 <c:when test="${not empty sessionScope.appliedDiscountAmount}">
                                     -<fmt:formatNumber value="${sessionScope.appliedDiscountAmount}" type="number" maxFractionDigits="0" /> ₫
@@ -175,6 +175,16 @@
 </div>
 
 <script>
+    // Khởi tạo giá trị discount từ server khi trang load
+    let serverDiscount = 0;
+    (function() {
+        const discountEl = document.getElementById('discountDisplay');
+        if (discountEl) {
+            const discountAmount = parseFloat(discountEl.getAttribute('data-discount-amount') || '0');
+            serverDiscount = isNaN(discountAmount) ? 0 : discountAmount;
+        }
+    })();
+    
     function updateCartUI() {
         const cartItems = document.querySelectorAll('.cart-item');
         const cartContentDiv = document.getElementById('cartContent');
@@ -189,11 +199,13 @@
     }
 
     function getServerDiscount() {
-        const el = document.getElementById('discountDisplay');
-        if (!el) return 0;
-        const raw = (el.textContent || '0').toString();
-        const num = Number(raw.replace(/[^0-9.\-]/g, ''));
-        return isNaN(num) ? 0 : num;
+        // Trả về giá trị discount đã được lưu từ server
+        return serverDiscount || 0;
+    }
+    
+    // Hàm để cập nhật giá trị discount khi có thay đổi từ server (sau khi áp dụng/xóa mã)
+    function updateServerDiscount(newDiscount) {
+        serverDiscount = newDiscount || 0;
     }
 
     function hasSelectedItems() {
@@ -303,7 +315,17 @@
         });
     });
 
-    // Khởi tạo tính tổng ban đầu
+    // Khởi tạo tính tổng ban đầu (đảm bảo discount đã được load)
+    // Đảm bảo serverDiscount được khởi tạo trước khi tính tổng
+    if (typeof serverDiscount === 'undefined') {
+        const discountEl = document.getElementById('discountDisplay');
+        if (discountEl) {
+            const discountAmount = parseFloat(discountEl.getAttribute('data-discount-amount') || '0');
+            serverDiscount = isNaN(discountAmount) ? 0 : discountAmount;
+        } else {
+            serverDiscount = 0;
+        }
+    }
     updateTotal();
     toggleCheckoutButton();
 

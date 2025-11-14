@@ -18,6 +18,7 @@ public class Order {
     private String trackingNumber;
     private Integer discountId;
     private double discountAmount;
+    private String discountCode;
     private String notes;
     private List<OrderDetail> details = new ArrayList<>();
     // For UI summaries
@@ -50,6 +51,8 @@ public class Order {
     public void setDiscountId(Integer discountId) { this.discountId = discountId; }
     public double getDiscountAmount() { return discountAmount; }
     public void setDiscountAmount(double discountAmount) { this.discountAmount = discountAmount; }
+    public String getDiscountCode() { return discountCode; }
+    public void setDiscountCode(String discountCode) { this.discountCode = discountCode; }
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
     public List<OrderDetail> getDetails() { return details; }
