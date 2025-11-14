@@ -1,5 +1,7 @@
 package Model;
 
+import java.sql.Timestamp;
+
 public class lienhe {
     private int id;
     private String name;
@@ -8,6 +10,7 @@ public class lienhe {
     private String email;
     private String subject;
     private String message;
+    private Timestamp created_at; // Ngày tạo phản hồi
     private boolean status; // ✅ Thêm trạng thái xử lý (0 = chưa xử lý, 1 = đã xử lý)
 
     public lienhe() {}
@@ -24,7 +27,7 @@ public class lienhe {
     }
 
     // Constructor mới (dùng khi lấy dữ liệu từ SQL)
-    public lienhe(int id, String name, String phone, String address, String email, String subject, String message, boolean status) {
+    public lienhe(int id, String name, String phone, String address, String email, String subject, String message, Timestamp created_at, boolean status) {
         this.id = id;
         this.name = name;
         this.phone = phone;
@@ -32,6 +35,7 @@ public class lienhe {
         this.email = email;
         this.subject = subject;
         this.message = message;
+        this.created_at = created_at;
         this.status = status;
     }
 
@@ -59,4 +63,7 @@ public class lienhe {
 
     public boolean isStatus() { return status; }
     public void setStatus(boolean status) { this.status = status; }
+    
+    public Timestamp getCreated_at() { return created_at; }
+    public void setCreated_at(Timestamp created_at) { this.created_at = created_at; }
 }

@@ -2,7 +2,6 @@ package Controller;
 
 import DAO.lienheDAO;
 import DAO.NotificationDB;
-import Model.Notification;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -24,6 +23,30 @@ public class lienhe extends HttpServlet {
             String subject = request.getParameter("subject");
             String message = request.getParameter("message");
 
+            // Kiểm tra và tạo user nếu email chưa tồn tại (để đảm bảo FOREIGN KEY constraint)
+            DAO.UserDB userDB = new DAO.UserDB();
+            Model.user existingUser = userDB.getUserByEmail(email);
+            boolean isNewUser = (existingUser == null);
+            
+            if (isNewUser) {
+                // Tự động tạo user tạm thời với email này
+                // Sử dụng tên từ form làm username, password tạm thời (user có thể đổi sau)
+                String tempPassword = "temp_" + System.currentTimeMillis(); // Password tạm thời
+                boolean userCreated = userDB.signup(name, email, tempPassword);
+                if (!userCreated) {
+                    // Nếu tạo user thất bại (có thể do username trùng), thử với email làm username
+                    String usernameFromEmail = email.split("@")[0]; // Lấy phần trước @
+                    userCreated = userDB.signup(usernameFromEmail, email, tempPassword);
+                }
+                if (!userCreated) {
+                    // Nếu vẫn thất bại, thông báo lỗi
+                    String errorMsg = "Không thể tạo tài khoản. Vui lòng đăng ký tài khoản trước hoặc liên hệ trực tiếp qua hotline.";
+                    String target = request.getContextPath() + "/View/contact.jsp?msg=" + java.net.URLEncoder.encode(errorMsg, "UTF-8");
+                    response.sendRedirect(target);
+                    return;
+                }
+            }
+
             // Tạo đối tượng liên hệ
             Model.lienhe contact = new Model.lienhe(name, phone, address, email, subject, message);
 
@@ -44,24 +67,25 @@ public class lienhe extends HttpServlet {
                     e.printStackTrace();
                     // Không làm gián đoạn flow nếu tạo thông báo thất bại
                 }
-            }
-
-            // Điều hướng kết quả
-            if (result) {
                 // ✅ Gửi thành công → điều hướng về lại trang liên hệ + thông báo
-                // response.sendRedirect(request.getContextPath() + "/View/contact.jsp?msg=Gửi thành công! Cảm ơn bạn đã góp ý 💌");
-                request.getRequestDispatcher("/View/contact.jsp?msg=Gửi thành công! Cảm ơn bạn đã góp ý 💌").forward(request, response);
+                String successMsg = "Gửi thành công! Cảm ơn bạn đã góp ý 💌";
+                if (isNewUser) {
+                    successMsg += " (Tài khoản đã được tạo tự động với email của bạn. Bạn có thể đăng nhập và đổi mật khẩu sau.)";
+                }
+                String target = request.getContextPath() + "/View/contact.jsp?msg=" + java.net.URLEncoder.encode(successMsg, "UTF-8");
+                response.sendRedirect(target);
             } else {
                 // ❌ Gửi thất bại
-                // response.sendRedirect(request.getContextPath() + "/View/contact.jsp?msg=Gửi thất bại. Vui lòng thử lại ❌");
-                request.getRequestDispatcher("/View/contact.jsp?msg=Gửi thất bại. Vui lòng thử lại ❌").forward(request, response);
-
+                String target = request.getContextPath() + "/View/contact.jsp?msg=" + java.net.URLEncoder.encode("Gửi thất bại. Vui lòng thử lại sau ❌", "UTF-8");
+                response.sendRedirect(target);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
             // Luôn có phản hồi để tránh load mãi
-            response.sendRedirect(request.getContextPath() + "/View/contact.jsp?msg=Lỗi máy chủ! Không gửi được phản hồi ⚠️");
+            String errorMsg = "Lỗi máy chủ! Không gửi được phản hồi ⚠️";
+            String target = request.getContextPath() + "/View/contact.jsp?msg=" + java.net.URLEncoder.encode(errorMsg, "UTF-8");
+            response.sendRedirect(target);
         }
     }
 

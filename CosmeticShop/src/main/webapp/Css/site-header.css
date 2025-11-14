@@ -391,6 +391,19 @@
   border-left: 3px solid #f76c85;
 }
 
+.notification-item.has-link {
+  cursor: pointer;
+}
+
+.notification-item.has-link:hover {
+  background: #ffeef0;
+  transform: translateX(2px);
+}
+
+.notification-item.has-link .notification-item-title {
+  color: #f76c85;
+}
+
 .notification-item-title {
   font-weight: 600;
   font-size: 14px;

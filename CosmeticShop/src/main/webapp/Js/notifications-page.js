@@ -56,6 +56,7 @@
             if (!type) return 'Khác';
             const map = {
                 'NEW_ORDER': 'Đơn hàng mới',
+                'ORDER_STATUS_UPDATE': 'Cập nhật đơn hàng',
                 'CUSTOMER_FEEDBACK': 'Phản hồi khách hàng',
                 'LOW_RATING': 'Đánh giá thấp',
                 'DISCOUNT_ASSIGNED': 'Voucher mới',
@@ -85,13 +86,24 @@
 
         function resolveLink(linkUrl) {
             if (!linkUrl) return null;
+            
+            // Nếu linkUrl đã có context path, dùng trực tiếp
+            if (contextPath && linkUrl.startsWith(contextPath)) {
+                return linkUrl;
+            }
+            
+            // Absolute URL - dùng trực tiếp
             if (linkUrl.startsWith('http://') || linkUrl.startsWith('https://')) {
                 return linkUrl;
             }
+            
+            // Relative path từ root - thêm context path nếu có
             if (linkUrl.startsWith('/')) {
-                return contextPath + linkUrl;
+                return (contextPath || '') + linkUrl;
             }
-            return contextPath + '/' + linkUrl;
+            
+            // Relative path - thêm context path và dấu /
+            return (contextPath || '') + '/' + linkUrl;
         }
 
         function renderList(data) {
@@ -128,7 +140,7 @@
                             </div>
                             <div class="notification-meta">
                                 <span><i class="fa-regular fa-clock me-1"></i>${escapeHtml(timeLabel)}</span>
-                                ${link ? `<a href="${link}" class="text-decoration-none"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>Xem chi tiết</a>` : ''}
+                                ${link ? `<a href="${escapeHtml(link)}" class="text-decoration-none notification-link" data-notification-id="${notif.notificationId}" data-is-read="${notif.read}"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>Xem chi tiết</a>` : ''}
                             </div>
                             <div class="notification-actions">
                                 ${notif.read
@@ -250,6 +262,22 @@
         }
 
         listEl.addEventListener('click', function(event) {
+            // Xử lý click vào link "Xem chi tiết"
+            const linkElement = event.target.closest('.notification-link');
+            if (linkElement) {
+                const notificationId = parseInt(linkElement.getAttribute('data-notification-id'), 10);
+                const isRead = linkElement.getAttribute('data-is-read') === 'true';
+                
+                // Nếu notification chưa đọc, đánh dấu đã đọc trước khi navigate
+                if (!isRead && Number.isInteger(notificationId)) {
+                    // Đánh dấu đã đọc (không chờ response)
+                    markNotificationAsRead(notificationId);
+                }
+                // Cho phép link hoạt động bình thường (navigate đến URL)
+                return;
+            }
+            
+            // Xử lý các button action
             const actionButton = event.target.closest('[data-action]');
             if (!actionButton) return;
 

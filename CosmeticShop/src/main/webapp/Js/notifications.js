@@ -84,9 +84,14 @@ document.addEventListener('DOMContentLoaded', function() {
         notificationList.innerHTML = notifications.map(notif => {
             const timeAgo = getTimeAgo(notif.createdAt);
             const unreadClass = !notif.read ? 'unread' : '';
+            const hasLink = notif.linkUrl ? 'has-link' : '';
+            const linkIcon = notif.linkUrl ? '<i class="fas fa-external-link-alt ms-2" style="font-size: 10px; opacity: 0.6;"></i>' : '';
             return `
-                <div class="notification-item ${unreadClass}" data-id="${notif.notificationId}" data-read="${notif.read}">
-                    <div class="notification-item-title">${escapeHtml(notif.title)}</div>
+                <div class="notification-item ${unreadClass} ${hasLink}" data-id="${notif.notificationId}" data-read="${notif.read}" data-link="${escapeHtml(notif.linkUrl || '')}">
+                    <div class="notification-item-title">
+                        ${escapeHtml(notif.title)}
+                        ${linkIcon}
+                    </div>
                     <div class="notification-item-message">${escapeHtml(notif.message)}</div>
                     <div class="notification-item-time">${timeAgo}</div>
                 </div>
@@ -98,7 +103,8 @@ document.addEventListener('DOMContentLoaded', function() {
             item.addEventListener('click', function() {
                 const notificationId = parseInt(this.dataset.id);
                 const isRead = this.dataset.read === 'true';
-                const linkUrl = notifications.find(n => n.notificationId === notificationId)?.linkUrl;
+                // Lấy linkUrl từ dataset hoặc từ notifications array
+                const linkUrl = this.dataset.link || notifications.find(n => n.notificationId === notificationId)?.linkUrl;
                 
                 // Mark as read if not read
                 if (!isRead) {
@@ -108,14 +114,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Navigate to link if available
                 if (linkUrl) {
                     // Đảm bảo linkUrl có context path nếu cần
-                    let finalUrl = linkUrl;
-                    if (linkUrl.startsWith('/')) {
+                    let finalUrl = linkUrl.trim();
+                    
+                    // Nếu linkUrl đã có context path (bắt đầu bằng contextPath), dùng trực tiếp
+                    if (contextPath && finalUrl.startsWith(contextPath)) {
+                        finalUrl = linkUrl;
+                    } else if (finalUrl.startsWith('http://') || finalUrl.startsWith('https://')) {
+                        // Absolute URL - dùng trực tiếp
+                        finalUrl = linkUrl;
+                    } else if (finalUrl.startsWith('/')) {
                         // Relative path từ root - thêm context path nếu có
-                        finalUrl = contextPath + linkUrl;
-                    } else if (!linkUrl.startsWith('http://') && !linkUrl.startsWith('https://')) {
+                        finalUrl = (contextPath || '') + linkUrl;
+                    } else {
                         // Relative path - thêm context path và dấu /
-                        finalUrl = contextPath + '/' + linkUrl;
+                        finalUrl = (contextPath || '') + '/' + linkUrl;
                     }
+                    
+                    // Đóng dropdown trước khi navigate
+                    if (notificationDropdown) {
+                        notificationDropdown.classList.remove('show');
+                    }
+                    
+                    // Navigate đến trang admin
+                    console.log('[Notification] Navigating to:', finalUrl);
                     window.location.href = finalUrl;
                 }
             });
