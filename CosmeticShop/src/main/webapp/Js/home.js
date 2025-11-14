@@ -203,4 +203,161 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
     }
+
+    // Product Carousels - Xử lý cho 3 section sản phẩm
+    var productCarousels = [
+        { carousel: 'promotionalCarousel', track: 'promotionalTrack', prev: 'promotionalPrevBtn', next: 'promotionalNextBtn' },
+        { carousel: 'featuredCarousel', track: 'featuredTrack', prev: 'featuredPrevBtn', next: 'featuredNextBtn' },
+        { carousel: 'bestSellingCarousel', track: 'bestSellingTrack', prev: 'bestSellingPrevBtn', next: 'bestSellingNextBtn' }
+    ];
+
+    productCarousels.forEach(function(carouselConfig) {
+        var carouselEl = document.getElementById(carouselConfig.carousel);
+        var trackEl = document.getElementById(carouselConfig.track);
+        var prevBtn = document.getElementById(carouselConfig.prev);
+        var nextBtn = document.getElementById(carouselConfig.next);
+
+        if (carouselEl && trackEl && prevBtn && nextBtn) {
+            var scrollPosition = 0;
+            var scrollAmount = 0;
+            var maxScroll = 0;
+            var cardWidth = 0;
+            var gap = 20;
+
+            function calculateScrollAmount() {
+                // Tính width của 1 product card
+                var firstCard = trackEl.querySelector('.product-card');
+                if (firstCard) {
+                    var cardStyle = window.getComputedStyle(firstCard);
+                    cardWidth = firstCard.offsetWidth + parseFloat(cardStyle.marginLeft || 0) + parseFloat(cardStyle.marginRight || 0);
+                } else {
+                    cardWidth = 220; // fallback
+                }
+                
+                // Tính số sản phẩm hiển thị trong 1 hàng dựa trên kích thước màn hình
+                var containerWidth = carouselEl.offsetWidth;
+                var computedStyle = window.getComputedStyle(carouselEl);
+                var paddingLeft = parseFloat(computedStyle.paddingLeft) || 0;
+                var paddingRight = parseFloat(computedStyle.paddingRight) || 0;
+                var actualWidth = containerWidth - paddingLeft - paddingRight;
+                
+                // Tính số sản phẩm có thể hiển thị trong 1 hàng
+                var itemsPerRow = Math.floor(actualWidth / (cardWidth + gap));
+                if (itemsPerRow < 1) itemsPerRow = 1;
+                
+                // Scroll 1 hàng mỗi lần
+                scrollAmount = itemsPerRow * (cardWidth + gap);
+            }
+
+            function updateMaxScroll() {
+                calculateScrollAmount();
+                var containerWidth = carouselEl.offsetWidth;
+                var computedStyle = window.getComputedStyle(carouselEl);
+                var paddingLeft = parseFloat(computedStyle.paddingLeft) || 0;
+                var paddingRight = parseFloat(computedStyle.paddingRight) || 0;
+                var actualWidth = containerWidth - paddingLeft - paddingRight;
+                
+                var trackWidth = trackEl.scrollWidth || trackEl.offsetWidth;
+                maxScroll = Math.max(0, trackWidth - actualWidth);
+            }
+
+            function scrollProducts(direction) {
+                updateMaxScroll();
+                
+                var newPosition = scrollPosition + (direction * scrollAmount);
+                
+                if (newPosition > maxScroll) {
+                    newPosition = maxScroll;
+                } else if (newPosition < 0) {
+                    newPosition = 0;
+                }
+
+                scrollPosition = newPosition;
+                trackEl.style.transform = 'translateX(-' + scrollPosition + 'px)';
+                
+                updateButtonStates();
+            }
+            
+            function updateButtonStates() {
+                if (maxScroll <= 0) {
+                    prevBtn.style.opacity = '0.3';
+                    prevBtn.style.pointerEvents = 'none';
+                    nextBtn.style.opacity = '0.3';
+                    nextBtn.style.pointerEvents = 'none';
+                } else {
+                    if (scrollPosition <= 0) {
+                        prevBtn.style.opacity = '0.3';
+                        prevBtn.style.pointerEvents = 'none';
+                        nextBtn.style.opacity = '1';
+                        nextBtn.style.pointerEvents = 'auto';
+                    } else if (scrollPosition >= maxScroll) {
+                        prevBtn.style.opacity = '1';
+                        prevBtn.style.pointerEvents = 'auto';
+                        nextBtn.style.opacity = '0.3';
+                        nextBtn.style.pointerEvents = 'none';
+                    } else {
+                        prevBtn.style.opacity = '1';
+                        prevBtn.style.pointerEvents = 'auto';
+                        nextBtn.style.opacity = '1';
+                        nextBtn.style.pointerEvents = 'auto';
+                    }
+                }
+            }
+
+            function handlePrevClick(e) {
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                scrollProducts(-1);
+                return false;
+            }
+
+            function handleNextClick(e) {
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                scrollProducts(1);
+                return false;
+            }
+
+            prevBtn.onclick = handlePrevClick;
+            prevBtn.addEventListener('click', handlePrevClick);
+            nextBtn.onclick = handleNextClick;
+            nextBtn.addEventListener('click', handleNextClick);
+
+            window.addEventListener('resize', function() {
+                updateMaxScroll();
+                updateButtonStates();
+            });
+
+            setTimeout(function() {
+                updateMaxScroll();
+                updateButtonStates();
+            }, 200);
+
+            // Touch/swipe support
+            var touchStartX = 0;
+            var touchEndX = 0;
+
+            carouselEl.addEventListener('touchstart', function(e) {
+                touchStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
+
+            carouselEl.addEventListener('touchend', function(e) {
+                touchEndX = e.changedTouches[0].screenX;
+                var swipeThreshold = 50;
+                var diff = touchStartX - touchEndX;
+
+                if (Math.abs(diff) > swipeThreshold) {
+                    if (diff > 0) {
+                        scrollProducts(1);
+                    } else {
+                        scrollProducts(-1);
+                    }
+                }
+            }, { passive: true });
+        }
+    });
 });

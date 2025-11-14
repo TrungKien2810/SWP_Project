@@ -413,7 +413,7 @@
           callbacks: {
             label: function(context) {
               if (salesData.length === 0) return '';
-              return 'Doanh thu: ' + new Intl.NumberFormat('vi-VN').format(context.parsed.y) + ' VNĐ';
+              return 'Doanh thu: ' + new Intl.NumberFormat('vi-VN').format(context.parsed.y) + ' ₫';
             }
           }
         }
@@ -517,7 +517,7 @@
           tooltip: {
             callbacks: {
               label: function(context) {
-                return 'Doanh thu: ' + new Intl.NumberFormat('vi-VN').format(context.parsed.x) + ' VNĐ';
+                return 'Doanh thu: ' + new Intl.NumberFormat('vi-VN').format(context.parsed.x) + ' ₫';
               }
             }
           }

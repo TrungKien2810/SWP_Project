@@ -238,11 +238,11 @@
             <div class="col-md-8">
               <div class="row g-2">
                 <div class="col-md-6">
-                  <label class="form-label">Giá từ (VNĐ)</label>
+                  <label class="form-label">Giá từ (₫)</label>
                   <input type="number" class="form-control" name="minPrice" min="0" step="1000" placeholder="VD: 100000">
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Đến (VNĐ)</label>
+                  <label class="form-label">Đến (₫)</label>
                   <input type="number" class="form-control" name="maxPrice" min="0" step="1000" placeholder="VD: 500000">
                 </div>
               </div>
@@ -268,11 +268,11 @@
             <div class="col-md-8">
               <div class="row g-2">
                 <div class="col-md-6">
-                  <label class="form-label">Giá từ (VNĐ)</label>
+                  <label class="form-label">Giá từ (₫)</label>
                   <input type="number" class="form-control" name="minPrice" min="0" step="1000" placeholder="VD: 100000">
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Đến (VNĐ)</label>
+                  <label class="form-label">Đến (₫)</label>
                   <input type="number" class="form-control" name="maxPrice" min="0" step="1000" placeholder="VD: 500000">
                 </div>
               </div>
@@ -292,11 +292,11 @@
             <div class="col-md-12">
               <div class="row g-2">
                 <div class="col-md-6">
-                  <label class="form-label">Giá từ (VNĐ)</label>
+                  <label class="form-label">Giá từ (₫)</label>
                   <input type="number" class="form-control" name="minPrice" min="0" step="1000" placeholder="VD: 100000">
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Đến (VNĐ)</label>
+                  <label class="form-label">Đến (₫)</label>
                   <input type="number" class="form-control" name="maxPrice" min="0" step="1000" placeholder="VD: 500000">
                 </div>
               </div>

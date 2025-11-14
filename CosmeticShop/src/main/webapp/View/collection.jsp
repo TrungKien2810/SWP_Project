@@ -230,7 +230,7 @@
                                                                         -<fmt:formatNumber value="${product.activeDiscount.value}" maxFractionDigits="0" />%
                                                                     </c:when>
                                                                     <c:otherwise>
-                                                                        -<fmt:formatNumber value="${product.activeDiscount.value}" type="number" maxFractionDigits="0" /> VNĐ
+                                                                        -<fmt:formatNumber value="${product.activeDiscount.value}" type="number" maxFractionDigits="0" /> ₫
                                                                     </c:otherwise>
                                                                 </c:choose>
                                                             </div>
@@ -260,21 +260,21 @@
                                                                 <c:when test="${product.discountActive}">
                                                                     <div class="price-wrapper">
                                                                         <span class="price-old">
-                                                                            <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> VNĐ
+                                                                            <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> ₫
                                                                         </span>
                                                                         <span class="price-new">
-                                                                            <fmt:formatNumber value="${product.discountedPrice}" type="number" maxFractionDigits="0" /> VNĐ
+                                                                            <fmt:formatNumber value="${product.discountedPrice}" type="number" maxFractionDigits="0" /> ₫
                                                                         </span>
                                                                         <c:if test="${product.discountAmount > 0}">
                                                                             <span class="price-save">
-                                                                                Tiết kiệm <fmt:formatNumber value="${product.discountAmount}" type="number" maxFractionDigits="0" /> VNĐ
+                                                                                Tiết kiệm <fmt:formatNumber value="${product.discountAmount}" type="number" maxFractionDigits="0" /> ₫
                                                                             </span>
                                                                         </c:if>
                                                                     </div>
                                                                 </c:when>
                                                                 <c:otherwise>
                                                                     <p class="price">
-                                                                        <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> VNĐ
+                                                                        <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> ₫
                                                                     </p>
                                                                 </c:otherwise>
                                                             </c:choose>

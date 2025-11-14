@@ -42,9 +42,9 @@ function debounce(fn, delay) {
             var price = new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 0 }).format(item.price);
             var originalPrice = new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 0 }).format(item.originalPrice || item.price);
             var hasDiscount = !!item.hasDiscount && item.originalPrice && item.originalPrice > item.price;
-            var priceHtml = '<div class="suggest-price"><span class="suggest-price-current">' + price + ' VNĐ</span>';
+            var priceHtml = '<div class="suggest-price"><span class="suggest-price-current">' + price + ' ₫</span>';
             if (hasDiscount) {
-                priceHtml += '<span class="suggest-price-original">' + originalPrice + ' VNĐ</span>';
+                priceHtml += '<span class="suggest-price-original">' + originalPrice + ' ₫</span>';
             }
             priceHtml += '</div>';
             return '' +
