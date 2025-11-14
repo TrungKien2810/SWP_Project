@@ -11,7 +11,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css?v=2.1">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css?v=2.2">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/collection.css?v=2.1">
         <title>Pinky Cloud - Trang Chủ</title>
     </head>
@@ -649,27 +649,30 @@
                     <p><i class="fas fa-envelope text-info"></i> pinkycloudvietnam@gmail.com</p>
                     <p><i class="fas fa-globe text-success"></i> <a href="${pageContext.request.contextPath}/View/home.jsp" target="_blank" style="color: #24e454; text-decoration: none;">pinkycloud.vn</a></p>
 
-                    <h3 class="mt-4">Hệ Thống Phòng Kinh Doanh</h3>
-                    <h5>TOCEPO THỊ NẠI</h5>
+                    <h3 class="mt-4">Hệ Thống Chi Nhánh</h3>
+                    <h5>PinkyCloud Thị Nại</h5>
                     <p><i class="fas fa-map-marker-alt text-danger"></i> 224 Đống Đa, Thị Nải, Quy Nhơn, Bình Định, Việt Nam</p>
                     <p><i class="fas fa-phone text-primary"></i> 0888.004.444 - 0888.885.884 (Zalo)</p>
 
-                    <h5>Quán Nhậu Aking 2</h5>
+                    <h5>PinkyCloud Quy Nhơn</h5>
                     <p><i class="fas fa-map-marker-alt text-danger"></i> 153-155 Bùi Xuân Phái, Trần Hưng Đạo, Quy Nhơn, Bình Định, Việt Nam</p>
                     <p><i class="fas fa-phone text-primary"></i> 0833.55.4444 (Zalo)</p>
 
-                    <h3 class="mt-4">Nhà Phân Phối KEEPFLY</h3>
-                    <h5><i class="fas fa-home"></i> Bình Dương</h5>
+                    <h3 class="mt-4">Hệ Thống Đại Lý Phân Phối</h3>
+                    <h5><i class="fas fa-store"></i> Đại Lý Bình Dương</h5>
                     <p><i class="fas fa-map-marker-alt text-danger"></i> 1/5 KP. Bình Quới A, P. Bình Chuẩn, TP. Thuận An</p>
 
-                    <h5><i class="fas fa-home"></i> TP. Nha Trang</h5>
+                    <h5><i class="fas fa-store"></i> Đại Lý Nha Trang</h5>
                     <p><i class="fas fa-map-marker-alt text-danger"></i> 17/11/1 đường 52, Vĩnh Phước, Tp Nha Trang</p>
 
-                    <h5><i class="fas fa-home"></i> Kiên Giang</h5>
+                    <h5><i class="fas fa-store"></i> Đại Lý Kiên Giang</h5>
                     <p><i class="fas fa-map-marker-alt text-danger"></i> 151 Quang Trung, Vĩnh Thạnh, Rạch Giá, Kiên Giang</p>
 
-                    <h3 class="mt-4">PINKYCLOUD SHOWROOM</h3>
+                    <h3 class="mt-4">Showroom PinkyCloud</h3>
+                    <h5><i class="fas fa-building"></i> Showroom TP. Hồ Chí Minh</h5>
                     <p><i class="fas fa-map-marker-alt text-danger"></i> 15-17 Tô Hiệu, Tân Phú, TP. Hồ Chí Minh</p>
+                    
+                    <h5><i class="fas fa-building"></i> Showroom Bình Định</h5>
                     <p><i class="fas fa-map-marker-alt text-danger"></i> 56 Ngô Gia Tự, Tây Sơn, Bình Định</p>
                 </div>
             </div>
