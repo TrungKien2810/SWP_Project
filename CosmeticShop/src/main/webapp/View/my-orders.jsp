@@ -89,7 +89,7 @@
                                         </div>
                                     </td>
                                     <td>${r.orderDateStr}</td>
-                                    <td><fmt:formatNumber value="${r.totalAmount}" type="number" maxFractionDigits="0"/> đ</td>
+                                    <td><fmt:formatNumber value="${r.totalAmount}" type="number" maxFractionDigits="0"/> ₫</td>
                                     <td><span class="status-badge status-${r.orderStatus}">${r.orderStatus}</span></td>
                                     <td><span class="status-badge pay-${r.paymentStatus}">${r.paymentStatus}</span></td>
                                     <td>

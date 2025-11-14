@@ -4,6 +4,7 @@
 <%@ page import="java.util.*" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -12,6 +13,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/cart.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/toast-notification.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
           crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
@@ -45,15 +47,6 @@
 %>
 
 <div class="cart-page container mt-5">
-    <!-- Hiển thị thông báo -->
-    <c:if test="${not empty requestScope.msg}">
-        <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin-bottom: 20px;">
-            <i class="fas fa-check-circle me-2"></i>
-            ${requestScope.msg}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    </c:if>
-    
     <h2 class="text-center mb-4">GIỎ HÀNG CỦA BẠN</h2>
 
     <div id="cartContent">
@@ -150,19 +143,20 @@
                             <a class="small" href="${pageContext.request.contextPath}/products">Tiếp tục mua sắm</a>
                         </div>
                         <c:if test="${not empty sessionScope.appliedDiscountCode}">
-                            <small class="text-success">Đã áp dụng: ${sessionScope.appliedDiscountCode} (-${sessionScope.appliedDiscountAmount})</small>
-                        </c:if>
-                        <c:if test="${not empty requestScope.msg}">
-                            <small class="text-success">${requestScope.msg}</small>
-                        </c:if>
-                        <c:if test="${not empty requestScope.error}">
-                            <small class="text-danger">${requestScope.error}</small>
+                            <small class="text-success">Đã áp dụng: ${sessionScope.appliedDiscountCode} (-<fmt:formatNumber value="${sessionScope.appliedDiscountAmount}" type="number" maxFractionDigits="0" /> ₫)</small>
                         </c:if>
                     </div>
 
                     <div class="d-flex justify-content-between mb-2">
                         <span>Giảm giá:</span>
-                        <span id="discountDisplay">${sessionScope.appliedDiscountAmount != null ? sessionScope.appliedDiscountAmount : 0}</span>
+                        <span id="discountDisplay">
+                            <c:choose>
+                                <c:when test="${not empty sessionScope.appliedDiscountAmount}">
+                                    -<fmt:formatNumber value="${sessionScope.appliedDiscountAmount}" type="number" maxFractionDigits="0" /> ₫
+                                </c:when>
+                                <c:otherwise>0 ₫</c:otherwise>
+                            </c:choose>
+                        </span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <span class="fw-bold">Tổng thanh toán:</span>
@@ -334,5 +328,40 @@
 
 <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
 <script src="${pageContext.request.contextPath}/Js/home.js"></script>
+<script src="${pageContext.request.contextPath}/Js/toast-notification.js"></script>
+<script>
+    // Hiển thị toast notification từ URL parameter
+    window.addEventListener('load', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const msg = urlParams.get('msg');
+        const error = urlParams.get('error');
+        
+        if (msg) {
+            try {
+                const decodedMsg = decodeURIComponent(msg);
+                setTimeout(function() {
+                    if (typeof showToast === 'function') {
+                        showToast(decodedMsg, 'success', 4000);
+                    }
+                }, 200);
+            } catch (e) {
+                console.error('Error decoding message:', e);
+            }
+        }
+        
+        if (error) {
+            try {
+                const decodedError = decodeURIComponent(error);
+                setTimeout(function() {
+                    if (typeof showToast === 'function') {
+                        showToast(decodedError, 'error', 4000);
+                    }
+                }, 200);
+            } catch (e) {
+                console.error('Error decoding error:', e);
+            }
+        }
+    });
+</script>
 </body>
 </html>

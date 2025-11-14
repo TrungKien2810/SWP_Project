@@ -72,19 +72,29 @@ public class cart extends HttpServlet {
         HttpSession session = request.getSession();
         user user = (user) session.getAttribute("user");
         List<CartItems> cartItems = new ArrayList<>();
-        Object CartItems = session.getAttribute("cartItems");
-        if (CartItems != null) {
-            @SuppressWarnings("unchecked")
-            List<CartItems> sessionCartItems = (List<CartItems>) CartItems;
-            cartItems = sessionCartItems;
-            // Lấy danh sách voucher được gán cho user để hiển thị select
-            if (session.getAttribute("user") != null) {
-                Model.user u = (Model.user) session.getAttribute("user");
-                // Auto-assign due discounts before loading list
-                new DiscountDB().assignDueForUser(u.getUser_id());
-                request.setAttribute("assignedDiscounts",
-                        new DiscountDB().listAssignedDiscountsForUser(u.getUser_id()));
+        
+        if (user != null) {
+            // Logged in user: load from database
+            Object CartItems = session.getAttribute("cartItems");
+            if (CartItems != null) {
+                @SuppressWarnings("unchecked")
+                List<CartItems> sessionCartItems = (List<CartItems>) CartItems;
+                cartItems = sessionCartItems;
+            } else {
+                CartDB cd = new CartDB();
+                Cart cart = cd.getCartByUserId(user.getUser_id());
+                if (cart != null) {
+                    cartItems = cd.getCartItemsByCartId(cart.getCart_id());
+                }
             }
+            
+            // Lấy danh sách voucher được gán cho user để hiển thị select
+            Model.user u = (Model.user) session.getAttribute("user");
+            // Auto-assign due discounts before loading list
+            new DiscountDB().assignDueForUser(u.getUser_id());
+            request.setAttribute("assignedDiscounts",
+                    new DiscountDB().listAssignedDiscountsForUser(u.getUser_id()));
+            
             // Đồng bộ giá hiện tại cho các item đang có trong session (kể cả giảm giá mới)
             try {
                 ProductDB pd = new ProductDB();
@@ -98,42 +108,20 @@ public class cart extends HttpServlet {
             } catch (Exception ignore) {}
             request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
         } else {
-            if (session.getAttribute("user") != null) {
-                Model.user u = (Model.user) session.getAttribute("user");
-                new DiscountDB().assignDueForUser(u.getUser_id());
-                request.setAttribute("assignedDiscounts",
-                        new DiscountDB().listAssignedDiscountsForUser(u.getUser_id()));
+            // ✅ Guest user: ALWAYS read from cookie to ensure sync
+            // (Don't rely on session cartItems which might be stale)
+            ProductDB pd = new ProductDB();
+            java.util.Map<Integer, Integer> cookieCart = CartCookieUtil.readCartMap(request);
+            for (java.util.Map.Entry<Integer, Integer> e : cookieCart.entrySet()) {
+                Product p = pd.getProductById(e.getKey());
+                if (p == null)
+                    continue;
+                CartItems ci = new CartItems(0, 0, p.getProductId(), e.getValue(), p.getDiscountedPrice());
+                cartItems.add(ci);
             }
-            if (user != null) {
-                CartDB cd = new CartDB();
-                Cart cart = cd.getCartByUserId(user.getUser_id());
-                if (cart != null) {
-                    cartItems = cd.getCartItemsByCartId(cart.getCart_id());
-                    // Cập nhật giá theo thời điểm hiện tại
-                    ProductDB pd = new ProductDB();
-                    for (CartItems ci : cartItems) {
-                        Product p = pd.getProductById(ci.getProduct_id());
-                        if (p != null) {
-                            ci.setPrice(p.getDiscountedPrice());
-                        }
-                    }
-                }
-                session.setAttribute("cartItems", cartItems);
-                request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
-            } else {
-                // Guest: build from cookie
-                ProductDB pd = new ProductDB();
-                java.util.Map<Integer, Integer> cookieCart = CartCookieUtil.readCartMap(request);
-                for (java.util.Map.Entry<Integer, Integer> e : cookieCart.entrySet()) {
-                    Product p = pd.getProductById(e.getKey());
-                    if (p == null)
-                        continue;
-                    CartItems ci = new CartItems(0, 0, p.getProductId(), e.getValue(), p.getDiscountedPrice());
-                    cartItems.add(ci);
-                }
-                session.setAttribute("cartItems", cartItems);
-                request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
-            }
+            // ✅ Always update session from cookie for guest users
+            session.setAttribute("cartItems", cartItems);
+            request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
         }
     }
 

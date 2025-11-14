@@ -8,7 +8,7 @@
       <div class="card shadow-sm">
         <div class="card-body">
           <div class="fw-semibold">Doanh thu hôm nay</div>
-          <div class="fs-4 text-success">${String.format("%,.0f", doanhThuHomNay)} đ</div>
+          <div class="fs-4 text-success">${String.format("%,.0f", doanhThuHomNay)} ₫</div>
         </div>
       </div>
     </div>

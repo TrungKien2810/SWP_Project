@@ -56,7 +56,7 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="shipping_method_id" id="m_${m.methodId}" value="${m.methodId}" data-cost="${m.cost}" ${st.first ? 'checked' : ''} required>
                                 <label class="form-check-label" for="m_${m.methodId}">
-                                    ${m.name} - <span class="highlight">${m.cost}</span> VND (dự kiến ${m.estimatedDays} ngày)
+                                    ${m.name} - <span class="highlight"><fmt:formatNumber value="${m.cost}" type="number" maxFractionDigits="0" /> ₫</span> (dự kiến ${m.estimatedDays} ngày)
                                 </label>
                             </div>
                         </c:forEach>

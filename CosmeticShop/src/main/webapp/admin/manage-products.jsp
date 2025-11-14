@@ -59,7 +59,7 @@
                       </c:otherwise>
                     </c:choose>
                   </td>
-                  <td class="text-end"><strong style="color:#f76c85;">${String.format("%,.0f", p.price)} đ</strong></td>
+                  <td class="text-end"><strong style="color:#f76c85;">${String.format("%,.0f", p.price)} ₫</strong></td>
                   <td class="text-end">${p.stock}</td>
                   <td class="text-end">
                     <div class="d-inline-flex gap-2 align-items-center justify-content-end">

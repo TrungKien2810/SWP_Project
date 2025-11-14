@@ -23,7 +23,6 @@ import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
 import Util.CartCookieUtil;
-import jakarta.servlet.http.Cookie;
 
 /**
  *
@@ -246,6 +245,15 @@ public class addToCart extends HttpServlet {
             int newQty = cookieCart.getOrDefault(p_id, 0) + addQuantity;
             cookieCart.put(p_id, newQty);
             CartCookieUtil.writeCartMap(response, cookieCart);
+            
+            // ✅ Cập nhật session cartItems từ cookie để đồng bộ
+            List<CartItems> guestCartItems = new ArrayList<>();
+            for (java.util.Map.Entry<Integer, Integer> e : cookieCart.entrySet()) {
+                Product p = pd.getProductById(e.getKey());
+                if (p == null) continue;
+                guestCartItems.add(new CartItems(0, 0, p.getProductId(), e.getValue(), p.getDiscountedPrice()));
+            }
+            session.setAttribute("cartItems", guestCartItems);
             
             // Nếu là "Mua ngay", chuyển hướng đến giỏ hàng
             if ("true".equals(buyNow)) {
