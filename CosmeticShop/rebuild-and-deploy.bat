@@ -31,8 +31,13 @@ if /i "!deploy!"=="y" (
     echo === Step 2: Deploying to Tomcat ===
     echo.
     
-    set /p tomcatPath="Enter Tomcat path: "
-    
+    if not defined tomcatPath (
+        set "tomcatPath=C:\Edu\Tools\apache-tomcat-11.0.13"
+        echo Using default Tomcat path: !tomcatPath!
+    ) else (
+        echo Using predefined tomcatPath: !tomcatPath!
+    )
+
     if not exist "!tomcatPath!" (
         echo Tomcat path not found: !tomcatPath!
         pause

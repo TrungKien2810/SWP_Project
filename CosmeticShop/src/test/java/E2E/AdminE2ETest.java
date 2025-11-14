@@ -13,8 +13,6 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.time.Duration;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 /**
  * End-to-End tests cho chức năng Admin.
  * 
@@ -125,11 +123,15 @@ class AdminE2ETest {
         driver.get(BASE_URL + "/login");
         
         WebElement emailInput = wait.until(
-            ExpectedConditions.presenceOfElementLocated(By.name("email"))
+            ExpectedConditions.presenceOfElementLocated(By.id("email"))
         );
+        emailInput.clear();
         emailInput.sendKeys(adminUser.getEmail());
         
-        WebElement passwordInput = driver.findElement(By.name("password"));
+        WebElement passwordInput = wait.until(
+            ExpectedConditions.presenceOfElementLocated(By.id("password"))
+        );
+        passwordInput.clear();
         passwordInput.sendKeys(adminUser.getPassword());
         
         WebElement submitButton = wait.until(

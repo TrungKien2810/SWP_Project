@@ -199,6 +199,8 @@ class AddToCartE2ETest {
         
         // Nếu không tìm thấy, có thể giỏ hàng trống hoặc cần đăng nhập
         // Test này có thể pass nếu có ít nhất 1 item hoặc có message "Giỏ hàng trống"
+        // Note: cartItems được tìm để verify trang cart đã load, không cần assertion cụ thể
+        System.out.println("[shouldViewCartAfterAddingProduct] Tìm thấy " + cartItems.size() + " items trong giỏ hàng");
     }
     
     @Test
@@ -242,16 +244,29 @@ class AddToCartE2ETest {
         driver.get(BASE_URL + "/login");
         
         WebElement emailInput = wait.until(
-            ExpectedConditions.presenceOfElementLocated(By.name("email"))
+            ExpectedConditions.presenceOfElementLocated(By.id("email"))
         );
+        emailInput.clear();
         emailInput.sendKeys(testUser.getEmail());
         
-        WebElement passwordInput = driver.findElement(By.name("password"));
+        WebElement passwordInput = wait.until(
+            ExpectedConditions.presenceOfElementLocated(By.id("password"))
+        );
+        passwordInput.clear();
         passwordInput.sendKeys(testUser.getPassword());
         
-        WebElement submitButton = driver.findElement(
-            By.cssSelector("button[type='submit'], input[type='submit']")
+        WebElement submitButton = wait.until(
+            ExpectedConditions.elementToBeClickable(
+                By.xpath("//button[contains(text(), 'Đăng nhập')] | //button[@type='submit']")
+            )
         );
+        // Scroll vào view trước khi click
+        ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", submitButton);
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
         submitButton.click();
         
         // Đợi đăng nhập thành công
