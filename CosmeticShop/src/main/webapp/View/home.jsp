@@ -17,8 +17,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/collection.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css?v=2.1">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/collection.css?v=2.1">
         <title>Pinky Cloud - Trang Chủ</title>
     </head>
     <body 
@@ -28,6 +28,7 @@
         <c:remove var="cartSuccessMsg" scope="session" />
         <c:remove var="cartErrorMsg" scope="session" />
         <%@ include file="/View/includes/header.jspf" %>
+        <%@ include file="/View/includes/mobile-search.jspf" %>
 
         <%
             // Load banners
@@ -99,7 +100,7 @@
             <div class="carousel-inner">
                 <c:if test="${empty bannerList}">
                     <div class="carousel-item active">
-                        <img src="${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png"
+                        <img src="${pageContext.request.contextPath}/IMG/logo.png"
                              class="d-block w-100"
                              alt="Banner"
                              style="max-height: 550px; object-fit: contain;">
@@ -342,10 +343,10 @@
                                                     <img src="${pageContext.request.contextPath}${product.imageUrl}"
                                                          alt="${fn:escapeXml(product.name)}"
                                                          loading="lazy"
-                                                         onerror="this.src='${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png'">
+                                                         onerror="this.src='${pageContext.request.contextPath}/IMG/logo.png'">
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <img src="${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png"
+                                                    <img src="${pageContext.request.contextPath}/IMG/logo.png"
                                                          alt="${fn:escapeXml(product.name)}"
                                                          loading="lazy">
                                                 </c:otherwise>
@@ -456,10 +457,10 @@
                                                 <img src="${pageContext.request.contextPath}${product.imageUrl}"
                                                      alt="${fn:escapeXml(product.name)}"
                                                      loading="lazy"
-                                                     onerror="this.src='${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png'">
+                                                     onerror="this.src='${pageContext.request.contextPath}/IMG/logo.png'">
                                             </c:when>
                                             <c:otherwise>
-                                                <img src="${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png"
+                                                <img src="${pageContext.request.contextPath}/IMG/logo.png"
                                                      alt="${fn:escapeXml(product.name)}"
                                                      loading="lazy">
                                             </c:otherwise>
@@ -566,10 +567,10 @@
                                                     <img src="${pageContext.request.contextPath}${product.imageUrl}"
                                                          alt="${fn:escapeXml(product.name)}"
                                                          loading="lazy"
-                                                         onerror="this.src='${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png'">
+                                                         onerror="this.src='${pageContext.request.contextPath}/IMG/logo.png'">
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <img src="${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png"
+                                                    <img src="${pageContext.request.contextPath}/IMG/logo.png"
                                                          alt="${fn:escapeXml(product.name)}"
                                                          loading="lazy">
                                                 </c:otherwise>

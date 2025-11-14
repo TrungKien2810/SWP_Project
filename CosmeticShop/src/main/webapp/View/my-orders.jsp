@@ -9,6 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/my-orders.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <title>Lịch sử mua hàng</title>
@@ -62,6 +63,7 @@
 </head>
 <body>
     <%@ include file="includes/header.jspf" %>
+    <%@ include file="includes/mobile-search.jspf" %>
     <div class="container my-4" style="max-width: 1000px;">
         <h3 class="mb-3" style="color:#f76c85">Lịch sử mua hàng</h3>
         <c:choose>
@@ -137,10 +139,22 @@
                                     <td><span class="status-badge status-${r.orderStatus}">${r.orderStatus}</span></td>
                                     <td><span class="status-badge pay-${r.paymentStatus}">${r.paymentStatus}</span></td>
                                     <td>
-                                        <a href="${pageContext.request.contextPath}/order-detail?orderId=${r.orderId}" 
-                                           class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-eye"></i> Chi tiết
-                                        </a>
+                                        <div class="d-flex gap-2">
+                                            <a href="${pageContext.request.contextPath}/order-detail?orderId=${r.orderId}" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i> Chi tiết
+                                            </a>
+                                            <c:if test="${r.orderStatus == 'PENDING' || r.orderStatus == 'CONFIRMED'}">
+                                                <form method="post" action="${pageContext.request.contextPath}/cancel-order" 
+                                                      onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng #${r.orderId}?');" 
+                                                      style="display: inline;">
+                                                    <input type="hidden" name="orderId" value="${r.orderId}">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                        <i class="fas fa-times"></i> Hủy
+                                                    </button>
+                                                </form>
+                                            </c:if>
+                                        </div>
                                     </td>
                                 </tr>
                             </c:forEach>

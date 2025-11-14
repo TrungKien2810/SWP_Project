@@ -1,4 +1,27 @@
-// Lightweight debounce
+<%@ page pageEncoding="UTF-8" %>
+<!-- Mobile Search Bar - Chỉ hiển thị trên mobile -->
+<div class="mobile-search-container">
+    <div class="mobile-search-wrapper">
+        <form action="${pageContext.request.contextPath}/search" method="get" class="mobile-search-form">
+            <div class="mobile-search-input-group">
+                <input type="text" 
+                       name="q" 
+                       id="mobilePageSearchInput" 
+                       placeholder="Tìm kiếm sản phẩm..." 
+                       autocomplete="off"
+                       class="mobile-search-input">
+                <button type="submit" class="mobile-search-button">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+            </div>
+            <!-- Search suggestions dropdown -->
+            <div id="mobilePageSearchSuggestions" class="mobile-search-suggestions" style="display:none;"></div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Debounce function
 function debounce(fn, delay) {
     let t;
     return function () {
@@ -9,29 +32,25 @@ function debounce(fn, delay) {
     };
 }
 
-(function () {
-    const input = document.getElementById('globalSearchInput');
-    const dropdown = document.getElementById('searchSuggestions');
-    const searchBtn = document.getElementById('globalSearchBtn');
-    if (!input || !dropdown) return;
-
+// Initialize mobile search suggestions
+(function() {
+    const mobileSearchInput = document.getElementById('mobilePageSearchInput');
+    const mobileSearchSuggestions = document.getElementById('mobilePageSearchSuggestions');
+    if (!mobileSearchInput || !mobileSearchSuggestions) return;
+    
     function getContextPath() {
         if (window.APP_CTX) return window.APP_CTX;
-        var el = document.querySelector('body');
-        if (el && el.getAttribute('data-context-path')) {
-            return el.getAttribute('data-context-path');
-        }
         var path = window.location.pathname;
         var index = path.indexOf('/', 1);
         return index > 0 ? path.substring(0, index) : '';
     }
     const contextPath = getContextPath();
-
+    
     function hide() {
-        dropdown.style.display = 'none';
-        dropdown.innerHTML = '';
+        mobileSearchSuggestions.style.display = 'none';
+        mobileSearchSuggestions.innerHTML = '';
     }
-
+    
     function render(items) {
         if (!items || items.length === 0) {
             hide();
@@ -56,10 +75,10 @@ function debounce(fn, delay) {
                 '  </div>' +
                 '</a>';
         }).join('');
-        dropdown.innerHTML = html;
-        dropdown.style.display = 'block';
+        mobileSearchSuggestions.innerHTML = html;
+        mobileSearchSuggestions.style.display = 'block';
     }
-
+    
     var fetchSuggest = debounce(function (value) {
         if (!value || value.trim().length === 0) {
             hide();
@@ -75,38 +94,19 @@ function debounce(fn, delay) {
                 hide();
             });
     }, 180);
-
-    input.addEventListener('input', function (e) {
+    
+    mobileSearchInput.addEventListener('input', function (e) {
         fetchSuggest(e.target.value);
     });
-    input.addEventListener('focus', function (e) {
-        if (dropdown.innerHTML && dropdown.innerHTML.length > 0) {
-            dropdown.style.display = 'block';
+    mobileSearchInput.addEventListener('focus', function (e) {
+        if (mobileSearchSuggestions.innerHTML && mobileSearchSuggestions.innerHTML.length > 0) {
+            mobileSearchSuggestions.style.display = 'block';
         }
     });
-    input.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            var val = input.value ? input.value.trim() : '';
-            if (val.length > 0) {
-                window.location.href = contextPath + '/products?search=' + encodeURIComponent(val);
-            }
-        }
-    });
-    if (searchBtn) {
-        searchBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            var val = input.value ? input.value.trim() : '';
-            if (val.length > 0) {
-                window.location.href = contextPath + '/products?search=' + encodeURIComponent(val);
-            }
-        });
-    }
     document.addEventListener('click', function (e) {
-        if (!dropdown.contains(e.target) && e.target !== input) {
+        if (!mobileSearchSuggestions.contains(e.target) && e.target !== mobileSearchInput) {
             hide();
         }
     });
 })();
-
-
+</script>

@@ -63,7 +63,7 @@
                       <input class="form-check-input me-2" type="checkbox" name="productIds" value="${p.productId}" />
                       <img src="${pageContext.request.contextPath}${p.imageUrl}" alt="${p.name}"
                            style="width:48px;height:48px;object-fit:cover;border-radius:8px;"
-                           onerror="this.src='${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png'">
+                           onerror="this.src='${pageContext.request.contextPath}/IMG/logo.png'">
                       <span class="flex-grow-1" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${p.name}">
                         ${p.productId} - ${p.name}
                       </span>
@@ -100,7 +100,7 @@
                       <input class="form-check-input me-2" type="checkbox" name="productIds" value="${p.productId}" />
                       <img src="${pageContext.request.contextPath}${p.imageUrl}" alt="${p.name}"
                            style="width:40px;height:40px;object-fit:cover;border-radius:8px;"
-                           onerror="this.src='${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png'">
+                           onerror="this.src='${pageContext.request.contextPath}/IMG/logo.png'">
                       <span class="flex-grow-1" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${p.name}">
                         ${p.productId} - ${p.name}
                       </span>
@@ -126,7 +126,7 @@
                       <input class="form-check-input me-2" type="checkbox" name="productIds" value="${p.productId}" />
                       <img src="${pageContext.request.contextPath}${p.imageUrl}" alt="${p.name}"
                            style="width:40px;height:40px;object-fit:cover;border-radius:8px;"
-                           onerror="this.src='${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png'">
+                           onerror="this.src='${pageContext.request.contextPath}/IMG/logo.png'">
                       <span class="flex-grow-1" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${p.name}">
                         ${p.productId} - ${p.name}
                       </span>

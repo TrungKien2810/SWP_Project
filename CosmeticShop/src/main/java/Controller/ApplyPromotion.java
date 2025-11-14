@@ -51,14 +51,16 @@ public class ApplyPromotion extends HttpServlet {
             
             String msg = "Đã xóa mã giảm giá: " + (removedCode != null ? removedCode : "");
             String encodedMsg = URLEncoder.encode(msg, StandardCharsets.UTF_8);
-            response.sendRedirect(request.getContextPath() + "/View/cart.jsp?msg=" + encodedMsg);
+            // Redirect về controller cart để load lại assignedDiscounts
+            response.sendRedirect(request.getContextPath() + "/cart?msg=" + encodedMsg);
             return;
         }
 
         if (cartId == null) {
             String error = "Không tìm thấy giỏ hàng.";
             String encodedError = URLEncoder.encode(error, StandardCharsets.UTF_8);
-            response.sendRedirect(request.getContextPath() + "/View/cart.jsp?error=" + encodedError);
+            // Redirect về controller cart để load lại assignedDiscounts
+            response.sendRedirect(request.getContextPath() + "/cart?error=" + encodedError);
             return;
         }
 
@@ -67,7 +69,8 @@ public class ApplyPromotion extends HttpServlet {
         if (currentUser == null) {
             String error = "Vui lòng đăng nhập để sử dụng mã giảm giá.";
             String encodedError = URLEncoder.encode(error, StandardCharsets.UTF_8);
-            response.sendRedirect(request.getContextPath() + "/View/cart.jsp?error=" + encodedError);
+            // Redirect về controller cart để load lại assignedDiscounts
+            response.sendRedirect(request.getContextPath() + "/cart?error=" + encodedError);
             return;
         }
 
@@ -77,10 +80,13 @@ public class ApplyPromotion extends HttpServlet {
             session.removeAttribute("appliedDiscountAmount");
             String error = result.getMessage();
             String encodedError = URLEncoder.encode(error, StandardCharsets.UTF_8);
-            response.sendRedirect(request.getContextPath() + "/View/cart.jsp?error=" + encodedError);
+            // Redirect về controller cart để load lại assignedDiscounts
+            response.sendRedirect(request.getContextPath() + "/cart?error=" + encodedError);
             return;
         }
 
+        // Service đã kiểm tra tất cả: validate mã, quyền user, min order, và tính discount amount
+        // Chỉ cần set vào session khi success
         session.setAttribute("appliedDiscountCode", result.getDiscountCode());
         session.setAttribute("appliedDiscountAmount", result.getDiscountAmount());
         // Xóa lastRemovedDiscountCode khi áp dụng mã mới
@@ -88,6 +94,7 @@ public class ApplyPromotion extends HttpServlet {
         // KHÔNG trừ lượt dùng khi mới áp dụng trong giỏ hàng. Chỉ trừ khi đơn hàng hoàn tất.
         String msg = result.getMessage();
         String encodedMsg = URLEncoder.encode(msg, StandardCharsets.UTF_8);
-        response.sendRedirect(request.getContextPath() + "/View/cart.jsp?msg=" + encodedMsg);
+        // Redirect về controller cart để load lại assignedDiscounts
+        response.sendRedirect(request.getContextPath() + "/cart?msg=" + encodedMsg);
     }
 }

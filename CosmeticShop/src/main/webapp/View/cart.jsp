@@ -11,9 +11,9 @@
     <meta charset="UTF-8">
     <title>Giỏ hàng của bạn - PinkyCloud</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/cart.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/toast-notification.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/cart.css?v=2.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
           crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
@@ -24,6 +24,7 @@
 <c:remove var="cartSuccessMsg" scope="session" />
 <c:remove var="cartErrorMsg" scope="session" />
 <%@ include file="/View/includes/header.jspf" %>
+<%@ include file="/View/includes/mobile-search.jspf" %>
 
 <%
     List<CartItems> cartItems = new ArrayList<CartItems>();
@@ -151,7 +152,7 @@
 
                     <div class="d-flex justify-content-between mb-2">
                         <span>Giảm giá:</span>
-                        <span id="discountDisplay">
+                        <span id="discountDisplay" data-discount-amount="<%= appliedDiscount != null ? appliedDiscount : 0.0 %>">
                             <c:choose>
                                 <c:when test="${not empty sessionScope.appliedDiscountAmount}">
                                     -<fmt:formatNumber value="${sessionScope.appliedDiscountAmount}" type="number" maxFractionDigits="0" /> ₫
@@ -175,6 +176,16 @@
 </div>
 
 <script>
+    // Khởi tạo giá trị discount từ server khi trang load
+    let serverDiscount = 0;
+    (function() {
+        const discountEl = document.getElementById('discountDisplay');
+        if (discountEl) {
+            const discountAmount = parseFloat(discountEl.getAttribute('data-discount-amount') || '0');
+            serverDiscount = isNaN(discountAmount) ? 0 : discountAmount;
+        }
+    })();
+    
     function updateCartUI() {
         const cartItems = document.querySelectorAll('.cart-item');
         const cartContentDiv = document.getElementById('cartContent');
@@ -189,11 +200,13 @@
     }
 
     function getServerDiscount() {
-        const el = document.getElementById('discountDisplay');
-        if (!el) return 0;
-        const raw = (el.textContent || '0').toString();
-        const num = Number(raw.replace(/[^0-9.\-]/g, ''));
-        return isNaN(num) ? 0 : num;
+        // Trả về giá trị discount đã được lưu từ server
+        return serverDiscount || 0;
+    }
+    
+    // Hàm để cập nhật giá trị discount khi có thay đổi từ server (sau khi áp dụng/xóa mã)
+    function updateServerDiscount(newDiscount) {
+        serverDiscount = newDiscount || 0;
     }
 
     function hasSelectedItems() {
@@ -303,7 +316,17 @@
         });
     });
 
-    // Khởi tạo tính tổng ban đầu
+    // Khởi tạo tính tổng ban đầu (đảm bảo discount đã được load)
+    // Đảm bảo serverDiscount được khởi tạo trước khi tính tổng
+    if (typeof serverDiscount === 'undefined') {
+        const discountEl = document.getElementById('discountDisplay');
+        if (discountEl) {
+            const discountAmount = parseFloat(discountEl.getAttribute('data-discount-amount') || '0');
+            serverDiscount = isNaN(discountAmount) ? 0 : discountAmount;
+        } else {
+            serverDiscount = 0;
+        }
+    }
     updateTotal();
     toggleCheckoutButton();
 
@@ -420,6 +443,42 @@
             }
         }
     });
+    
+    // Mobile cart summary expand/collapse
+    if (window.innerWidth <= 768) {
+        document.addEventListener('DOMContentLoaded', function() {
+            const cartSummary = document.querySelector('.cart-summary');
+            if (cartSummary) {
+                // Start collapsed
+                cartSummary.classList.add('collapsed');
+                
+                // Click on summary header or before element to toggle
+                const toggleSummary = function(e) {
+                    // Don't toggle if clicking on interactive elements
+                    if (e.target.tagName === 'BUTTON' || 
+                        e.target.tagName === 'INPUT' || 
+                        e.target.tagName === 'SELECT' ||
+                        e.target.tagName === 'A' ||
+                        e.target.closest('button') ||
+                        e.target.closest('input') ||
+                        e.target.closest('select') ||
+                        e.target.closest('a') ||
+                        e.target.closest('#checkoutBtn')) {
+                        return;
+                    }
+                    
+                    // Toggle collapsed class
+                    cartSummary.classList.toggle('collapsed');
+                };
+                
+                // Click on summary to expand/collapse
+                cartSummary.addEventListener('click', toggleSummary);
+                
+                // Click on ::before element (drag handle)
+                cartSummary.style.cursor = 'pointer';
+            }
+        });
+    }
 </script>
 </body>
 </html>
