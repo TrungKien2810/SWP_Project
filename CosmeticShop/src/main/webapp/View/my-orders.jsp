@@ -106,7 +106,11 @@
             </c:otherwise>
         </c:choose>
     </div>
+    <%@ include file="includes/footer.jspf" %>
     <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
+    <script src="${pageContext.request.contextPath}/Js/home.js"></script>
+    <script src="${pageContext.request.contextPath}/Js/search-suggest.js"></script>
+    <script src="${pageContext.request.contextPath}/Js/notification.js"></script>
 </body>
 </html>
 

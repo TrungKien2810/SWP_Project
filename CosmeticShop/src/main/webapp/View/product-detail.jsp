@@ -112,36 +112,52 @@
                         </p>
                     </div>
                     
-                    <!-- Nút thêm vào giỏ hàng + số lượng -->
-                    <div class="action-buttons mb-4">
-                        <form action="${pageContext.request.contextPath}/addToCart" method="get" class="d-flex align-items-center gap-2">
-                            <input type="hidden" name="id" value="<%=p.getProductId()%>"/>
-                            <div class="qty-control" role="group" aria-label="Số lượng">
-                                <button type="button" id="qtyMinus" class="qty-btn" aria-label="Giảm" onclick="changeQty(-1)" <%= p.getStock() <= 0 ? "disabled" : "" %>>
-                                    <span aria-hidden="true">−</span>
-                                </button>
-                                <input type="text" class="qty-input" name="quantity" id="qtyInput"
-                                       value="1" inputmode="numeric" pattern="[0-9]*"
-                                       aria-live="assertive" aria-valuenow="1" aria-valuemin="1" aria-valuemax="<%=p.getStock()%>" role="spinbutton"
-                                       data-min="1" data-max="<%=p.getStock()%>" <%= p.getStock() <= 0 ? "disabled" : "" %> />
-                                <button type="button" id="qtyPlus" class="qty-btn" aria-label="Tăng" onclick="changeQty(1)" <%= p.getStock() <= 0 ? "disabled" : "" %>>
-                                    <span aria-hidden="true">+</span>
-                                </button>
-                            </div>
-                            <button type="submit" class="btn btn-primary add-to-cart" <%= p.getStock() <= 0 ? "disabled" : "" %>>
-                                <i class="fas fa-shopping-cart me-2"></i>
-                                Thêm vào giỏ hàng
+                    <!-- Số lượng sản phẩm -->
+                    <div class="qty-section mb-3">
+                        <label class="qty-label">Số lượng:</label>
+                        <div class="qty-control" role="group" aria-label="Số lượng">
+                            <button type="button" id="qtyMinus" class="qty-btn" aria-label="Giảm" onclick="changeQty(-1)" <%= p.getStock() <= 0 ? "disabled" : "" %>>
+                                <span aria-hidden="true">−</span>
                             </button>
-                            <c:if test="${not empty sessionScope.user}">
-                                <button type="button" id="wishlistBtn" class="btn ${inWishlist ? 'btn-danger' : 'btn-outline-danger'}" onclick="toggleWishlist(<%=p.getProductId()%>, event); return false;" title="${inWishlist ? 'Xóa khỏi wishlist' : 'Thêm vào wishlist'}">
-                                    <i class="${inWishlist ? 'fas' : 'far'} fa-heart" id="wishlistIcon"></i>
-                                </button>
-                            </c:if>
-                        </form>
+                            <input type="text" class="qty-input" id="qtyInput"
+                                   value="1" inputmode="numeric" pattern="[0-9]*"
+                                   aria-live="assertive" aria-valuenow="1" aria-valuemin="1" aria-valuemax="<%=p.getStock()%>" role="spinbutton"
+                                   data-min="1" data-max="<%=p.getStock()%>" <%= p.getStock() <= 0 ? "disabled" : "" %> />
+                            <button type="button" id="qtyPlus" class="qty-btn" aria-label="Tăng" onclick="changeQty(1)" <%= p.getStock() <= 0 ? "disabled" : "" %>>
+                                <span aria-hidden="true">+</span>
+                            </button>
+                        </div>
                         <small class="qty-hint <%= p.getStock() <= 5 ? "low" : "ok" %>">
                             <i class="fas fa-info-circle"></i>
-                            <%= p.getStock() > 0 ? ("Chọn số lượng (tối đa " + p.getStock() + ")") : "Hết hàng" %>
+                            <%= p.getStock() > 0 ? ("Còn " + p.getStock() + " sản phẩm") : "Hết hàng" %>
                         </small>
+                    </div>
+                    
+                    <!-- Nút hành động -->
+                    <div class="action-buttons mb-4">
+                        <a href="${pageContext.request.contextPath}/addToCart?id=<%=p.getProductId()%>&quantity=1&buyNow=true" 
+                           class="btn btn-buy-now <%= p.getStock() <= 0 ? "disabled" : "" %>"
+                           onclick="this.href = this.href.replace('quantity=1', 'quantity=' + document.getElementById('qtyInput').value); return <%= p.getStock() > 0 ? "true" : "false" %>;">
+                            <i class="fas fa-shopping-bag"></i>
+                            Mua ngay
+                        </a>
+                        <form action="${pageContext.request.contextPath}/addToCart" method="get" style="display: inline;">
+                            <input type="hidden" name="id" value="<%=p.getProductId()%>"/>
+                            <input type="hidden" name="quantity" id="hiddenQuantity" value="1"/>
+                            <button type="submit" class="btn btn-add-cart" <%= p.getStock() <= 0 ? "disabled" : "" %>
+                                    onclick="document.getElementById('hiddenQuantity').value = document.getElementById('qtyInput').value;">
+                                <i class="fas fa-cart-plus"></i>
+                                Thêm vào giỏ hàng
+                            </button>
+                        </form>
+                        <c:if test="${not empty sessionScope.user}">
+                            <button type="button" id="wishlistBtn" class="btn btn-wishlist ${inWishlist ? 'active' : ''}" 
+                                    onclick="toggleWishlist(<%=p.getProductId()%>, event); return false;" 
+                                    title="${inWishlist ? 'Xóa khỏi wishlist' : 'Thêm vào wishlist'}">
+                                <i class="${inWishlist ? 'fas' : 'far'} fa-heart" id="wishlistIcon"></i>
+                                <span class="wishlist-text">${inWishlist ? 'Đã yêu thích' : 'Yêu thích'}</span>
+                            </button>
+                        </c:if>
                     </div>
                 </div>
             </div>

@@ -11,7 +11,7 @@ import java.util.List;
 public class lienheDAO {
 
     public boolean insertContact(lienhe contact) {
-        String sql = "INSERT INTO lienhe (name, phone, address, email, subject, message) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Contacts (name, phone, address, email, subject, message) VALUES (?, ?, ?, ?, ?, ?)";
         Connection conn = null;
         PreparedStatement ps = null;
 
@@ -44,7 +44,12 @@ public class lienheDAO {
             }
 
         } catch (SQLException e) {
-            System.out.println("❌ Lỗi SQL khi thêm liên hệ: " + e.getMessage());
+            String errorMsg = e.getMessage();
+            if (errorMsg != null && errorMsg.contains("FOREIGN KEY")) {
+                System.out.println("❌ Lỗi SQL: Email không tồn tại trong hệ thống. Vui lòng đăng ký tài khoản trước hoặc sử dụng email đã đăng ký.");
+            } else {
+                System.out.println("❌ Lỗi SQL khi thêm liên hệ: " + errorMsg);
+            }
             e.printStackTrace();
             return false;
 
@@ -65,7 +70,7 @@ public class lienheDAO {
 
     public List<lienhe> getAllContacts() {
         List<lienhe> list = new ArrayList<>();
-        String sql = "SELECT id, name, phone, address, email, subject, message, status FROM lienhe ORDER BY id DESC";
+        String sql = "SELECT id, name, phone, address, email, subject, message, created_at, status FROM Contacts ORDER BY id DESC";
         try {
             DBConnect db = new DBConnect();
             Connection conn = db.conn;
@@ -81,6 +86,7 @@ public class lienheDAO {
                         rs.getString("email"),
                         rs.getString("subject"),
                         rs.getString("message"),
+                        rs.getTimestamp("created_at"),
                         rs.getBoolean("status"));
                 list.add(c);
             }
@@ -92,7 +98,7 @@ public class lienheDAO {
     }
 
     public boolean updateStatus(int id, boolean status) {
-        String sql = "UPDATE lienhe SET status = ? WHERE id = ?";
+        String sql = "UPDATE Contacts SET status = ? WHERE id = ?";
         try {
             DBConnect db = new DBConnect();
             Connection conn = db.conn;

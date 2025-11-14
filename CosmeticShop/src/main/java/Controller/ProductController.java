@@ -96,15 +96,15 @@ public class ProductController extends HttpServlet {
         String pageStr = request.getParameter("page");
         String pageSizeStr = request.getParameter("pageSize");
         int page = 1;
-        int pageSize = 12;
+        int pageSize = 20;
         if (pageStr != null && !pageStr.isEmpty()) {
             try { page = Integer.parseInt(pageStr); if (page < 1) page = 1; } catch (NumberFormatException ignored) {}
         }
         if (pageSizeStr != null && !pageSizeStr.isEmpty()) {
             try {
                 pageSize = Integer.parseInt(pageSizeStr);
-                if (pageSize < 1) pageSize = 12;
-                if (pageSize > 50) pageSize = 50;
+                if (pageSize < 1) pageSize = 20;
+                if (pageSize > 100) pageSize = 100;
             } catch (NumberFormatException ignored) {}
         }
         

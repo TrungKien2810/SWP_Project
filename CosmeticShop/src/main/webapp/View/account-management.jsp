@@ -13,64 +13,76 @@
     <title>PinkyCloud - Account Management</title>
     <style>
         .account-container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 20px;
         }
         .account-card {
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(247, 108, 133, 0.1);
+            padding: 25px;
             margin-bottom: 20px;
         }
         .account-header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
         .account-header h2 {
             color: #f76c85;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        .account-header p {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
         }
         .account-info {
             display: flex;
             align-items: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: #f8f9fa;
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #fff5f7 0%, #ffffff 100%);
             border-radius: 10px;
+            border: 2px solid #fbd0da;
         }
         .account-avatar {
-            width: 80px;
-            height: 80px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             background: #f76c85;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 2rem;
-            margin-right: 20px;
+            font-size: 1.5rem;
+            margin-right: 15px;
+            flex-shrink: 0;
         }
         .account-details h4 {
             color: #333;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
+            font-size: 1.1rem;
         }
         .account-details p {
             color: #666;
             margin: 0;
+            font-size: 0.85rem;
+            line-height: 1.4;
         }
         .account-actions {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
         }
         .action-card {
             background: white;
-            border: 2px solid #e9ecef;
+            border: 2px solid #fbd0da;
             border-radius: 10px;
-            padding: 20px;
+            padding: 15px 10px;
             text-align: center;
             transition: all 0.3s ease;
             cursor: pointer;
@@ -79,21 +91,18 @@
             border-color: #f76c85;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(247, 108, 133, 0.2);
+            background: #fff5f7;
         }
         .action-icon {
-            font-size: 2.5rem;
+            font-size: 2rem;
             color: #f76c85;
-            margin-bottom: 15px;
+            margin-bottom: 8px;
         }
         .action-title {
-            font-size: 1.2rem;
+            font-size: 0.95rem;
             font-weight: 600;
             color: #333;
-            margin-bottom: 10px;
-        }
-        .action-description {
-            color: #666;
-            font-size: 0.9rem;
+            margin-bottom: 0;
         }
         /* Theme alignment */
         .btn-primary {
@@ -152,8 +161,7 @@
                     <div class="action-icon">
                         <i class="fas fa-user-pen"></i>
                     </div>
-                    <div class="action-title">Chỉnh sửa tài khoản</div>
-                    <div class="action-description">Đổi tên hiển thị và ảnh đại diện</div>
+                    <div class="action-title">Chỉnh sửa</div>
                 </div>
 
                 <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/change-password'">
@@ -161,7 +169,27 @@
                         <i class="fas fa-key"></i>
                     </div>
                     <div class="action-title">Đổi mật khẩu</div>
-                    <div class="action-description">Thay đổi mật khẩu tài khoản của bạn</div>
+                </div>
+
+                <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/shipping-address'">
+                    <div class="action-icon">
+                        <i class="fas fa-location-dot"></i>
+                    </div>
+                    <div class="action-title">Địa chỉ</div>
+                </div>
+
+                <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/wishlist'">
+                    <div class="action-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div class="action-title">Yêu thích</div>
+                </div>
+
+                <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/my-orders'">
+                    <div class="action-icon">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <div class="action-title">Đơn hàng</div>
                 </div>
 
                 <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/cart'">
@@ -169,39 +197,6 @@
                         <i class="fas fa-shopping-cart"></i>
                     </div>
                     <div class="action-title">Giỏ hàng</div>
-                    <div class="action-description">Xem và quản lý giỏ hàng của bạn</div>
-                </div>
-
-                <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/shipping-address'">
-                    <div class="action-icon">
-                        <i class="fas fa-location-dot"></i>
-                    </div>
-                    <div class="action-title">Địa chỉ giao hàng</div>
-                    <div class="action-description">Quản lý địa chỉ nhận hàng của bạn</div>
-                </div>
-
-                <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/View/forgot-password.jsp'">
-                    <div class="action-icon">
-                        <i class="fas fa-lock"></i>
-                    </div>
-                    <div class="action-title">Quên mật khẩu</div>
-                    <div class="action-description">Khôi phục mật khẩu qua email</div>
-                </div>
-
-                <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/wishlist'">
-                    <div class="action-icon">
-                        <i class="fas fa-heart"></i>
-                    </div>
-                    <div class="action-title">Wishlist</div>
-                    <div class="action-description">Xem danh sách sản phẩm yêu thích của bạn</div>
-                </div>
-
-                <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/my-orders'">
-                    <div class="action-icon">
-                        <i class="fas fa-receipt"></i>
-                    </div>
-                    <div class="action-title">Lịch sử mua hàng</div>
-                    <div class="action-description">Xem các đơn hàng và trạng thái thanh toán</div>
                 </div>
 
                 <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/logout'">
@@ -209,7 +204,6 @@
                         <i class="fas fa-sign-out-alt"></i>
                     </div>
                     <div class="action-title">Đăng xuất</div>
-                    <div class="action-description">Thoát khỏi tài khoản hiện tại</div>
                 </div>
             </div>
 
@@ -253,6 +247,8 @@
 
     <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
     <script src="${pageContext.request.contextPath}/Js/home.js"></script>
+    <script src="${pageContext.request.contextPath}/Js/search-suggest.js"></script>
+    <script src="${pageContext.request.contextPath}/Js/notification.js"></script>
     <script>
     function previewAvatar(e){
         const file = e.target.files && e.target.files[0];

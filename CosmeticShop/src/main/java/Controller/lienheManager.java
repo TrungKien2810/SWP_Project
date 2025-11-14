@@ -31,13 +31,8 @@ public class lienheManager extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-     
-      
-      lienheDAO dao = new lienheDAO();
-        List<Model.lienhe> list = dao.getAllContacts();
-
-        request.setAttribute("contactList", list);
-        request.getRequestDispatcher("View/contact-manager.jsp").forward(request, response);
+        // Redirect về admin panel để quản lý contact
+        response.sendRedirect(request.getContextPath() + "/admin?action=contact");
     }
 
 

@@ -300,8 +300,8 @@
                         </h2>
                         <p class="text-muted mb-0">Giá tốt nhất dành cho bạn</p>
                     </div>
-                    <a href="${pageContext.request.contextPath}/products" class="btn btn-outline-success d-none d-md-block">
-                        Khám phá <i class="fas fa-arrow-right ms-1"></i>
+                    <a href="${pageContext.request.contextPath}/promotional-products" class="btn btn-outline-success d-none d-md-block">
+                        Xem tất cả <i class="fas fa-arrow-right ms-1"></i>
                     </a>
                 </div>
                 
@@ -312,79 +312,82 @@
                         </div>
                     </c:when>
                     <c:otherwise>
-                        <div class="product-grid">
-                            <c:forEach var="product" items="${promotionalProducts}">
-                                <div class="product-card"
-                                     onclick="window.location.href='${pageContext.request.contextPath}/product-detail?id=${product.productId}'"
-                                     style="cursor: pointer;">
-                                    <div class="promotional-badge">
-                                        <i class="fas fa-percentage"></i> Giá tốt
-                                    </div>
-                                    <c:if test="${product.discountActive}">
-                                        <div class="discount-flag" style="left: auto; right: 12px; top: 52px;">
+                        <div class="product-carousel-wrapper">
+                            <button type="button" class="product-carousel-btn product-carousel-btn-prev" id="promotionalPrevBtn" aria-label="Previous">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div class="product-carousel-container" id="promotionalCarousel">
+                                <div class="product-carousel-track" id="promotionalTrack">
+                                    <c:forEach var="product" items="${promotionalProducts}">
+                                        <div class="product-card"
+                                             onclick="window.location.href='${pageContext.request.contextPath}/product-detail?id=${product.productId}'"
+                                             style="cursor: pointer;">
+                                            <div class="promotional-badge">
+                                                <i class="fas fa-percentage"></i> Giá tốt
+                                            </div>
+                                            <c:if test="${product.discountActive}">
+                                                <div class="discount-flag" style="left: auto; right: 12px; top: 52px;">
+                                                    <c:choose>
+                                                        <c:when test="${product.activeDiscount.type == 'PERCENTAGE'}">
+                                                            -<fmt:formatNumber value="${product.activeDiscount.value}" maxFractionDigits="0"/>%
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            -<fmt:formatNumber value="${product.activeDiscount.value}" type="number" maxFractionDigits="0" /> ₫
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </div>
+                                            </c:if>
                                             <c:choose>
-                                                <c:when test="${product.activeDiscount.type == 'PERCENTAGE'}">
-                                                    -<fmt:formatNumber value="${product.activeDiscount.value}" maxFractionDigits="0"/>%
+                                                <c:when test="${not empty product.imageUrl}">
+                                                    <img src="${pageContext.request.contextPath}${product.imageUrl}"
+                                                         alt="${fn:escapeXml(product.name)}"
+                                                         loading="lazy"
+                                                         onerror="this.src='${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png'">
                                                 </c:when>
                                                 <c:otherwise>
-                                                    -<fmt:formatNumber value="${product.activeDiscount.value}" type="number" maxFractionDigits="0" /> VNĐ
+                                                    <img src="${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png"
+                                                         alt="${fn:escapeXml(product.name)}"
+                                                         loading="lazy">
                                                 </c:otherwise>
                                             </c:choose>
+                                            <div class="product-card-body">
+                                                <h5>${fn:escapeXml(product.name)}</h5>
+                                                <c:choose>
+                                                    <c:when test="${product.discountActive}">
+                                                        <div class="price-wrapper">
+                                                            <span class="price-old">
+                                                                <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> ₫
+                                                            </span>
+                                                            <span class="price-new">
+                                                                <fmt:formatNumber value="${product.discountedPrice}" type="number" maxFractionDigits="0" /> ₫
+                                                            </span>
+                                                            <c:if test="${product.discountAmount > 0}">
+                                                                <span class="price-save">
+                                                                    Tiết kiệm <fmt:formatNumber value="${product.discountAmount}" type="number" maxFractionDigits="0" /> ₫
+                                                                </span>
+                                                            </c:if>
+                                                        </div>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <p class="price">
+                                                            <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> ₫
+                                                        </p>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </div>
                                         </div>
-                                    </c:if>
-                                    <c:choose>
-                                        <c:when test="${not empty product.imageUrl}">
-                                            <img src="${pageContext.request.contextPath}${product.imageUrl}"
-                                                 alt="${fn:escapeXml(product.name)}"
-                                                 loading="lazy"
-                                                 onerror="this.src='${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png'">
-                                        </c:when>
-                                        <c:otherwise>
-                                            <img src="${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png"
-                                                 alt="${fn:escapeXml(product.name)}"
-                                                 loading="lazy">
-                                        </c:otherwise>
-                                    </c:choose>
-                                    <div class="product-card-body">
-                                        <h5>${fn:escapeXml(product.name)}</h5>
-                                        <c:choose>
-                                            <c:when test="${product.discountActive}">
-                                                <div class="price-wrapper">
-                                                    <span class="price-old">
-                                                        <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> VNĐ
-                                                    </span>
-                                                    <span class="price-new">
-                                                        <fmt:formatNumber value="${product.discountedPrice}" type="number" maxFractionDigits="0" /> VNĐ
-                                                    </span>
-                                                    <c:if test="${product.discountAmount > 0}">
-                                                        <span class="price-save">
-                                                            Tiết kiệm <fmt:formatNumber value="${product.discountAmount}" type="number" maxFractionDigits="0" /> VNĐ
-                                                        </span>
-                                                    </c:if>
-                                                </div>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <p class="price">
-                                                    <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> VNĐ
-                                                </p>
-                                            </c:otherwise>
-                                        </c:choose>
-                                        <div class="action-buttons">
-                                            <a href="${pageContext.request.contextPath}/addToCart?id=${product.productId}&buyNow=true"
-                                               class="btn btn-sm btn-buy-now"
-                                               onclick="event.stopPropagation();">
-                                                <i class="fas fa-shopping-bag"></i> Mua ngay
-                                            </a>
-                                        </div>
-                                    </div>
+                                    </c:forEach>
                                 </div>
-                            </c:forEach>
+                            </div>
+                            <button type="button" class="product-carousel-btn product-carousel-btn-next" id="promotionalNextBtn" aria-label="Next">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
                         </div>
                         
                         <!-- Nút xem tất cả cho mobile -->
                         <div class="text-center mt-4 d-md-none">
-                            <a href="${pageContext.request.contextPath}/products" class="btn btn-success btn-lg">
-                                Xem tất cả sản phẩm <i class="fas fa-arrow-right ms-2"></i>
+                            <a href="${pageContext.request.contextPath}/promotional-products" class="btn btn-success btn-lg">
+                                Xem tất cả sản phẩm khuyến mại <i class="fas fa-arrow-right ms-2"></i>
                             </a>
                         </div>
                     </c:otherwise>
@@ -401,8 +404,8 @@
                     </h2>
                     <p class="text-muted mb-0">Những sản phẩm được yêu thích nhất</p>
                 </div>
-                <a href="${pageContext.request.contextPath}/products" class="btn btn-outline-primary d-none d-md-block">
-                    Khám phá <i class="fas fa-arrow-right ms-1"></i>
+                <a href="${pageContext.request.contextPath}/featured-products" class="btn btn-outline-primary d-none d-md-block">
+                    Xem tất cả <i class="fas fa-arrow-right ms-1"></i>
                 </a>
             </div>
             
@@ -413,76 +416,79 @@
                     </div>
                 </c:when>
                 <c:otherwise>
-                    <div class="product-grid">
-                        <c:forEach var="product" items="${featuredProducts}">
-                            <div class="product-card"
-                                 onclick="window.location.href='${pageContext.request.contextPath}/product-detail?id=${product.productId}'"
-                                 style="cursor: pointer;">
-                                <c:if test="${product.discountActive}">
-                                    <div class="discount-flag">
+                    <div class="product-carousel-wrapper">
+                        <button type="button" class="product-carousel-btn product-carousel-btn-prev" id="featuredPrevBtn" aria-label="Previous">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div class="product-carousel-container" id="featuredCarousel">
+                            <div class="product-carousel-track" id="featuredTrack">
+                                <c:forEach var="product" items="${featuredProducts}">
+                                    <div class="product-card"
+                                         onclick="window.location.href='${pageContext.request.contextPath}/product-detail?id=${product.productId}'"
+                                         style="cursor: pointer;">
+                                        <c:if test="${product.discountActive}">
+                                            <div class="discount-flag">
+                                                <c:choose>
+                                                    <c:when test="${product.activeDiscount.type == 'PERCENTAGE'}">
+                                                        -<fmt:formatNumber value="${product.activeDiscount.value}" maxFractionDigits="0"/>%
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        -<fmt:formatNumber value="${product.activeDiscount.value}" type="number" maxFractionDigits="0"/> ₫
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </div>
+                                        </c:if>
                                         <c:choose>
-                                            <c:when test="${product.activeDiscount.type == 'PERCENTAGE'}">
-                                                -<fmt:formatNumber value="${product.activeDiscount.value}" maxFractionDigits="0"/>%
+                                            <c:when test="${not empty product.imageUrl}">
+                                                <img src="${pageContext.request.contextPath}${product.imageUrl}"
+                                                     alt="${fn:escapeXml(product.name)}"
+                                                     loading="lazy"
+                                                     onerror="this.src='${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png'">
                                             </c:when>
                                             <c:otherwise>
-                                                -<fmt:formatNumber value="${product.activeDiscount.value}" type="number" maxFractionDigits="0"/> VNĐ
+                                                <img src="${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png"
+                                                     alt="${fn:escapeXml(product.name)}"
+                                                     loading="lazy">
                                             </c:otherwise>
                                         </c:choose>
+                                        <div class="product-card-body">
+                                            <h5>${fn:escapeXml(product.name)}</h5>
+                                            <c:choose>
+                                                <c:when test="${product.discountActive}">
+                                                    <div class="price-wrapper">
+                                                        <span class="price-old">
+                                                            <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> ₫
+                                                        </span>
+                                                        <span class="price-new">
+                                                            <fmt:formatNumber value="${product.discountedPrice}" type="number" maxFractionDigits="0" /> ₫
+                                                        </span>
+                                                        <c:if test="${product.discountAmount > 0}">
+                                                            <span class="price-save">
+                                                                Tiết kiệm <fmt:formatNumber value="${product.discountAmount}" type="number" maxFractionDigits="0" /> ₫
+                                                            </span>
+                                                        </c:if>
+                                                    </div>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <p class="price">
+                                                        <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> ₫
+                                                    </p>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </div>
                                     </div>
-                                </c:if>
-                                <c:choose>
-                                    <c:when test="${not empty product.imageUrl}">
-                                        <img src="${pageContext.request.contextPath}${product.imageUrl}"
-                                             alt="${fn:escapeXml(product.name)}"
-                                             loading="lazy"
-                                             onerror="this.src='${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png'">
-                                    </c:when>
-                                    <c:otherwise>
-                                        <img src="${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png"
-                                             alt="${fn:escapeXml(product.name)}"
-                                             loading="lazy">
-                                    </c:otherwise>
-                                </c:choose>
-                                <div class="product-card-body">
-                                    <h5>${fn:escapeXml(product.name)}</h5>
-                                    <c:choose>
-                                        <c:when test="${product.discountActive}">
-                                            <div class="price-wrapper">
-                                                <span class="price-old">
-                                                    <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> VNĐ
-                                                </span>
-                                                <span class="price-new">
-                                                    <fmt:formatNumber value="${product.discountedPrice}" type="number" maxFractionDigits="0" /> VNĐ
-                                                </span>
-                                                <c:if test="${product.discountAmount > 0}">
-                                                    <span class="price-save">
-                                                        Tiết kiệm <fmt:formatNumber value="${product.discountAmount}" type="number" maxFractionDigits="0" /> VNĐ
-                                                    </span>
-                                                </c:if>
-                                            </div>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <p class="price">
-                                                <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> VNĐ
-                                            </p>
-                                        </c:otherwise>
-                                    </c:choose>
-                                    <div class="action-buttons">
-                                        <a href="${pageContext.request.contextPath}/addToCart?id=${product.productId}&buyNow=true"
-                                           class="btn btn-sm btn-buy-now"
-                                           onclick="event.stopPropagation();">
-                                            <i class="fas fa-shopping-bag"></i> Mua ngay
-                                        </a>
-                                    </div>
-                                </div>
+                                </c:forEach>
                             </div>
-                        </c:forEach>
+                        </div>
+                        <button type="button" class="product-carousel-btn product-carousel-btn-next" id="featuredNextBtn" aria-label="Next">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
                     </div>
                     
                     <!-- Nút xem tất cả cho mobile -->
                     <div class="text-center mt-4 d-md-none">
-                        <a href="${pageContext.request.contextPath}/products" class="btn btn-primary btn-lg">
-                            Xem tất cả sản phẩm <i class="fas fa-arrow-right ms-2"></i>
+                        <a href="${pageContext.request.contextPath}/featured-products" class="btn btn-primary btn-lg">
+                            Xem tất cả sản phẩm nổi bật <i class="fas fa-arrow-right ms-2"></i>
                         </a>
                     </div>
                 </c:otherwise>
@@ -499,8 +505,8 @@
                         </h2>
                         <p class="text-muted mb-0">Những sản phẩm được khách hàng yêu thích nhất</p>
                     </div>
-                    <a href="${pageContext.request.contextPath}/products" class="btn btn-outline-danger d-none d-md-block">
-                        Khám phá <i class="fas fa-arrow-right ms-1"></i>
+                    <a href="${pageContext.request.contextPath}/best-selling-products" class="btn btn-outline-danger d-none d-md-block">
+                        Xem tất cả <i class="fas fa-arrow-right ms-1"></i>
                     </a>
                 </div>
             
@@ -511,79 +517,82 @@
                         </div>
                     </c:when>
                     <c:otherwise>
-                        <div class="product-grid">
-                            <c:forEach var="product" items="${bestSellingProducts}">
-                                <div class="product-card"
-                                     onclick="window.location.href='${pageContext.request.contextPath}/product-detail?id=${product.productId}'"
-                                     style="cursor: pointer;">
-                                    <div class="best-selling-badge">
-                                        <i class="fas fa-fire"></i> Bán chạy
-                                    </div>
-                                    <c:if test="${product.discountActive}">
-                                        <div class="discount-flag" style="left: auto; right: 12px; top: 52px;">
+                        <div class="product-carousel-wrapper">
+                            <button type="button" class="product-carousel-btn product-carousel-btn-prev" id="bestSellingPrevBtn" aria-label="Previous">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div class="product-carousel-container" id="bestSellingCarousel">
+                                <div class="product-carousel-track" id="bestSellingTrack">
+                                    <c:forEach var="product" items="${bestSellingProducts}">
+                                        <div class="product-card"
+                                             onclick="window.location.href='${pageContext.request.contextPath}/product-detail?id=${product.productId}'"
+                                             style="cursor: pointer;">
+                                            <div class="best-selling-badge">
+                                                <i class="fas fa-fire"></i> Bán chạy
+                                            </div>
+                                            <c:if test="${product.discountActive}">
+                                                <div class="discount-flag" style="left: auto; right: 12px; top: 52px;">
+                                                    <c:choose>
+                                                        <c:when test="${product.activeDiscount.type == 'PERCENTAGE'}">
+                                                            -<fmt:formatNumber value="${product.activeDiscount.value}" maxFractionDigits="0"/>%
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            -<fmt:formatNumber value="${product.activeDiscount.value}" type="number" maxFractionDigits="0" /> ₫
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </div>
+                                            </c:if>
                                             <c:choose>
-                                                <c:when test="${product.activeDiscount.type == 'PERCENTAGE'}">
-                                                    -<fmt:formatNumber value="${product.activeDiscount.value}" maxFractionDigits="0"/>%
+                                                <c:when test="${not empty product.imageUrl}">
+                                                    <img src="${pageContext.request.contextPath}${product.imageUrl}"
+                                                         alt="${fn:escapeXml(product.name)}"
+                                                         loading="lazy"
+                                                         onerror="this.src='${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png'">
                                                 </c:when>
                                                 <c:otherwise>
-                                                    -<fmt:formatNumber value="${product.activeDiscount.value}" type="number" maxFractionDigits="0" /> VNĐ
+                                                    <img src="${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png"
+                                                         alt="${fn:escapeXml(product.name)}"
+                                                         loading="lazy">
                                                 </c:otherwise>
                                             </c:choose>
+                                            <div class="product-card-body">
+                                                <h5>${fn:escapeXml(product.name)}</h5>
+                                                <c:choose>
+                                                    <c:when test="${product.discountActive}">
+                                                        <div class="price-wrapper">
+                                                            <span class="price-old">
+                                                                <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> ₫
+                                                            </span>
+                                                            <span class="price-new">
+                                                                <fmt:formatNumber value="${product.discountedPrice}" type="number" maxFractionDigits="0" /> ₫
+                                                            </span>
+                                                            <c:if test="${product.discountAmount > 0}">
+                                                                <span class="price-save">
+                                                                    Tiết kiệm <fmt:formatNumber value="${product.discountAmount}" type="number" maxFractionDigits="0" /> ₫
+                                                                </span>
+                                                            </c:if>
+                                                        </div>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <p class="price">
+                                                            <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> ₫
+                                                        </p>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </div>
                                         </div>
-                                    </c:if>
-                                    <c:choose>
-                                        <c:when test="${not empty product.imageUrl}">
-                                            <img src="${pageContext.request.contextPath}${product.imageUrl}"
-                                                 alt="${fn:escapeXml(product.name)}"
-                                                 loading="lazy"
-                                                 onerror="this.src='${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png'">
-                                        </c:when>
-                                        <c:otherwise>
-                                            <img src="${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png"
-                                                 alt="${fn:escapeXml(product.name)}"
-                                                 loading="lazy">
-                                        </c:otherwise>
-                                    </c:choose>
-                                    <div class="product-card-body">
-                                        <h5>${fn:escapeXml(product.name)}</h5>
-                                        <c:choose>
-                                            <c:when test="${product.discountActive}">
-                                                <div class="price-wrapper">
-                                                    <span class="price-old">
-                                                        <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> VNĐ
-                                                    </span>
-                                                    <span class="price-new">
-                                                        <fmt:formatNumber value="${product.discountedPrice}" type="number" maxFractionDigits="0" /> VNĐ
-                                                    </span>
-                                                    <c:if test="${product.discountAmount > 0}">
-                                                        <span class="price-save">
-                                                            Tiết kiệm <fmt:formatNumber value="${product.discountAmount}" type="number" maxFractionDigits="0" /> VNĐ
-                                                        </span>
-                                                    </c:if>
-                                                </div>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <p class="price">
-                                                    <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> VNĐ
-                                                </p>
-                                            </c:otherwise>
-                                        </c:choose>
-                                        <div class="action-buttons">
-                                            <a href="${pageContext.request.contextPath}/addToCart?id=${product.productId}&buyNow=true"
-                                               class="btn btn-sm btn-buy-now"
-                                               onclick="event.stopPropagation();">
-                                                <i class="fas fa-shopping-bag"></i> Mua ngay
-                                            </a>
-                                        </div>
-                                    </div>
+                                    </c:forEach>
                                 </div>
-                            </c:forEach>
+                            </div>
+                            <button type="button" class="product-carousel-btn product-carousel-btn-next" id="bestSellingNextBtn" aria-label="Next">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
                         </div>
                         
                         <!-- Nút xem tất cả cho mobile -->
                         <div class="text-center mt-4 d-md-none">
-                            <a href="${pageContext.request.contextPath}/products" class="btn btn-danger btn-lg">
-                                Xem tất cả sản phẩm <i class="fas fa-arrow-right ms-2"></i>
+                            <a href="${pageContext.request.contextPath}/best-selling-products" class="btn btn-danger btn-lg">
+                                Xem tất cả sản phẩm bán chạy <i class="fas fa-arrow-right ms-2"></i>
                             </a>
                         </div>
                     </c:otherwise>

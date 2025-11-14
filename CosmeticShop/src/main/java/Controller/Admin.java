@@ -312,6 +312,12 @@ public class Admin extends HttpServlet {
                 request.setAttribute("banners", bannerDb().listAll());
                 request.getRequestDispatcher("/admin/manage-banners.jsp").forward(request, response);
                 break;
+            case "contact":
+                DAO.lienheDAO contactDAO = new DAO.lienheDAO();
+                java.util.List<Model.lienhe> contactList = contactDAO.getAllContacts();
+                request.setAttribute("contactList", contactList);
+                request.getRequestDispatcher("/admin/manage-contact.jsp").forward(request, response);
+                break;
             case "reports":
                 // Xử lý bộ lọc
                 String reportStartDateStr = request.getParameter("startDate");

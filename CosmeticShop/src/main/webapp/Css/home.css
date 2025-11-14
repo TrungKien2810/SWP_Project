@@ -520,11 +520,85 @@ body {
   background: white;
 }
 
+/* Product Grid - Dùng cho các trang khác (không phải trang chủ) */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: 20px;
   padding: 15px 0;
+}
+
+/* Product Carousel - Dùng cho trang chủ (chỉ hiển thị 1 hàng) */
+.product-carousel-wrapper {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+.product-carousel-container {
+  overflow: hidden;
+  width: 100%;
+  padding: 0 50px;
+}
+
+.product-carousel-track {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 20px;
+  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  width: fit-content;
+  padding: 15px 0;
+}
+
+.product-carousel-track .product-card {
+  flex: 0 0 auto;
+  width: 200px;
+  min-width: 200px;
+  max-width: 200px;
+}
+
+.product-carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: white;
+  border: 2px solid #f76c85;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+  transition: all 0.3s ease, opacity 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  opacity: 1;
+}
+
+.product-carousel-btn:hover {
+  background: #f76c85;
+  transform: translateY(-50%) scale(1.15);
+  box-shadow: 0 6px 20px rgba(247, 108, 133, 0.4);
+}
+
+.product-carousel-btn i {
+  font-size: 20px;
+  color: #f76c85;
+  transition: color 0.3s;
+}
+
+.product-carousel-btn:hover i {
+  color: white;
+}
+
+.product-carousel-btn-prev {
+  left: -20px;
+}
+
+.product-carousel-btn-next {
+  right: -20px;
 }
 
 .product-card {
@@ -611,7 +685,7 @@ body {
 }
 
 .product-card-body .price {
-  font-size: 1.25rem;
+  font-size: 16px;
   font-weight: 700;
   color: #f76c85;
   margin-bottom: 12px;
@@ -619,22 +693,30 @@ body {
 
 .product-card .price-wrapper {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   margin-bottom: 15px;
   flex-wrap: wrap;
 }
 
 .product-card .price-old {
-  font-size: 0.95rem;
+  font-size: 16px;
   color: #9b9b9b;
   text-decoration: line-through;
+  order: 1;
+  text-align: left;
+  flex: 0 0 auto;
 }
 
 .product-card .price-new {
-  font-size: 1.4rem;
+  font-size: 16px;
   font-weight: 700;
   color: #f76c85;
+  order: 2;
+  text-align: right;
+  flex: 1;
+  min-width: 0;
 }
 
 .product-card .price-save {
@@ -644,31 +726,17 @@ body {
   padding: 4px 10px;
   border-radius: 999px;
   font-weight: 600;
+  width: 100%;
+  text-align: center;
+  order: 3;
 }
 
 .action-buttons {
-  display: flex;
-  gap: 8px;
+  display: none;
 }
 
 .btn-buy-now {
-  flex: 1;
-  background: linear-gradient(135deg, #f76c85 0%, #ff8fa3 100%);
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  transition: all 0.3s;
-  box-shadow: 0 3px 10px rgba(247, 108, 133, 0.25);
-}
-
-.btn-buy-now:hover {
-  background: linear-gradient(135deg, #ff8fa3 0%, #f76c85 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(247, 108, 133, 0.4);
-  color: white;
+  display: none;
 }
 
 /* ========== SẢN PHẨM BÁN CHẠY & KHUYẾN MẠI ========== */
@@ -865,8 +933,14 @@ footer hr {
   }
   
   .product-grid {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 18px;
+  }
+  
+  .product-carousel-track .product-card {
+    width: 180px;
+    min-width: 180px;
+    max-width: 180px;
   }
   
   .category-card-home {
@@ -909,6 +983,30 @@ footer hr {
   .category-carousel-track {
     gap: 20px;
   }
+  
+  .product-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+  }
+  
+  .product-carousel-track .product-card {
+    width: 160px;
+    min-width: 160px;
+    max-width: 160px;
+  }
+  
+  .product-carousel-container {
+    padding: 0 40px;
+  }
+  
+  .product-carousel-btn {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .product-carousel-btn i {
+    font-size: 16px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -934,6 +1032,29 @@ footer hr {
     gap: 12px;
   }
   
+  .product-carousel-track .product-card {
+    width: 150px;
+    min-width: 150px;
+    max-width: 150px;
+  }
+  
+  .product-carousel-container {
+    padding: 0 30px;
+  }
+  
+  .product-carousel-btn {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .product-carousel-btn-prev {
+    left: -10px;
+  }
+  
+  .product-carousel-btn-next {
+    right: -10px;
+  }
+  
   .product-card img {
     height: 180px;
   }
@@ -948,7 +1069,7 @@ footer hr {
   }
   
   .product-card-body .price {
-    font-size: 1.1rem;
+    font-size: 16px;
   }
   
   .section-header h2 {
@@ -998,6 +1119,16 @@ footer hr {
   
   .product-grid {
     gap: 10px;
+  }
+  
+  .product-carousel-track .product-card {
+    width: 140px;
+    min-width: 140px;
+    max-width: 140px;
+  }
+  
+  .product-carousel-container {
+    padding: 0 20px;
   }
   
   .product-card img {
