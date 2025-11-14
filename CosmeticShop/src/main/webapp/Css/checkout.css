@@ -491,3 +491,350 @@ textarea.form-control {
   }
 }
 
+/* ===== ENHANCED MOBILE RESPONSIVE STYLES ===== */
+@media (max-width: 768px) {
+  /* Checkout Page Container */
+  .checkout-page {
+    padding: 15px !important;
+    margin-top: 20px !important;
+  }
+  
+  .checkout-page h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  /* Layout Adjustments */
+  .row {
+    margin: 0;
+  }
+  
+  .col-lg-8,
+  .col-lg-4 {
+    padding: 0;
+    margin-bottom: 20px;
+  }
+  
+  /* Checkout Sections */
+  .checkout-section {
+    padding: 15px;
+    margin-bottom: 15px;
+  }
+  
+  .checkout-section h4 {
+    font-size: 18px;
+    margin-bottom: 15px;
+  }
+  
+  .checkout-section h5 {
+    font-size: 16px;
+  }
+  
+  /* Address Cards */
+  .address-card {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .address-card label {
+    padding: 10px;
+  }
+  
+  .address-card .form-check-input {
+    transform: scale(1.2);
+    margin-top: 0;
+  }
+  
+  .address-card h6 {
+    font-size: 15px;
+    margin-left: 25px;
+  }
+  
+  .address-card p {
+    font-size: 13px;
+    margin-left: 25px;
+    margin-bottom: 5px;
+  }
+  
+  /* New Address Button */
+  .new-address-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 14px;
+    margin-top: 10px;
+  }
+  
+  /* Shipping Method Cards */
+  .shipping-method {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .shipping-method label {
+    padding: 10px;
+  }
+  
+  .shipping-method .form-check-input {
+    transform: scale(1.2);
+    margin-top: 0;
+  }
+  
+  .shipping-method-info {
+    margin-left: 25px;
+  }
+  
+  .shipping-method h6 {
+    font-size: 15px;
+  }
+  
+  .shipping-method .text-muted {
+    font-size: 12px;
+  }
+  
+  .shipping-method .text-primary {
+    font-size: 14px;
+  }
+  
+  /* Payment Methods */
+  .payment-method {
+    padding: 15px;
+  }
+  
+  .payment-method label {
+    font-size: 14px;
+    padding: 8px;
+  }
+  
+  .payment-method .form-check-input {
+    transform: scale(1.2);
+  }
+  
+  /* Order Notes */
+  .form-control[rows="3"] {
+    font-size: 14px;
+    padding: 10px;
+  }
+  
+  /* Order Summary Sidebar */
+  .order-summary {
+    position: relative;
+    top: 0;
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .order-summary h4 {
+    font-size: 18px;
+    margin-bottom: 15px;
+  }
+  
+  /* Order Items List */
+  .list-group-item {
+    padding: 10px;
+    flex-wrap: wrap;
+  }
+  
+  .list-group-item img {
+    width: 60px;
+    height: 60px;
+    margin-right: 10px;
+  }
+  
+  .list-group-item .ms-2 {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .list-group-item h6 {
+    font-size: 13px;
+    margin-bottom: 5px;
+  }
+  
+  .list-group-item small {
+    font-size: 12px;
+  }
+  
+  .list-group-item span {
+    font-size: 14px;
+    width: 100%;
+    text-align: right;
+    margin-top: 5px;
+  }
+  
+  /* Summary Totals */
+  .order-summary .d-flex {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  
+  .order-summary .fw-bold {
+    font-size: 16px;
+  }
+  
+  .order-summary hr {
+    margin: 15px 0;
+  }
+  
+  /* Place Order Button */
+  .btn-place-order {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    margin-top: 15px;
+  }
+  
+  /* Modal Adjustments */
+  .modal-dialog {
+    margin: 10px;
+    max-width: calc(100% - 20px);
+  }
+  
+  .modal-content {
+    padding: 15px;
+  }
+  
+  .modal-header {
+    padding: 10px 15px;
+  }
+  
+  .modal-title {
+    font-size: 18px;
+  }
+  
+  .modal-body {
+    padding: 15px;
+  }
+  
+  /* Form Controls in Modal */
+  .modal-body .form-control,
+  .modal-body .form-select {
+    font-size: 14px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+  }
+  
+  .modal-body label {
+    font-size: 13px;
+    margin-bottom: 5px;
+  }
+  
+  .modal-footer {
+    padding: 10px 15px;
+  }
+  
+  .modal-footer .btn {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+}
+
+/* Small Mobile Devices */
+@media (max-width: 480px) {
+  .checkout-page h2 {
+    font-size: 20px;
+  }
+  
+  .checkout-section {
+    padding: 12px;
+  }
+  
+  .checkout-section h4 {
+    font-size: 16px;
+  }
+  
+  .address-card,
+  .shipping-method {
+    padding: 10px;
+  }
+  
+  .address-card h6,
+  .shipping-method h6 {
+    font-size: 14px;
+  }
+  
+  .address-card p {
+    font-size: 12px;
+  }
+  
+  /* Order Items */
+  .list-group-item {
+    padding: 8px;
+  }
+  
+  .list-group-item img {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .list-group-item h6 {
+    font-size: 12px;
+  }
+  
+  .list-group-item small {
+    font-size: 11px;
+  }
+  
+  /* Summary */
+  .order-summary {
+    padding: 12px;
+  }
+  
+  .order-summary h4 {
+    font-size: 16px;
+  }
+  
+  .order-summary .d-flex {
+    font-size: 13px;
+  }
+  
+  .order-summary .fw-bold {
+    font-size: 15px;
+  }
+  
+  /* Buttons */
+  .btn-place-order {
+    padding: 12px;
+    font-size: 15px;
+  }
+}
+
+/* Touch-friendly adjustments */
+@media (hover: none) and (pointer: coarse) {
+  .form-check-input {
+    min-width: 20px;
+    min-height: 20px;
+  }
+  
+  .address-card,
+  .shipping-method,
+  .payment-method label {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .btn {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Landscape adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+  .checkout-page {
+    padding: 10px;
+  }
+  
+  .order-summary {
+    position: relative;
+    margin-top: 20px;
+  }
+}
+
+/* Prevent layout shift on mobile */
+@media (max-width: 768px) {
+  .sticky-top {
+    position: relative !important;
+    top: 0 !important;
+  }
+}
+

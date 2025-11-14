@@ -3,10 +3,12 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/site-header.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/toast-notification.css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/Css/responsive-common.css">
 <script>
     window.APP_CTX = '${pageContext.request.contextPath}';
 </script>
 <script src="${pageContext.request.contextPath}/Js/toast-notification.js"></script>
+<script src="${pageContext.request.contextPath}/Js/mobile-menu.js"></script>
                     <div class="header">
                         <div class="header_text">
                             <p>THEO DÕI CHÚNG TÔI</p>
@@ -23,9 +25,59 @@
                         </div>
                     </div>
                     <div class="menu">
+                            <!-- Mobile menu button -->
+                            <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </button>
+                            
                             <div class="menu_logo">
-                                <img src="${pageContext.request.contextPath}/IMG/logo.jpg" alt="" style="width: 200px;">
+                                <a href="${pageContext.request.contextPath}/View/home.jsp" style="display: inline-block; text-decoration: none;">
+                                    <img src="${pageContext.request.contextPath}/IMG/logo.jpg" alt="PinkyCloud - Trang chủ" style="width: 200px; cursor: pointer;">
+                                </a>
                             </div>
+                            
+                            <!-- Mobile Navigation Overlay -->
+                            <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+                            
+                            <!-- Mobile Navigation -->
+                            <div class="mobile-nav" id="mobileNav">
+                                <div class="mobile-nav-header">
+                                    <a href="${pageContext.request.contextPath}/View/home.jsp" style="display: inline-block; text-decoration: none;">
+                                        <img src="${pageContext.request.contextPath}/IMG/logo.jpg" alt="PinkyCloud - Trang chủ" style="width: 150px; cursor: pointer;">
+                                    </a>
+                                    <button class="mobile-nav-close" id="mobileNavClose">&times;</button>
+                                </div>
+                                <div class="mobile-nav-content">
+                                    <ul class="mobile-nav-list">
+                                        <li><a href="${pageContext.request.contextPath}/View/home.jsp">TRANG CHỦ</a></li>
+                                        <li><a href="${pageContext.request.contextPath}/View/about-us.jsp">VỀ CHÚNG TÔI</a></li>
+                                        <li><a href="${pageContext.request.contextPath}/products">BỘ SƯU TẬP</a></li>
+                                        <li><a href="${pageContext.request.contextPath}/View/contact.jsp">LIÊN HỆ</a></li>
+                                        <c:if test="${empty sessionScope.user}">
+                                            <li><a href="${pageContext.request.contextPath}/signup">ĐĂNG NHẬP & ĐĂNG KÝ</a></li>
+                                        </c:if>
+                                        <c:if test="${!empty sessionScope.user}">
+                                            <li class="mobile-nav-divider">Tài khoản</li>
+                                            <li><a href="${pageContext.request.contextPath}/account-management">Quản lý tài khoản</a></li>
+                                            <c:if test="${sessionScope.user.role == 'ADMIN'}">
+                                                <li><a href="${pageContext.request.contextPath}/admin?action=dashboard">Admin Panel</a></li>
+                                            </c:if>
+                                            <li><a href="${pageContext.request.contextPath}/my-promos">My Vouchers</a></li>
+                                            <li><a href="${pageContext.request.contextPath}/cart">Giỏ hàng</a></li>
+                                            <li><a href="${pageContext.request.contextPath}/my-orders">Đơn hàng của tôi</a></li>
+                                            <li><a href="${pageContext.request.contextPath}/notification-center">Thông báo</a></li>
+                                            <li><a href="${pageContext.request.contextPath}/logout" class="mobile-logout">Đăng xuất</a></li>
+                                        </c:if>
+                                    </ul>
+                                    <div class="mobile-nav-search">
+                                        <input type="text" placeholder="Tìm kiếm sản phẩm..." id="mobileSearchInput">
+                                        <button id="mobileSearchBtn"><i class="fa-solid fa-magnifying-glass"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <div class="menu_list">
                                 <ul class="menu_list_item">
                                     <li ><a class="menu_list_link" href="${pageContext.request.contextPath}/View/home.jsp">TRANG CHỦ</a></li>
@@ -103,3 +155,85 @@
 
 
 <script src="${pageContext.request.contextPath}/Js/search-suggest.js"></script>
+<script>
+// Mobile Menu JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+    const mobileNav = document.getElementById('mobileNav');
+    const mobileNavClose = document.getElementById('mobileNavClose');
+    const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+    const body = document.body;
+    
+    // Open mobile menu
+    if (mobileMenuToggle) {
+        mobileMenuToggle.addEventListener('click', function() {
+            mobileNav.classList.add('active');
+            mobileNavOverlay.classList.add('active');
+            mobileMenuToggle.classList.add('active');
+            body.classList.add('mobile-menu-open');
+        });
+    }
+    
+    // Close mobile menu
+    function closeMobileMenu() {
+        mobileNav.classList.remove('active');
+        mobileNavOverlay.classList.remove('active');
+        mobileMenuToggle.classList.remove('active');
+        body.classList.remove('mobile-menu-open');
+    }
+    
+    // Close button
+    if (mobileNavClose) {
+        mobileNavClose.addEventListener('click', closeMobileMenu);
+    }
+    
+    // Click on overlay
+    if (mobileNavOverlay) {
+        mobileNavOverlay.addEventListener('click', closeMobileMenu);
+    }
+    
+    // Mobile search functionality
+    const mobileSearchInput = document.getElementById('mobileSearchInput');
+    const mobileSearchBtn = document.getElementById('mobileSearchBtn');
+    
+    if (mobileSearchBtn) {
+        mobileSearchBtn.addEventListener('click', function() {
+            const searchTerm = mobileSearchInput.value.trim();
+            if (searchTerm) {
+                window.location.href = window.APP_CTX + '/search?q=' + encodeURIComponent(searchTerm);
+            }
+        });
+    }
+    
+    if (mobileSearchInput) {
+        mobileSearchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const searchTerm = this.value.trim();
+                if (searchTerm) {
+                    window.location.href = window.APP_CTX + '/search?q=' + encodeURIComponent(searchTerm);
+                }
+            }
+        });
+    }
+    
+    // Close menu when clicking on a link
+    const mobileNavLinks = document.querySelectorAll('.mobile-nav-list a');
+    mobileNavLinks.forEach(function(link) {
+        link.addEventListener('click', function() {
+            // Close menu after a small delay to allow the link to be followed
+            setTimeout(closeMobileMenu, 300);
+        });
+    });
+    
+    // Handle window resize
+    let resizeTimer;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+            if (window.innerWidth > 768) {
+                closeMobileMenu();
+            }
+        }, 250);
+    });
+});
+</script>

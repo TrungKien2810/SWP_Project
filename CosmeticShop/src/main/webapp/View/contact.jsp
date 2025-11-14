@@ -19,6 +19,7 @@
 
     <body>
         <%@ include file="/View/includes/header.jspf" %>
+        <%@ include file="/View/includes/mobile-search.jspf" %>
 
         <main class="container-fluid" style="margin-top: 20px;">
         
