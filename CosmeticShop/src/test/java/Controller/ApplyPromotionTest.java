@@ -1,7 +1,6 @@
 package Controller;
 
 import Model.user;
-import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -29,8 +28,6 @@ class ApplyPromotionTest {
     @Mock
     private HttpSession session;
     @Mock
-    private RequestDispatcher dispatcher;
-    @Mock
     private CartPromotionService cartPromotionService;
 
     private ApplyPromotion servlet;
@@ -42,11 +39,11 @@ class ApplyPromotionTest {
         servlet.setCartPromotionService(cartPromotionService);
 
         when(request.getSession()).thenReturn(session);
-        when(request.getRequestDispatcher("/View/cart.jsp")).thenReturn(dispatcher);
+        when(request.getContextPath()).thenReturn("/CosmeticShop");
     }
 
     @Test
-    @DisplayName("removeDiscount=true sẽ xóa mã và forward")
+    @DisplayName("removeDiscount=true sẽ xóa mã và redirect")
     void shouldRemoveDiscount() throws ServletException, IOException {
         when(request.getParameter("removeDiscount")).thenReturn("true");
         when(session.getAttribute("appliedDiscountCode")).thenReturn("PROMO");
@@ -55,7 +52,7 @@ class ApplyPromotionTest {
 
         verify(session).removeAttribute("appliedDiscountCode");
         verify(session).removeAttribute("appliedDiscountAmount");
-        verify(dispatcher).forward(request, response);
+        verify(response).sendRedirect(anyString());
     }
 
     @Test
@@ -67,7 +64,7 @@ class ApplyPromotionTest {
 
         servlet.doPost(request, response);
 
-        verify(dispatcher).forward(request, response);
+        verify(response).sendRedirect(anyString());
         verifyNoInteractions(cartPromotionService);
     }
 
@@ -86,11 +83,11 @@ class ApplyPromotionTest {
 
         verify(session).removeAttribute("appliedDiscountCode");
         verify(session).removeAttribute("appliedDiscountAmount");
-        verify(dispatcher).forward(request, response);
+        verify(response).sendRedirect(anyString());
     }
 
     @Test
-    @DisplayName("Service thành công -> lưu mã và forward")
+    @DisplayName("Service thành công -> lưu mã và redirect")
     void shouldApplyDiscountSuccessfully() throws ServletException, IOException {
         user u = new user();
         u.setUser_id(2);
@@ -104,7 +101,7 @@ class ApplyPromotionTest {
 
         verify(session).setAttribute("appliedDiscountCode", "PROMO");
         verify(session).setAttribute("appliedDiscountAmount", 50_000.0);
-        verify(dispatcher).forward(request, response);
+        verify(response).sendRedirect(anyString());
     }
 }
 

@@ -4,6 +4,7 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.Assumptions;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.edge.EdgeDriver;
@@ -36,6 +37,7 @@ class LoginE2ETest {
     private static WebDriverWait wait;
     private static final String BASE_URL = "http://localhost:8080/CosmeticShop";
     private static final long STEP_DELAY_MS = Long.getLong("e2e.stepDelay", 1200L);
+    private static final long VISUAL_DELAY_MS = 2000L; // 2 giây sau khi highlight
     
     @BeforeAll
     static void setUpAll() {
@@ -166,6 +168,9 @@ class LoginE2ETest {
     
     @BeforeEach
     void setUp() {
+        // Logout trước khi test login mới (đảm bảo không có session cũ)
+        logoutIfLoggedIn();
+        
         // Mỗi test bắt đầu từ trang chủ
         if (driver != null) {
             driver.get(BASE_URL);
@@ -175,26 +180,67 @@ class LoginE2ETest {
         }
     }
     
+    /**
+     * Helper method để logout nếu đang logged in
+     */
+    private void logoutIfLoggedIn() {
+        if (driver == null) {
+            return;
+        }
+        
+        try {
+            // Kiểm tra xem có đang logged in không bằng cách tìm logout link
+            driver.get(BASE_URL);
+            pause(500);
+            
+            try {
+                // Tìm logout link hoặc button
+                WebElement logoutLink = driver.findElement(
+                    By.xpath("//a[contains(@href, '/logout')] | //a[contains(text(), 'Đăng xuất')] | //a[contains(text(), 'Log Out')]")
+                );
+                
+                if (logoutLink != null && logoutLink.isDisplayed()) {
+                    System.out.println("[LoginE2ETest] Đang logout trước khi test login mới...");
+                    // Click logout link hoặc truy cập trực tiếp logout URL
+                    driver.get(BASE_URL + "/logout");
+                    pause(1000);
+                    // Đợi logout xong (redirect về home)
+                    wait.until(ExpectedConditions.or(
+                        ExpectedConditions.urlContains("/home"),
+                        ExpectedConditions.urlContains("/View/home"),
+                        ExpectedConditions.urlContains("/products"),
+                        ExpectedConditions.urlContains("/login")
+                    ));
+                    System.out.println("[LoginE2ETest] Đã logout thành công!");
+                }
+            } catch (Exception e) {
+                // Không tìm thấy logout link, có nghĩa là chưa login
+                // Không cần làm gì
+            }
+        } catch (Exception e) {
+            // Nếu có lỗi, chỉ log và tiếp tục
+            System.out.println("[LoginE2ETest] Không thể kiểm tra logout: " + e.getMessage());
+        }
+    }
+    
     @Test
     @Order(1)
     @DisplayName("E2E: Truy cập trang đăng nhập")
     void shouldNavigateToLoginPage() {
-        // Đi thẳng đến trang login (đơn giản hơn)
+        printTestHeader("TEST 1", "Truy cập trang đăng nhập");
+        
+        logStep("1.1", "Truy cập trang login");
         driver.get(BASE_URL + "/login");
         pause();
         
-        // Đợi trang load xong
+        logStep("1.2", "Kiểm tra trang đã load");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
-        
-        // Kiểm tra đã chuyển đến trang login
         wait.until(ExpectedConditions.urlContains("/login"));
         assertThat(driver.getCurrentUrl()).contains("/login");
+        System.out.println("  🌐 URL: " + driver.getCurrentUrl());
+        System.out.println("  📄 Page Title: " + driver.getTitle());
         
-        // Debug: In ra title và URL
-        System.out.println("[shouldNavigateToLoginPage] Current URL: " + driver.getCurrentUrl());
-        System.out.println("[shouldNavigateToLoginPage] Page Title: " + driver.getTitle());
-        
-        // Kiểm tra có form đăng nhập - dùng id thay vì name để chắc chắn hơn
+        logStep("1.3", "Kiểm tra form đăng nhập");
         WebElement emailInput = wait.until(
             ExpectedConditions.presenceOfElementLocated(By.id("email"))
         );
@@ -202,134 +248,140 @@ class LoginE2ETest {
             ExpectedConditions.presenceOfElementLocated(By.id("password"))
         );
         
+        scrollAndHighlight(emailInput, "Email input field");
+        scrollAndHighlight(passwordInput, "Password input field");
+        
         assertThat(emailInput).isNotNull();
         assertThat(passwordInput).isNotNull();
+        System.out.println("\n✅ TEST 1 hoàn thành!\n");
     }
     
     @Test
     @Order(2)
     @DisplayName("E2E: Đăng nhập với email không hợp lệ -> hiển thị lỗi")
     void shouldShowErrorForInvalidEmail() {
-        // Điều hướng đến trang login
+        printTestHeader("TEST 2", "Đăng nhập với email không hợp lệ");
+        
+        // Đảm bảo đã logout trước khi test
+        logoutIfLoggedIn();
+        
+        logStep("2.1", "Truy cập trang login");
         driver.get(BASE_URL + "/login");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
         
-        // Nhập email không hợp lệ - dùng id thay vì name
+        logStep("2.2", "Nhập email không hợp lệ");
         WebElement emailInput = wait.until(
             ExpectedConditions.presenceOfElementLocated(By.id("email"))
         );
         emailInput.clear();
         emailInput.sendKeys("invalid-email");
-        System.out.println("[LoginE2ETest] Nhập email không hợp lệ: invalid-email");
+        scrollAndHighlight(emailInput, "Email input (invalid format)");
+        System.out.println("  📧 Email: invalid-email");
         pause();
         
+        logStep("2.3", "Nhập password");
         WebElement passwordInput = wait.until(
             ExpectedConditions.presenceOfElementLocated(By.id("password"))
         );
         passwordInput.clear();
         passwordInput.sendKeys("password123");
+        scrollAndHighlight(passwordInput, "Password input");
         pause();
         
-        // Submit form - tìm button với text "Đăng nhập ngay!"
+        logStep("2.4", "Submit form");
         WebElement submitButton = wait.until(
             ExpectedConditions.elementToBeClickable(
                 By.xpath("//button[contains(text(), 'Đăng nhập')] | //button[@type='submit']")
             )
         );
-        // Scroll vào view trước khi click
-        ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", submitButton);
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        scrollAndHighlight(submitButton, "Submit button");
         submitButton.click();
         pause();
         
-        // Đợi redirect về login page (sau khi submit form)
+        logStep("2.5", "Kiểm tra thông báo lỗi");
         wait.until(ExpectedConditions.urlContains("/login"));
         
-        // Đợi toast notification xuất hiện (error message hiển thị qua toast)
         try {
-            // Đợi toast notification error xuất hiện
             WebElement toastError = wait.until(
                 ExpectedConditions.presenceOfElementLocated(
                     By.cssSelector(".toast-notification.error, .toast-notification[class*='error']")
                 )
             );
-            
-            // Đợi thêm một chút để toast hiển thị đầy đủ
+            scrollAndHighlight(toastError, "Error toast notification");
             Thread.sleep(1000);
             
-            // Lấy text từ toast message
             WebElement toastMessage = toastError.findElement(By.cssSelector(".toast-message"));
-            String errorText = toastMessage.getText().toLowerCase();
+            String errorText = toastMessage.getText();
+            System.out.println("  ⚠️  Error message: " + errorText);
             
-            assertThat(errorText)
+            assertThat(errorText.toLowerCase())
                 .satisfiesAnyOf(
                     text -> assertThat(text).contains("email"),
                     text -> assertThat(text).contains("hợp lệ"),
                     text -> assertThat(text).contains("gmail")
                 );
         } catch (Exception e) {
-            // Nếu không tìm thấy toast, kiểm tra URL vẫn ở login page (có nghĩa là đã redirect về login)
             assertThat(driver.getCurrentUrl()).contains("/login");
-            System.out.println("[shouldShowErrorForInvalidEmail] Toast notification không tìm thấy, nhưng đã redirect về login page");
+            System.out.println("  ⚠️  Toast không tìm thấy, nhưng đã redirect về login page");
         }
+        
+        System.out.println("\n✅ TEST 2 hoàn thành!\n");
     }
     
     @Test
     @Order(3)
     @DisplayName("E2E: Đăng nhập với trường rỗng -> hiển thị lỗi")
     void shouldShowErrorForEmptyFields() {
+        printTestHeader("TEST 3", "Đăng nhập với trường rỗng");
+        
+        // Đảm bảo đã logout trước khi test
+        logoutIfLoggedIn();
+        
+        logStep("3.1", "Truy cập trang login");
         driver.get(BASE_URL + "/login");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
         pause();
         
-        // Đảm bảo các field rỗng
+        logStep("3.2", "Để trống các field");
         WebElement emailInput = wait.until(
             ExpectedConditions.presenceOfElementLocated(By.id("email"))
         );
         emailInput.clear();
+        scrollAndHighlight(emailInput, "Email input (empty)");
         
         WebElement passwordInput = wait.until(
             ExpectedConditions.presenceOfElementLocated(By.id("password"))
         );
         passwordInput.clear();
+        scrollAndHighlight(passwordInput, "Password input (empty)");
         
-        // Submit form với trường rỗng
+        logStep("3.3", "Submit form với trường rỗng");
         WebElement submitButton = wait.until(
             ExpectedConditions.elementToBeClickable(
                 By.xpath("//button[contains(text(), 'Đăng nhập')] | //button[@type='submit']")
             )
         );
-        // Scroll vào view trước khi click
-        ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", submitButton);
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        scrollAndHighlight(submitButton, "Submit button");
         submitButton.click();
         pause();
         
-        // Đợi redirect về login page
+        logStep("3.4", "Kiểm tra thông báo lỗi");
         wait.until(ExpectedConditions.urlContains("/login"));
         
-        // Đợi toast notification error xuất hiện
         try {
             WebElement toastError = wait.until(
                 ExpectedConditions.presenceOfElementLocated(
                     By.cssSelector(".toast-notification.error, .toast-notification[class*='error']")
                 )
             );
-            
+            scrollAndHighlight(toastError, "Error toast notification");
             Thread.sleep(1000);
             
             WebElement toastMessage = toastError.findElement(By.cssSelector(".toast-message"));
-            String errorText = toastMessage.getText().toLowerCase();
+            String errorText = toastMessage.getText();
+            System.out.println("  ⚠️  Error message: " + errorText);
             
-            assertThat(errorText)
+            assertThat(errorText.toLowerCase())
                 .satisfiesAnyOf(
                     text -> assertThat(text).contains("đầy đủ"),
                     text -> assertThat(text).contains("rỗng"),
@@ -338,63 +390,64 @@ class LoginE2ETest {
                     text -> assertThat(text).contains("mật khẩu")
                 );
         } catch (Exception e) {
-            // Nếu không tìm thấy toast, kiểm tra URL vẫn ở login page
             assertThat(driver.getCurrentUrl()).contains("/login");
-            System.out.println("[shouldShowErrorForEmptyFields] Toast notification không tìm thấy, nhưng đã redirect về login page");
+            System.out.println("  ⚠️  Toast không tìm thấy, nhưng đã redirect về login page");
         }
+        
+        System.out.println("\n✅ TEST 3 hoàn thành!\n");
     }
     
     @Test
     @Order(4)
     @DisplayName("E2E: Đăng nhập thành công -> chuyển đến trang chủ")
     void shouldLoginSuccessfully() {
+        printTestHeader("TEST 4", "Đăng nhập thành công");
+        
+        // Đảm bảo đã logout trước khi test
+        logoutIfLoggedIn();
+        
         // Lấy random user từ database
         Model.user testUser = TestDataHelper.getRandomUser();
         
-        // Nếu không có user nào, skip test
         if (testUser == null) {
-            System.out.println("[LoginE2ETest] Không có user nào trong database, skip test");
+            System.out.println("  ⚠️  Không có user nào trong database, skip test");
             return;
         }
         
+        logStep("4.1", "Truy cập trang login");
         driver.get(BASE_URL + "/login");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
         
-        // Nhập thông tin đăng nhập từ database - dùng id
+        logStep("4.2", "Nhập email");
         WebElement emailInput = wait.until(
             ExpectedConditions.presenceOfElementLocated(By.id("email"))
         );
         emailInput.clear();
         emailInput.sendKeys(testUser.getEmail());
-        System.out.println("[LoginE2ETest] Đang nhập email: " + testUser.getEmail());
+        scrollAndHighlight(emailInput, "Email input");
+        System.out.println("  📧 Email: " + testUser.getEmail());
         pause();
         
+        logStep("4.3", "Nhập password");
         WebElement passwordInput = wait.until(
             ExpectedConditions.presenceOfElementLocated(By.id("password"))
         );
         passwordInput.clear();
-        // Lưu ý: Password trong DB có thể là plain text hoặc hash
-        // Nếu là hash, cần có cách lấy password gốc hoặc tạo test user với password đã biết
         passwordInput.sendKeys(testUser.getPassword());
+        scrollAndHighlight(passwordInput, "Password input");
         pause();
         
-        // Submit form
+        logStep("4.4", "Submit form");
         WebElement submitButton = wait.until(
             ExpectedConditions.elementToBeClickable(
                 By.xpath("//button[contains(text(), 'Đăng nhập')] | //button[@type='submit']")
             )
         );
-        // Scroll vào view trước khi click
-        ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", submitButton);
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        scrollAndHighlight(submitButton, "Submit button");
         submitButton.click();
         pause();
         
-        // Kiểm tra đã chuyển đến trang chủ hoặc có thông báo thành công
+        logStep("4.5", "Kiểm tra đăng nhập thành công");
         wait.until(ExpectedConditions.or(
             ExpectedConditions.urlContains("/home"),
             ExpectedConditions.urlContains("/View/home"),
@@ -404,17 +457,18 @@ class LoginE2ETest {
             )
         ));
         
-        // Kiểm tra có thông tin user trong session (có thể kiểm tra qua UI)
-        // Ví dụ: có link "Log Out" hoặc tên user
+        System.out.println("  🌐 URL sau khi login: " + driver.getCurrentUrl());
+        
         try {
             WebElement logoutLink = wait.until(
                 ExpectedConditions.presenceOfElementLocated(
-                    By.xpath("//a[contains(text(), 'Log Out')] | //a[contains(text(), 'Đăng xuất')]")
+                    By.xpath("//a[contains(text(), 'Log Out')] | //a[contains(text(), 'Đăng xuất')] | //a[contains(@href, '/logout')]")
                 )
             );
+            scrollAndHighlight(logoutLink, "Logout link (login thành công)");
             assertThat(logoutLink).isNotNull();
+            System.out.println("  ✅ Tìm thấy logout link - đăng nhập thành công!");
         } catch (Exception e) {
-            // Nếu không tìm thấy logout link, chỉ cần kiểm tra URL đã chuyển
             String currentUrl = driver.getCurrentUrl();
             assertThat(currentUrl)
                 .satisfiesAnyOf(
@@ -422,85 +476,147 @@ class LoginE2ETest {
                     url -> assertThat(url).contains("/View/home"),
                     url -> assertThat(url).contains("/products")
                 );
+            System.out.println("  ✅ Đã redirect đến trang chủ - đăng nhập thành công!");
         }
+        
+        System.out.println("\n✅ TEST 4 hoàn thành!\n");
     }
     
     @Test
     @Order(5)
     @DisplayName("E2E: Đăng nhập với email không tồn tại -> hiển thị lỗi")
     void shouldShowErrorForNonExistentEmail() {
+        printTestHeader("TEST 5", "Đăng nhập với email không tồn tại");
+        
+        // Đảm bảo đã logout trước khi test
+        logoutIfLoggedIn();
+        
+        logStep("5.1", "Truy cập trang login");
         driver.get(BASE_URL + "/login");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
         
-        // Nhập email không tồn tại - dùng id
+        logStep("5.2", "Nhập email không tồn tại");
         WebElement emailInput = wait.until(
             ExpectedConditions.presenceOfElementLocated(By.id("email"))
         );
         emailInput.clear();
         emailInput.sendKeys("nonexistent@gmail.com");
-        System.out.println("[LoginE2ETest] Thử email không tồn tại: nonexistent@gmail.com");
+        scrollAndHighlight(emailInput, "Email input (non-existent)");
+        System.out.println("  📧 Email: nonexistent@gmail.com");
         pause();
         
+        logStep("5.3", "Nhập password");
         WebElement passwordInput = wait.until(
             ExpectedConditions.presenceOfElementLocated(By.id("password"))
         );
         passwordInput.clear();
         passwordInput.sendKeys("password123");
+        scrollAndHighlight(passwordInput, "Password input");
         pause();
         
-        // Submit form
+        logStep("5.4", "Submit form");
         WebElement submitButton = wait.until(
             ExpectedConditions.elementToBeClickable(
                 By.xpath("//button[contains(text(), 'Đăng nhập')] | //button[@type='submit']")
             )
         );
-        // Scroll vào view trước khi click
-        ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", submitButton);
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        scrollAndHighlight(submitButton, "Submit button");
         submitButton.click();
         pause();
         
-        // Đợi redirect về login page
+        logStep("5.5", "Kiểm tra thông báo lỗi");
         wait.until(ExpectedConditions.urlContains("/login"));
         
-        // Đợi toast notification error xuất hiện
         try {
             WebElement toastError = wait.until(
                 ExpectedConditions.presenceOfElementLocated(
                     By.cssSelector(".toast-notification.error, .toast-notification[class*='error']")
                 )
             );
-            
+            scrollAndHighlight(toastError, "Error toast notification");
             Thread.sleep(1000);
             
             WebElement toastMessage = toastError.findElement(By.cssSelector(".toast-message"));
-            String errorText = toastMessage.getText().toLowerCase();
+            String errorText = toastMessage.getText();
+            System.out.println("  ⚠️  Error message: " + errorText);
             
-            assertThat(errorText)
+            assertThat(errorText.toLowerCase())
                 .satisfiesAnyOf(
                     text -> assertThat(text).contains("không tồn tại"),
                     text -> assertThat(text).contains("đăng ký"),
                     text -> assertThat(text).contains("tài khoản")
                 );
         } catch (Exception e) {
-            // Nếu không tìm thấy toast, kiểm tra URL vẫn ở login page
             assertThat(driver.getCurrentUrl()).contains("/login");
-            System.out.println("[shouldShowErrorForNonExistentEmail] Toast notification không tìm thấy, nhưng đã redirect về login page");
+            System.out.println("  ⚠️  Toast không tìm thấy, nhưng đã redirect về login page");
         }
+        
+        System.out.println("\n✅ TEST 5 hoàn thành!\n");
     }
 
     private static void pause() {
-        if (STEP_DELAY_MS <= 0) {
+        pause(STEP_DELAY_MS);
+    }
+    
+    private static void pause(long milliseconds) {
+        if (milliseconds <= 0) {
             return;
         }
         try {
-            Thread.sleep(STEP_DELAY_MS);
+            Thread.sleep(milliseconds);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+        }
+    }
+    
+    /**
+     * In header cho mỗi test với format đẹp
+     */
+    private static void printTestHeader(String testNumber, String testName) {
+        System.out.println("\n" + "=".repeat(60));
+        System.out.println("🧪 " + testNumber + ": " + testName);
+        System.out.println("=".repeat(60) + "\n");
+    }
+    
+    /**
+     * Log step với format đẹp
+     */
+    private static void logStep(String stepNumber, String description) {
+        System.out.println("\n  ┌─ BƯỚC " + stepNumber + ": " + description);
+        System.out.println("  └─────────────────────────────────────────────");
+    }
+    
+    /**
+     * Highlight element để dễ nhìn thấy khi test
+     */
+    private static void highlightElement(WebElement element, String color) {
+        try {
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+            String originalStyle = element.getAttribute("style");
+            js.executeScript(
+                "arguments[0].setAttribute('style', arguments[1]);",
+                element,
+                "border: 3px solid " + color + "; background-color: rgba(255, 255, 0, 0.3); padding: 2px;"
+            );
+            pause(VISUAL_DELAY_MS);
+            js.executeScript("arguments[0].setAttribute('style', arguments[1]);", element, originalStyle != null ? originalStyle : "");
+        } catch (Exception e) {
+            // Bỏ qua nếu không thể highlight
+        }
+    }
+    
+    /**
+     * Scroll element vào view và highlight
+     */
+    private static void scrollAndHighlight(WebElement element, String stepName) {
+        try {
+            System.out.println("  👁️  Đang xem: " + stepName);
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+            js.executeScript("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", element);
+            pause(500);
+            highlightElement(element, "#ff0000"); // Màu đỏ để highlight
+        } catch (Exception e) {
+            System.out.println("  ⚠️  Không thể scroll/highlight: " + e.getMessage());
         }
     }
 }

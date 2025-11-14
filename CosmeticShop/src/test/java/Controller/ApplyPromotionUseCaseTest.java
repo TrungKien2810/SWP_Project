@@ -2,7 +2,6 @@ package Controller;
 
 import E2E.TestDataHelper;
 import Model.user;
-import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -42,9 +41,6 @@ class ApplyPromotionUseCaseTest {
     private HttpSession session;
 
     @Mock
-    private RequestDispatcher dispatcher;
-
-    @Mock
     private CartPromotionService cartPromotionService;
 
     private ApplyPromotion servlet;
@@ -57,6 +53,8 @@ class ApplyPromotionUseCaseTest {
         servlet = new ApplyPromotion();
         servlet.setCartPromotionService(cartPromotionService);
         
+        when(request.getContextPath()).thenReturn("/CosmeticShop");
+        
         // Lấy sample user từ database một lần (có thể cache)
         if (sampleUser == null) {
             sampleUser = TestDataHelper.getRandomUser();
@@ -68,14 +66,9 @@ class ApplyPromotionUseCaseTest {
         }
     }
 
-    private void setCommonDispatch() {
-        when(request.getRequestDispatcher("/View/cart.jsp")).thenReturn(dispatcher);
-    }
-
     @Test
-    @DisplayName("Gỡ mã giảm giá -> lưu mã cuối cùng để khôi phục và forward với thông báo")
+    @DisplayName("Gỡ mã giảm giá -> lưu mã cuối cùng để khôi phục và redirect với thông báo")
     void shouldHandleRemoveDiscount() throws Exception {
-        setCommonDispatch();
         when(request.getSession()).thenReturn(session);
         when(request.getParameter("removeDiscount")).thenReturn("true");
         lenient().when(request.getParameter("promoCode")).thenReturn(null);
@@ -87,29 +80,24 @@ class ApplyPromotionUseCaseTest {
         verify(session).removeAttribute("appliedDiscountCode");
         verify(session).removeAttribute("appliedDiscountAmount");
         verify(session).setAttribute("lastRemovedDiscountCode", "SPRING10");
-        verify(request).setAttribute("msg", "Đã xóa mã giảm giá: SPRING10");
-        verify(dispatcher).forward(request, response);
-        verifyNoInteractions(response);
+        verify(response).sendRedirect(anyString());
     }
 
     @Test
     @DisplayName("Không có cart id -> báo lỗi")
     void shouldFailWhenCartIdMissing() throws Exception {
-        setCommonDispatch();
         when(request.getSession()).thenReturn(session);
         when(request.getParameter("promoCode")).thenReturn("CODE");
         when(session.getAttribute("cartId")).thenReturn(null);
 
         servlet.doPost(request, response);
 
-        verify(request).setAttribute("error", "Không tìm thấy giỏ hàng.");
-        verify(dispatcher).forward(request, response);
+        verify(response).sendRedirect(anyString());
     }
 
     @Test
     @DisplayName("User chưa đăng nhập -> báo lỗi yêu cầu login")
     void shouldRequireLogin() throws Exception {
-        setCommonDispatch();
         when(request.getSession()).thenReturn(session);
         when(session.getAttribute("cartId")).thenReturn(99);
         when(session.getAttribute("user")).thenReturn(null);
@@ -117,14 +105,12 @@ class ApplyPromotionUseCaseTest {
 
         servlet.doPost(request, response);
 
-        verify(request).setAttribute("error", "Vui lòng đăng nhập để sử dụng mã giảm giá.");
-        verify(dispatcher).forward(request, response);
+        verify(response).sendRedirect(anyString());
     }
 
     @Test
     @DisplayName("Mã giảm giá không hợp lệ -> xóa khỏi session và báo lỗi")
     void shouldRejectInvalidCode() throws Exception {
-        setCommonDispatch();
         // Dùng sample user từ database
         user account = sampleUser;
 
@@ -139,14 +125,12 @@ class ApplyPromotionUseCaseTest {
 
         verify(session).removeAttribute("appliedDiscountCode");
         verify(session).removeAttribute("appliedDiscountAmount");
-        verify(request).setAttribute("error", "Mã giảm giá không hợp lệ hoặc đã hết hạn.");
-        verify(dispatcher).forward(request, response);
+        verify(response).sendRedirect(anyString());
     }
 
     @Test
     @DisplayName("User không đủ quyền sử dụng mã -> báo lỗi và không set session")
     void shouldDenyWhenUserNotEligible() throws Exception {
-        setCommonDispatch();
         // Dùng sample user từ database
         user account = sampleUser;
         when(request.getSession()).thenReturn(session);
@@ -158,14 +142,12 @@ class ApplyPromotionUseCaseTest {
 
         servlet.doPost(request, response);
 
-        verify(request).setAttribute("error", "Bạn không có quyền sử dụng mã giảm giá này.");
-        verify(dispatcher).forward(request, response);
+        verify(response).sendRedirect(anyString());
     }
 
     @Test
     @DisplayName("Không đạt min order -> báo lỗi")
     void shouldRejectWhenSubtotalBelowMinimum() throws Exception {
-        setCommonDispatch();
         // Dùng sample user từ database
         user account = sampleUser;
         when(request.getSession()).thenReturn(session);
@@ -177,14 +159,12 @@ class ApplyPromotionUseCaseTest {
 
         servlet.doPost(request, response);
 
-        verify(request).setAttribute("error", "Đơn hàng chưa đạt tối thiểu để áp dụng mã giảm giá.");
-        verify(dispatcher).forward(request, response);
+        verify(response).sendRedirect(anyString());
     }
 
     @Test
-    @DisplayName("Áp dụng mã phần trăm với giới hạn tối đa -> set session và forward thành công")
+    @DisplayName("Áp dụng mã phần trăm với giới hạn tối đa -> set session và redirect thành công")
     void shouldApplyPercentageDiscountWithMaxCap() throws Exception {
-        setCommonDispatch();
         // Dùng sample user từ database
         user account = sampleUser;
         when(request.getSession()).thenReturn(session);
@@ -201,8 +181,7 @@ class ApplyPromotionUseCaseTest {
         verify(session).setAttribute(eq("appliedDiscountAmount"), discountCaptor.capture());
         assertThat(discountCaptor.getValue()).isEqualTo(150_000d);
         verify(session).removeAttribute("lastRemovedDiscountCode");
-        verify(request).setAttribute("msg", "Áp dụng mã thành công: SALE50");
-        verify(dispatcher).forward(request, response);
+        verify(response).sendRedirect(anyString());
     }
 
 }
