@@ -35,6 +35,7 @@ class LoginE2ETest {
     private static WebDriver driver;
     private static WebDriverWait wait;
     private static final String BASE_URL = "http://localhost:8080/CosmeticShop";
+    private static final long STEP_DELAY_MS = Long.getLong("e2e.stepDelay", 1200L);
     
     @BeforeAll
     static void setUpAll() {
@@ -97,6 +98,7 @@ class LoginE2ETest {
                     // Kiểm tra web server có đang chạy không
                     System.out.println("[LoginE2ETest] Đang kiểm tra web server tại: " + BASE_URL);
                     driver.get(BASE_URL);
+                    pause();
                     
                     // Đợi trang load xong
                     wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
@@ -129,6 +131,7 @@ class LoginE2ETest {
             // Kiểm tra web server có đang chạy không
             System.out.println("[LoginE2ETest] Đang kiểm tra web server tại: " + BASE_URL);
             driver.get(BASE_URL);
+            pause();
             
             // Đợi trang load xong
             wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
@@ -166,6 +169,7 @@ class LoginE2ETest {
         // Mỗi test bắt đầu từ trang chủ
         if (driver != null) {
             driver.get(BASE_URL);
+            pause();
             // Đợi trang load xong
             wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
         }
@@ -177,6 +181,7 @@ class LoginE2ETest {
     void shouldNavigateToLoginPage() {
         // Đi thẳng đến trang login (đơn giản hơn)
         driver.get(BASE_URL + "/login");
+        pause();
         
         // Đợi trang load xong
         wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
@@ -215,12 +220,15 @@ class LoginE2ETest {
         );
         emailInput.clear();
         emailInput.sendKeys("invalid-email");
+        System.out.println("[LoginE2ETest] Nhập email không hợp lệ: invalid-email");
+        pause();
         
         WebElement passwordInput = wait.until(
             ExpectedConditions.presenceOfElementLocated(By.id("password"))
         );
         passwordInput.clear();
         passwordInput.sendKeys("password123");
+        pause();
         
         // Submit form - tìm button với text "Đăng nhập ngay!"
         WebElement submitButton = wait.until(
@@ -236,6 +244,7 @@ class LoginE2ETest {
             Thread.currentThread().interrupt();
         }
         submitButton.click();
+        pause();
         
         // Đợi redirect về login page (sau khi submit form)
         wait.until(ExpectedConditions.urlContains("/login"));
@@ -275,6 +284,7 @@ class LoginE2ETest {
     void shouldShowErrorForEmptyFields() {
         driver.get(BASE_URL + "/login");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
+        pause();
         
         // Đảm bảo các field rỗng
         WebElement emailInput = wait.until(
@@ -301,6 +311,7 @@ class LoginE2ETest {
             Thread.currentThread().interrupt();
         }
         submitButton.click();
+        pause();
         
         // Đợi redirect về login page
         wait.until(ExpectedConditions.urlContains("/login"));
@@ -355,6 +366,8 @@ class LoginE2ETest {
         );
         emailInput.clear();
         emailInput.sendKeys(testUser.getEmail());
+        System.out.println("[LoginE2ETest] Đang nhập email: " + testUser.getEmail());
+        pause();
         
         WebElement passwordInput = wait.until(
             ExpectedConditions.presenceOfElementLocated(By.id("password"))
@@ -363,6 +376,7 @@ class LoginE2ETest {
         // Lưu ý: Password trong DB có thể là plain text hoặc hash
         // Nếu là hash, cần có cách lấy password gốc hoặc tạo test user với password đã biết
         passwordInput.sendKeys(testUser.getPassword());
+        pause();
         
         // Submit form
         WebElement submitButton = wait.until(
@@ -378,6 +392,7 @@ class LoginE2ETest {
             Thread.currentThread().interrupt();
         }
         submitButton.click();
+        pause();
         
         // Kiểm tra đã chuyển đến trang chủ hoặc có thông báo thành công
         wait.until(ExpectedConditions.or(
@@ -423,12 +438,15 @@ class LoginE2ETest {
         );
         emailInput.clear();
         emailInput.sendKeys("nonexistent@gmail.com");
+        System.out.println("[LoginE2ETest] Thử email không tồn tại: nonexistent@gmail.com");
+        pause();
         
         WebElement passwordInput = wait.until(
             ExpectedConditions.presenceOfElementLocated(By.id("password"))
         );
         passwordInput.clear();
         passwordInput.sendKeys("password123");
+        pause();
         
         // Submit form
         WebElement submitButton = wait.until(
@@ -444,6 +462,7 @@ class LoginE2ETest {
             Thread.currentThread().interrupt();
         }
         submitButton.click();
+        pause();
         
         // Đợi redirect về login page
         wait.until(ExpectedConditions.urlContains("/login"));
@@ -471,6 +490,17 @@ class LoginE2ETest {
             // Nếu không tìm thấy toast, kiểm tra URL vẫn ở login page
             assertThat(driver.getCurrentUrl()).contains("/login");
             System.out.println("[shouldShowErrorForNonExistentEmail] Toast notification không tìm thấy, nhưng đã redirect về login page");
+        }
+    }
+
+    private static void pause() {
+        if (STEP_DELAY_MS <= 0) {
+            return;
+        }
+        try {
+            Thread.sleep(STEP_DELAY_MS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 }

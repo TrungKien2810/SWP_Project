@@ -1,6 +1,5 @@
 package Controller;
 
-import DAO.DiscountDB;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -8,15 +7,24 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.Timestamp;
+import service.PromotionService;
+import service.ServiceRegistry;
 
 @WebServlet(name = "DiscountController", urlPatterns = {"/discounts", "/my-promos"})
 public class DiscountController extends HttpServlet {
 
-    private DiscountDB db;
+    private PromotionService promotionService;
 
-    private DiscountDB db() {
-        if (db == null) db = new DiscountDB();
-        return db;
+    PromotionService promotionService() {
+        if (promotionService == null) {
+            promotionService = ServiceRegistry.getPromotionService();
+        }
+        return promotionService;
+    }
+
+    // Visible for tests
+    void setPromotionService(PromotionService promotionService) {
+        this.promotionService = promotionService;
     }
 
     @Override
@@ -31,8 +39,8 @@ public class DiscountController extends HttpServlet {
             }
             Model.user u = (Model.user) session.getAttribute("user");
             // Auto-assign due discounts for this user then load
-            db().assignDueForUser(u.getUser_id());
-            request.setAttribute("assignedDiscounts", db().listAssignedDiscountsForUser(u.getUser_id()));
+            promotionService().assignDueForUser(u.getUser_id());
+            request.setAttribute("assignedDiscounts", promotionService().listAssignedDiscountsForUser(u.getUser_id()));
             request.getRequestDispatcher("/View/my-discounts.jsp").forward(request, response);
             return;
         }
@@ -45,12 +53,12 @@ public class DiscountController extends HttpServlet {
             case "edit":
                 try {
                     int id = Integer.parseInt(request.getParameter("id"));
-                    request.setAttribute("discount", db().getById(id));
+                    request.setAttribute("discount", promotionService().getById(id));
                 } catch (NumberFormatException ignored) {}
                 request.getRequestDispatcher("/View/discount-form.jsp").forward(request, response);
                 break;
             default:
-                request.setAttribute("discounts", db().listAll());
+                request.setAttribute("discounts", promotionService().listAllDiscounts());
                 request.getRequestDispatcher("/View/discount-manager.jsp").forward(request, response);
                 break;
         }
@@ -76,7 +84,7 @@ public class DiscountController extends HttpServlet {
                 }
                 break;
             case "delete":
-                try { db().delete(Integer.parseInt(request.getParameter("id"))); } catch (NumberFormatException ignored) {}
+                try { promotionService().deleteDiscount(Integer.parseInt(request.getParameter("id"))); } catch (NumberFormatException ignored) {}
                 response.sendRedirect(request.getContextPath() + "/admin?action=discounts");
                 break;
             default:
@@ -150,7 +158,7 @@ public class DiscountController extends HttpServlet {
             forwardToForm(req, resp, update);
             return false;
         }
-        if (db().existsByCode(trimmedCode, excludeId)) {
+        if (promotionService().existsByCode(trimmedCode, excludeId)) {
             req.setAttribute("error", "Mã giảm giá đã tồn tại");
             forwardToForm(req, resp, update);
             return false;
@@ -188,10 +196,10 @@ public class DiscountController extends HttpServlet {
 
         boolean success;
         if (update) {
-            success = db().update(currentId, code, name, type, value, minOrder, maxDiscount, finalStart, end, active,
+            success = promotionService().updateDiscount(currentId, code, name, type, value, minOrder, maxDiscount, finalStart, end, active,
                     description, usageLimit, conditionType, conditionValue, conditionDescription, specialEvent, autoAssignAll, assignDate);
         } else {
-            success = db().create(code, name, type, value, minOrder, maxDiscount, finalStart, end, active,
+            success = promotionService().createDiscount(code, name, type, value, minOrder, maxDiscount, finalStart, end, active,
                     description, usageLimit, conditionType, conditionValue, conditionDescription, specialEvent, autoAssignAll, assignDate);
         }
         
@@ -209,7 +217,7 @@ public class DiscountController extends HttpServlet {
         if (update) {
             try {
                 int id = parseInt(req.getParameter("id"), -1);
-                req.setAttribute("discount", db().getById(id));
+                req.setAttribute("discount", promotionService().getById(id));
             } catch (NumberFormatException ignored) {}
         }
         req.getRequestDispatcher("/View/discount-form.jsp").forward(req, resp);

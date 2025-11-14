@@ -30,6 +30,7 @@ class AddToCartE2ETest {
     private static WebDriver driver;
     private static WebDriverWait wait;
     private static final String BASE_URL = "http://localhost:8080/CosmeticShop";
+    private static final long STEP_DELAY_MS = Long.getLong("e2e.stepDelay", 1200L);
     
     @BeforeAll
     static void setUpAll() {
@@ -114,6 +115,7 @@ class AddToCartE2ETest {
     void shouldAddProductToCartAsGuest() {
         // Truy cập trang sản phẩm
         driver.get(BASE_URL + "/products");
+        pause();
         
         // Tìm nút "Thêm vào giỏ" đầu tiên
         List<WebElement> addToCartButtons = wait.until(
@@ -142,7 +144,9 @@ class AddToCartE2ETest {
         }
         // Đợi element clickable
         wait.until(ExpectedConditions.elementToBeClickable(firstButton));
+        System.out.println("[AddToCartE2ETest] Click nút thêm vào giỏ: " + firstButton.getText());
         firstButton.click();
+        pause();
         
         // Kiểm tra có thông báo thành công hoặc redirect
         wait.until(ExpectedConditions.or(
@@ -190,6 +194,7 @@ class AddToCartE2ETest {
         
         // Truy cập trang giỏ hàng
         driver.get(BASE_URL + "/cart");
+        pause();
         
         // Kiểm tra có sản phẩm trong giỏ hàng
         // Tìm các element có thể chứa thông tin sản phẩm
@@ -217,6 +222,7 @@ class AddToCartE2ETest {
         
         // Bước 1: Thêm sản phẩm như guest
         driver.get(BASE_URL + "/products");
+        pause();
         
         List<WebElement> addButtons = driver.findElements(
             By.xpath("//a[contains(@href, 'addToCart')] | //button[contains(text(), 'Thêm vào giỏ')]")
@@ -232,28 +238,33 @@ class AddToCartE2ETest {
                 Thread.currentThread().interrupt();
             }
             wait.until(ExpectedConditions.elementToBeClickable(button));
+            System.out.println("[AddToCartE2ETest] Thêm sản phẩm trước khi đăng nhập: " + button.getText());
             button.click();
             try {
                 Thread.sleep(1000); // Đợi thêm vào giỏ
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
+            pause();
         }
         
         // Bước 2: Đăng nhập
         driver.get(BASE_URL + "/login");
+        pause();
         
         WebElement emailInput = wait.until(
             ExpectedConditions.presenceOfElementLocated(By.id("email"))
         );
         emailInput.clear();
         emailInput.sendKeys(testUser.getEmail());
+        pause();
         
         WebElement passwordInput = wait.until(
             ExpectedConditions.presenceOfElementLocated(By.id("password"))
         );
         passwordInput.clear();
         passwordInput.sendKeys(testUser.getPassword());
+        pause();
         
         WebElement submitButton = wait.until(
             ExpectedConditions.elementToBeClickable(
@@ -268,6 +279,7 @@ class AddToCartE2ETest {
             Thread.currentThread().interrupt();
         }
         submitButton.click();
+        pause();
         
         // Đợi đăng nhập thành công
         wait.until(ExpectedConditions.or(
@@ -277,6 +289,7 @@ class AddToCartE2ETest {
         
         // Bước 3: Kiểm tra giỏ hàng có sản phẩm từ guest cart
         driver.get(BASE_URL + "/cart");
+        pause();
         
         // Kiểm tra có sản phẩm trong giỏ hàng
         List<WebElement> cartItems = wait.until(
@@ -292,6 +305,17 @@ class AddToCartE2ETest {
             System.out.println("[AddToCartE2ETest] Không tìm thấy cart items, có thể đã merge hoặc UI khác");
         } else {
             assertThat(cartItems.size()).isGreaterThan(0);
+        }
+    }
+
+    private static void pause() {
+        if (STEP_DELAY_MS <= 0) {
+            return;
+        }
+        try {
+            Thread.sleep(STEP_DELAY_MS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 }

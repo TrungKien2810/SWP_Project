@@ -1,8 +1,5 @@
 package Controller;
 
-import DAO.CartDB;
-import DAO.DiscountDB;
-import Model.Discount;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -10,9 +7,26 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import service.CartPromotionService;
+import service.ServiceRegistry;
+import service.dto.PromotionApplicationResult;
 
 @WebServlet(name = "ApplyPromotion", urlPatterns = {"/apply-promo"})
 public class ApplyPromotion extends HttpServlet {
+
+    private CartPromotionService cartPromotionService;
+
+    CartPromotionService cartPromotionService() {
+        if (cartPromotionService == null) {
+            cartPromotionService = ServiceRegistry.getCartPromotionService();
+        }
+        return cartPromotionService;
+    }
+
+    // Setter để test có thể inject mock
+    void setCartPromotionService(CartPromotionService service) {
+        this.cartPromotionService = service;
+    }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -51,52 +65,21 @@ public class ApplyPromotion extends HttpServlet {
             return;
         }
 
-        DiscountDB discountDB = new DiscountDB();
-        Discount discount = discountDB.validateAndGetDiscount(code);
-        CartDB cartDB = new CartDB();
-        double subtotal = cartDB.calculateCartTotal(cartId);
-
-        if (discount == null) {
+        PromotionApplicationResult result = cartPromotionService().applyPromotion(currentUser.getUser_id(), cartId, code);
+        if (!result.isSuccess()) {
             session.removeAttribute("appliedDiscountCode");
             session.removeAttribute("appliedDiscountAmount");
-            request.setAttribute("error", "Mã giảm giá không hợp lệ hoặc đã hết hạn.");
+            request.setAttribute("error", result.getMessage());
             request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
             return;
         }
 
-        // Kiểm tra user có quyền sử dụng voucher này không
-        if (!discountDB.canUserUseDiscount(currentUser.getUser_id(), discount.getDiscountId())) {
-            session.removeAttribute("appliedDiscountCode");
-            session.removeAttribute("appliedDiscountAmount");
-            request.setAttribute("error", "Bạn không có quyền sử dụng mã giảm giá này.");
-            request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
-            return;
-        }
-
-        if (subtotal < discount.getMinOrderAmount()) {
-            request.setAttribute("error", "Đơn hàng chưa đạt tối thiểu để áp dụng mã giảm giá.");
-            request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
-            return;
-        }
-
-        double discountAmount;
-        if ("PERCENTAGE".equalsIgnoreCase(discount.getType())) {
-            discountAmount = subtotal * (discount.getValue() / 100.0);
-            if (discount.getMaxDiscountAmount() != null) {
-                discountAmount = Math.min(discountAmount, discount.getMaxDiscountAmount());
-            }
-        } else { // FIXED_AMOUNT
-            discountAmount = discount.getValue();
-        }
-        if (discountAmount < 0) discountAmount = 0;
-        if (discountAmount > subtotal) discountAmount = subtotal;
-
-        session.setAttribute("appliedDiscountCode", discount.getCode());
-        session.setAttribute("appliedDiscountAmount", discountAmount);
+        session.setAttribute("appliedDiscountCode", result.getDiscountCode());
+        session.setAttribute("appliedDiscountAmount", result.getDiscountAmount());
         // Xóa lastRemovedDiscountCode khi áp dụng mã mới
         session.removeAttribute("lastRemovedDiscountCode");
         // KHÔNG trừ lượt dùng khi mới áp dụng trong giỏ hàng. Chỉ trừ khi đơn hàng hoàn tất.
-        request.setAttribute("msg", "Áp dụng mã thành công: " + discount.getCode());
+        request.setAttribute("msg", result.getMessage());
         request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
     }
 }

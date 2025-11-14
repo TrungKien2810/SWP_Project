@@ -27,6 +27,7 @@ class AdminE2ETest {
     private static WebDriver driver;
     private static WebDriverWait wait;
     private static final String BASE_URL = "http://localhost:8080/CosmeticShop";
+    private static final long STEP_DELAY_MS = Long.getLong("e2e.stepDelay", 1200L);
     private static Model.user adminUser;
     
     @BeforeAll
@@ -112,6 +113,8 @@ class AdminE2ETest {
         }
     }
     
+    private static boolean isLoggedIn = false;
+    
     @BeforeEach
     void setUp() {
         if (adminUser == null) {
@@ -119,40 +122,60 @@ class AdminE2ETest {
             return;
         }
         
-        // Đăng nhập admin trước mỗi test
-        driver.get(BASE_URL + "/login");
-        
-        WebElement emailInput = wait.until(
-            ExpectedConditions.presenceOfElementLocated(By.id("email"))
-        );
-        emailInput.clear();
-        emailInput.sendKeys(adminUser.getEmail());
-        
-        WebElement passwordInput = wait.until(
-            ExpectedConditions.presenceOfElementLocated(By.id("password"))
-        );
-        passwordInput.clear();
-        passwordInput.sendKeys(adminUser.getPassword());
-        
-        WebElement submitButton = wait.until(
-            ExpectedConditions.elementToBeClickable(
-                By.cssSelector("button[type='submit'], input[type='submit']")
-            )
-        );
-        // Scroll vào view trước khi click
-        ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", submitButton);
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+        // Chỉ đăng nhập 1 lần, tái sử dụng session cho các test tiếp theo
+        if (!isLoggedIn) {
+            System.out.println("\n[AdminE2ETest] Đăng nhập admin lần đầu...");
+            // Đăng nhập admin
+            driver.get(BASE_URL + "/login");
+            pause();
+            
+            WebElement emailInput = wait.until(
+                ExpectedConditions.presenceOfElementLocated(By.id("email"))
+            );
+            emailInput.clear();
+            emailInput.sendKeys(adminUser.getEmail());
+            System.out.println("[AdminE2ETest] Email: " + adminUser.getEmail());
+            pause(1000); // Đợi 1 giây để xem email được nhập
+            
+            WebElement passwordInput = wait.until(
+                ExpectedConditions.presenceOfElementLocated(By.id("password"))
+            );
+            passwordInput.clear();
+            passwordInput.sendKeys(adminUser.getPassword());
+            pause(1000); // Đợi 1 giây để xem password được nhập
+            
+            WebElement submitButton = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                    By.cssSelector("button[type='submit'], input[type='submit']")
+                )
+            );
+            // Scroll vào view trước khi click
+            ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", submitButton);
+            pause(500);
+            submitButton.click();
+            pause(2000); // Đợi đăng nhập xong
+            
+            // Đợi đăng nhập thành công
+            wait.until(ExpectedConditions.or(
+                ExpectedConditions.urlContains("/home"),
+                ExpectedConditions.urlContains("/View/home")
+            ));
+            System.out.println("[AdminE2ETest] Đăng nhập thành công! Session sẽ được tái sử dụng cho các test tiếp theo.");
+            isLoggedIn = true;
+        } else {
+            // Đã đăng nhập rồi, chỉ cần đảm bảo vẫn ở trang home hoặc navigate về home
+            try {
+                String currentUrl = driver.getCurrentUrl();
+                if (!currentUrl.contains("/home") && !currentUrl.contains("/admin")) {
+                    driver.get(BASE_URL + "/View/home.jsp");
+                    pause(500);
+                }
+            } catch (Exception e) {
+                // Nếu có lỗi, thử đăng nhập lại
+                isLoggedIn = false;
+                setUp();
+            }
         }
-        submitButton.click();
-        
-        // Đợi đăng nhập thành công
-        wait.until(ExpectedConditions.or(
-            ExpectedConditions.urlContains("/home"),
-            ExpectedConditions.urlContains("/View/home")
-        ));
     }
     
     @Test
@@ -165,6 +188,12 @@ class AdminE2ETest {
         
         // Truy cập trang admin
         driver.get(BASE_URL + "/admin");
+        System.out.println("\n========================================");
+        System.out.println("[AdminE2ETest] TEST 1: Truy cập trang quản lý Admin");
+        System.out.println("========================================");
+        System.out.println("[AdminE2ETest] URL: " + driver.getCurrentUrl());
+        System.out.println("[AdminE2ETest] Page Title: " + driver.getTitle());
+        pause();
         
         // Kiểm tra đã vào trang admin
         wait.until(ExpectedConditions.or(
@@ -174,8 +203,23 @@ class AdminE2ETest {
             )
         ));
         
-        // Kiểm tra có các chức năng admin (tùy theo UI)
-        // Ví dụ: Quản lý sản phẩm, Quản lý đơn hàng, etc.
+        // Tìm và in ra các menu/button admin có sẵn
+        try {
+            java.util.List<WebElement> adminLinks = driver.findElements(
+                By.cssSelector("a[href*='admin'], .admin-menu a, nav a, .sidebar a")
+            );
+            System.out.println("[AdminE2ETest] Tìm thấy " + adminLinks.size() + " menu items:");
+            for (int i = 0; i < Math.min(adminLinks.size(), 10); i++) {
+                String text = adminLinks.get(i).getText().trim();
+                if (!text.isEmpty()) {
+                    System.out.println("  - " + text);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("[AdminE2ETest] Không tìm thấy menu items (có thể UI khác)");
+        }
+        
+        pause(3000); // Đợi 3 giây để xem rõ
     }
     
     @Test
@@ -188,11 +232,36 @@ class AdminE2ETest {
         
         // Truy cập trang quản lý sản phẩm
         driver.get(BASE_URL + "/admin?action=products");
+        System.out.println("\n========================================");
+        System.out.println("[AdminE2ETest] TEST 2: Xem danh sách sản phẩm");
+        System.out.println("========================================");
+        System.out.println("[AdminE2ETest] URL: " + driver.getCurrentUrl());
+        pause();
         
         // Kiểm tra có danh sách sản phẩm
-        wait.until(ExpectedConditions.presenceOfElementLocated(
-            By.cssSelector("table, .product-list, [class*='product']")
+        WebElement productList = wait.until(ExpectedConditions.presenceOfElementLocated(
+            By.cssSelector("table, .product-list, [class*='product'], tbody")
         ));
+        
+        // Đếm số sản phẩm trong bảng
+        try {
+            java.util.List<WebElement> productRows = driver.findElements(
+                By.cssSelector("table tbody tr, .product-item, [class*='product-row']")
+            );
+            System.out.println("[AdminE2ETest] Tìm thấy " + productRows.size() + " sản phẩm trong danh sách");
+            
+            // In ra 5 sản phẩm đầu tiên
+            for (int i = 0; i < Math.min(productRows.size(), 5); i++) {
+                String rowText = productRows.get(i).getText().trim();
+                if (!rowText.isEmpty() && rowText.length() < 200) {
+                    System.out.println("  Sản phẩm " + (i + 1) + ": " + rowText.substring(0, Math.min(100, rowText.length())));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("[AdminE2ETest] Không thể đếm sản phẩm (có thể UI khác)");
+        }
+        
+        pause(3000); // Đợi 3 giây để xem rõ
     }
     
     @Test
@@ -205,11 +274,51 @@ class AdminE2ETest {
         
         // Truy cập trang quản lý đơn hàng
         driver.get(BASE_URL + "/admin?action=orders");
+        System.out.println("\n========================================");
+        System.out.println("[AdminE2ETest] TEST 3: Xem danh sách đơn hàng");
+        System.out.println("========================================");
+        System.out.println("[AdminE2ETest] URL: " + driver.getCurrentUrl());
+        pause();
         
         // Kiểm tra có danh sách đơn hàng
-        wait.until(ExpectedConditions.presenceOfElementLocated(
-            By.cssSelector("table, .order-list, [class*='order']")
+        WebElement orderList = wait.until(ExpectedConditions.presenceOfElementLocated(
+            By.cssSelector("table, .order-list, [class*='order'], tbody")
         ));
+        
+        // Đếm số đơn hàng trong bảng
+        try {
+            java.util.List<WebElement> orderRows = driver.findElements(
+                By.cssSelector("table tbody tr, .order-item, [class*='order-row']")
+            );
+            System.out.println("[AdminE2ETest] Tìm thấy " + orderRows.size() + " đơn hàng trong danh sách");
+            
+            // In ra 5 đơn hàng đầu tiên
+            for (int i = 0; i < Math.min(orderRows.size(), 5); i++) {
+                String rowText = orderRows.get(i).getText().trim();
+                if (!rowText.isEmpty() && rowText.length() < 200) {
+                    System.out.println("  Đơn hàng " + (i + 1) + ": " + rowText.substring(0, Math.min(100, rowText.length())));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("[AdminE2ETest] Không thể đếm đơn hàng (có thể UI khác)");
+        }
+        
+        pause(3000); // Đợi 3 giây để xem rõ
+    }
+
+    private static void pause() {
+        pause(STEP_DELAY_MS);
+    }
+    
+    private static void pause(long milliseconds) {
+        if (milliseconds <= 0) {
+            return;
+        }
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }
 

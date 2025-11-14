@@ -1,9 +1,6 @@
 package Controller;
 
-import DAO.CartDB;
-import DAO.DiscountDB;
 import E2E.TestDataHelper;
-import Model.Discount;
 import Model.user;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,10 +12,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockedConstruction;
 import org.mockito.junit.jupiter.MockitoExtension;
+import service.CartPromotionService;
+import service.dto.PromotionApplicationResult;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,6 +44,9 @@ class ApplyPromotionUseCaseTest {
     @Mock
     private RequestDispatcher dispatcher;
 
+    @Mock
+    private CartPromotionService cartPromotionService;
+
     private ApplyPromotion servlet;
     
     // Sample user từ database (lấy một lần để dùng cho nhiều test)
@@ -55,6 +55,7 @@ class ApplyPromotionUseCaseTest {
     @BeforeEach
     void setUp() {
         servlet = new ApplyPromotion();
+        servlet.setCartPromotionService(cartPromotionService);
         
         // Lấy sample user từ database một lần (có thể cache)
         if (sampleUser == null) {
@@ -131,12 +132,10 @@ class ApplyPromotionUseCaseTest {
         when(session.getAttribute("cartId")).thenReturn(7);
         when(session.getAttribute("user")).thenReturn(account);
         when(request.getParameter("promoCode")).thenReturn("INVALID");
+        when(cartPromotionService.applyPromotion(account.getUser_id(), 7, "INVALID"))
+                .thenReturn(PromotionApplicationResult.failure("Mã giảm giá không hợp lệ hoặc đã hết hạn."));
 
-        try (MockedConstruction<DiscountDB> mockedDiscountDb = mockConstruction(DiscountDB.class, (mock, context) -> {
-                 when(mock.validateAndGetDiscount("INVALID")).thenReturn(null);
-             })) {
-            servlet.doPost(request, response);
-        }
+        servlet.doPost(request, response);
 
         verify(session).removeAttribute("appliedDiscountCode");
         verify(session).removeAttribute("appliedDiscountAmount");
@@ -150,22 +149,14 @@ class ApplyPromotionUseCaseTest {
         setCommonDispatch();
         // Dùng sample user từ database
         user account = sampleUser;
-        Discount discount = createPercentDiscount();
-
         when(request.getSession()).thenReturn(session);
         when(session.getAttribute("cartId")).thenReturn(15);
         when(session.getAttribute("user")).thenReturn(account);
         when(request.getParameter("promoCode")).thenReturn("SALE50");
+        when(cartPromotionService.applyPromotion(account.getUser_id(), 15, "SALE50"))
+                .thenReturn(PromotionApplicationResult.failure("Bạn không có quyền sử dụng mã giảm giá này."));
 
-        try (MockedConstruction<DiscountDB> mockedDiscountDb = mockConstruction(DiscountDB.class, (mock, context) -> {
-                 when(mock.validateAndGetDiscount("SALE50")).thenReturn(discount);
-                 when(mock.canUserUseDiscount(account.getUser_id(), discount.getDiscountId())).thenReturn(false);
-             });
-             MockedConstruction<CartDB> mockedCartDb = mockConstruction(CartDB.class, (mock, context) -> {
-                 when(mock.calculateCartTotal(15)).thenReturn(800_000d);
-             })) {
-            servlet.doPost(request, response);
-        }
+        servlet.doPost(request, response);
 
         verify(request).setAttribute("error", "Bạn không có quyền sử dụng mã giảm giá này.");
         verify(dispatcher).forward(request, response);
@@ -177,23 +168,14 @@ class ApplyPromotionUseCaseTest {
         setCommonDispatch();
         // Dùng sample user từ database
         user account = sampleUser;
-        Discount discount = createPercentDiscount();
-        discount.setMinOrderAmount(1_000_000d);
-
         when(request.getSession()).thenReturn(session);
         when(session.getAttribute("cartId")).thenReturn(77);
         when(session.getAttribute("user")).thenReturn(account);
         when(request.getParameter("promoCode")).thenReturn("SALE50");
+        when(cartPromotionService.applyPromotion(account.getUser_id(), 77, "SALE50"))
+                .thenReturn(PromotionApplicationResult.failure("Đơn hàng chưa đạt tối thiểu để áp dụng mã giảm giá."));
 
-        try (MockedConstruction<DiscountDB> mockedDiscountDb = mockConstruction(DiscountDB.class, (mock, context) -> {
-                 when(mock.validateAndGetDiscount("SALE50")).thenReturn(discount);
-                 when(mock.canUserUseDiscount(account.getUser_id(), discount.getDiscountId())).thenReturn(true);
-             });
-             MockedConstruction<CartDB> mockedCartDb = mockConstruction(CartDB.class, (mock, context) -> {
-                 when(mock.calculateCartTotal(77)).thenReturn(500_000d);
-             })) {
-            servlet.doPost(request, response);
-        }
+        servlet.doPost(request, response);
 
         verify(request).setAttribute("error", "Đơn hàng chưa đạt tối thiểu để áp dụng mã giảm giá.");
         verify(dispatcher).forward(request, response);
@@ -205,26 +187,14 @@ class ApplyPromotionUseCaseTest {
         setCommonDispatch();
         // Dùng sample user từ database
         user account = sampleUser;
-        Discount discount = createPercentDiscount();
-        discount.setCode("SALE50");
-        discount.setValue(20.0);
-        discount.setMinOrderAmount(100_000d);
-        discount.setMaxDiscountAmount(150_000d);
-
         when(request.getSession()).thenReturn(session);
         when(session.getAttribute("cartId")).thenReturn(101);
         when(session.getAttribute("user")).thenReturn(account);
         when(request.getParameter("promoCode")).thenReturn("SALE50");
+        when(cartPromotionService.applyPromotion(account.getUser_id(), 101, "SALE50"))
+                .thenReturn(PromotionApplicationResult.success("SALE50", 150_000d, "Áp dụng mã thành công: SALE50"));
 
-        try (MockedConstruction<DiscountDB> mockedDiscountDb = mockConstruction(DiscountDB.class, (mock, context) -> {
-                 when(mock.validateAndGetDiscount("SALE50")).thenReturn(discount);
-                 when(mock.canUserUseDiscount(account.getUser_id(), discount.getDiscountId())).thenReturn(true);
-             });
-             MockedConstruction<CartDB> mockedCartDb = mockConstruction(CartDB.class, (mock, context) -> {
-                 when(mock.calculateCartTotal(101)).thenReturn(1_500_000d);
-             })) {
-            servlet.doPost(request, response);
-        }
+        servlet.doPost(request, response);
 
         ArgumentCaptor<Double> discountCaptor = ArgumentCaptor.forClass(Double.class);
         verify(session).setAttribute(eq("appliedDiscountCode"), eq("SALE50"));
@@ -235,16 +205,5 @@ class ApplyPromotionUseCaseTest {
         verify(dispatcher).forward(request, response);
     }
 
-    private Discount createPercentDiscount() {
-        Discount discount = new Discount();
-        discount.setDiscountId(123);
-        discount.setType("PERCENTAGE");
-        discount.setCode("SALE");
-        discount.setValue(10.0);
-        discount.setMinOrderAmount(0);
-        discount.setStartDate(new Timestamp(System.currentTimeMillis()));
-        discount.setEndDate(new Timestamp(System.currentTimeMillis() + 86_400_000));
-        return discount;
-    }
 }
 
