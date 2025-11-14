@@ -1,8 +1,8 @@
 
         .product-grid {
             display: grid;
-            /* Tạo lưới với các cột có chiều rộng tối thiểu 180px và tự động lấp đầy */
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            /* Hiển thị 5 cột mỗi hàng */
+            grid-template-columns: repeat(5, 1fr);
             gap: 15px; /* Khoảng cách giữa các sản phẩm */
             padding: 15px 0;
         }
@@ -55,7 +55,7 @@
         }
 
         .product-grid.list-view .product-card-body .price {
-            font-size: 1.3rem;
+            font-size: 16px;
             margin-bottom: 10px;
         }
 
@@ -134,7 +134,7 @@
 
         .product-card-body .price {
             color: #f76c85;
-            font-size: 1.05rem;
+            font-size: 16px;
             font-weight: bold;
             margin-bottom: 10px;
         }
@@ -167,48 +167,48 @@
 
         /* Nút Mua ngay theo style mới */
         .btn-buy-now {
-            background-color: transparent !important;
-            border: 1px solid rgb(218, 233, 255) !important;
-            border-radius: 360px !important;
-            color: rgb(37, 121, 242) !important;
+            background: linear-gradient(135deg, #f76c85, #ff8fa3) !important;
+            border: 2px solid transparent !important;
+            border-radius: 8px !important;
+            color: white !important;
             font-weight: 600 !important;
-            font-size: 12px !important;
-            line-height: 14px !important;
-            padding: 8px 16px !important;
+            font-size: 13px !important;
+            line-height: 1.4 !important;
+            padding: 10px 20px !important;
             transition: all 0.3s ease !important;
             text-decoration: none !important;
             display: inline-flex !important;
             align-items: center !important;
             gap: 6px !important;
+            box-shadow: 0 2px 8px rgba(247, 108, 133, 0.25) !important;
         }
 
         .btn-buy-now:hover {
-            background-color: rgb(37, 121, 242) !important;
+            background: linear-gradient(135deg, #ff8fa3, #f76c85) !important;
             color: white !important;
-            border-color: rgb(37, 121, 242) !important;
-            transform: translateY(-1px) !important;
-            box-shadow: 0 2px 8px rgba(37, 121, 242, 0.3) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 12px rgba(247, 108, 133, 0.35) !important;
         }
 
         .btn-buy-now i {
-            font-size: 10px !important;
+            font-size: 12px !important;
         }
 
         /* Override Bootstrap classes */
         .btn-buy-now.btn-sm {
-            font-size: 12px !important;
-            padding: 8px 16px !important;
+            font-size: 13px !important;
+            padding: 10px 20px !important;
         }
 
         .btn-buy-now:focus {
-            box-shadow: none !important;
+            box-shadow: 0 2px 8px rgba(247, 108, 133, 0.25) !important;
             outline: none !important;
         }
 
         .btn-buy-now:active {
-            background-color: rgb(37, 121, 242) !important;
+            background: linear-gradient(135deg, #e84a68, #ff7a95) !important;
             color: white !important;
-            border-color: rgb(37, 121, 242) !important;
+            transform: translateY(0) !important;
         }
 
         /* CSS cho sidebar filter */
@@ -562,7 +562,26 @@
         }
 
         /* Responsive design cho layout mới */
+        @media (max-width: 1200px) {
+            .product-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 15px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .product-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 15px;
+            }
+        }
+        
         @media (max-width: 768px) {
+            .product-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            
             .filter-sidebar {
                 position: static;
                 max-height: none;
@@ -645,7 +664,7 @@
             }
             
             .product-grid {
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                grid-template-columns: repeat(3, 1fr);
                 gap: 15px;
             }
         }

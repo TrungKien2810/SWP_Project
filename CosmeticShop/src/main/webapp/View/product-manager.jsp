@@ -63,7 +63,7 @@
                                                     <tr>
                                                         <td>${product.productId}</td>
                                                         <td>${product.name}</td>
-                                                        <td><span class="text-success fw-bold">${product.price} VNĐ</span></td>
+                                                        <td><span class="text-success fw-bold">${product.price} ₫</span></td>
                                                         <td>
                                                             <c:choose>
                                                                 <c:when test="${product.description.length() > 50}">
@@ -129,7 +129,7 @@
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="mb-3">
-                                                        <label for="price" class="form-label">Giá (VNĐ)</label>
+                                                        <label for="price" class="form-label">Giá (₫)</label>
                                                         <input type="number" step="1000" class="form-control" name="price" id="price" required>
                                                     </div>
                                                 </div>

@@ -69,7 +69,7 @@ new Chart(ctx, {
     data: {
         labels: labels,
         datasets: [{
-            label: "Doanh thu (VNĐ)",
+            label: "Doanh thu (₫)",
             data: data7d,
             fill: true,
             borderColor: '#f76c85',

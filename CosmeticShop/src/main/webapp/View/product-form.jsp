@@ -65,7 +65,7 @@
             </div>
 
             <div class="mb-3">
-                <label for="price" class="form-label">Giá (VNĐ)</label>
+                <label for="price" class="form-label">Giá (₫)</label>
                 <input type="number" step="1000" class="form-control" name="price" id="price" value="${product.price}" required>
             </div>
 

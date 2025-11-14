@@ -1,0 +1,219 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sản Phẩm Khuyến Mại - PinkyCloud</title>
+    
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" 
+          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/collection.css">
+</head>
+
+<body>
+    <%@ include file="/View/includes/header.jspf" %>
+    
+    <main class="container my-5">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold" style="color: #f76c85; font-family: 'Times New Roman', Times, serif;">
+                <i class="fas fa-tags text-success"></i> SẢN PHẨM KHUYẾN MẠI
+            </h2>
+            <p class="text-muted">Giá tốt nhất dành cho bạn - Tiết kiệm ngay hôm nay!</p>
+        </div>
+
+        <!-- Thông tin kết quả -->
+        <div class="results-header mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-1">
+                        <i class="fas fa-percentage me-2"></i>Tổng số sản phẩm
+                    </h5>
+                    <small class="text-muted">
+                        <c:choose>
+                            <c:when test="${empty promotionalProducts}">
+                                Không có sản phẩm nào
+                            </c:when>
+                            <c:otherwise>
+                                Hiển thị ${(currentPage-1)*pageSize + 1}-${(currentPage-1)*pageSize + promotionalProducts.size()} 
+                                trong tổng số ${totalProducts} sản phẩm
+                            </c:otherwise>
+                        </c:choose>
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Danh sách sản phẩm -->
+        <c:choose>
+            <c:when test="${empty promotionalProducts}">
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle fa-2x mb-3"></i>
+                    <h5>Chưa có sản phẩm khuyến mại nào</h5>
+                    <p class="mb-0">Vui lòng quay lại sau hoặc xem các sản phẩm khác.</p>
+                    <a href="${pageContext.request.contextPath}/" class="btn btn-primary mt-3">
+                        <i class="fas fa-home me-2"></i>Về trang chủ
+                    </a>
+                </div>
+            </c:when>
+            <c:otherwise>
+                <div class="product-grid mb-5">
+                    <c:forEach var="product" items="${promotionalProducts}">
+                        <div class="product-card"
+                             onclick="window.location.href='${pageContext.request.contextPath}/product-detail?id=${product.productId}'"
+                             style="cursor: pointer;">
+                            <c:if test="${product.discountActive}">
+                                <div class="discount-flag">
+                                    <c:choose>
+                                        <c:when test="${product.activeDiscount.type == 'PERCENTAGE'}">
+                                            -<fmt:formatNumber value="${product.activeDiscount.value}" maxFractionDigits="0"/>%
+                                        </c:when>
+                                        <c:otherwise>
+                                            -<fmt:formatNumber value="${product.activeDiscount.value}" type="number" maxFractionDigits="0"/> ₫
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
+                            </c:if>
+                            
+                            <!-- Badge Khuyến mại -->
+                            <div style="position: absolute; top: 10px; right: 10px; background: linear-gradient(135deg, #00b894, #00cec9); color: white; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; z-index: 10; box-shadow: 0 3px 10px rgba(0, 184, 148, 0.5);">
+                                <i class="fas fa-percentage"></i> Giảm giá
+                            </div>
+                            
+                            <c:choose>
+                                <c:when test="${not empty product.imageUrl}">
+                                    <img src="${pageContext.request.contextPath}${product.imageUrl}"
+                                         alt="${fn:escapeXml(product.name)}"
+                                         loading="lazy"
+                                         onerror="this.src='${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png'">
+                                </c:when>
+                                <c:otherwise>
+                                    <img src="${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png"
+                                         alt="${fn:escapeXml(product.name)}"
+                                         loading="lazy">
+                                </c:otherwise>
+                            </c:choose>
+                            
+                            <div class="product-card-body">
+                                <h5>${fn:escapeXml(product.name)}</h5>
+                                <c:choose>
+                                    <c:when test="${product.discountActive}">
+                                        <div class="price-wrapper">
+                                            <span class="price-old">
+                                                <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> ₫
+                                            </span>
+                                            <span class="price-new">
+                                                <fmt:formatNumber value="${product.discountedPrice}" type="number" maxFractionDigits="0" /> ₫
+                                            </span>
+                                            <c:if test="${product.discountAmount > 0}">
+                                                <span class="price-save">
+                                                    Tiết kiệm <fmt:formatNumber value="${product.discountAmount}" type="number" maxFractionDigits="0" /> ₫
+                                                </span>
+                                            </c:if>
+                                        </div>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <p class="price">
+                                            <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> ₫
+                                        </p>
+                                    </c:otherwise>
+                                </c:choose>
+                                <div class="action-buttons">
+                                    <a href="${pageContext.request.contextPath}/addToCart?id=${product.productId}&buyNow=true"
+                                        class="btn btn-sm btn-buy-now"
+                                        onclick="event.stopPropagation();">
+                                        <i class="fas fa-shopping-bag"></i> Mua ngay
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </c:forEach>
+                </div>
+
+                <!-- Phân trang -->
+                <c:if test="${totalPages > 1}">
+                    <nav aria-label="Product pagination">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
+                                <a class="page-link" href="?page=${currentPage - 1}&pageSize=${pageSize}">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            
+                            <c:forEach var="i" begin="1" end="${totalPages}">
+                                <c:if test="${i == 1 || i == totalPages || (i >= currentPage - 2 && i <= currentPage + 2)}">
+                                    <li class="page-item ${currentPage == i ? 'active' : ''}">
+                                        <a class="page-link" href="?page=${i}&pageSize=${pageSize}">${i}</a>
+                                    </li>
+                                </c:if>
+                                <c:if test="${i == currentPage - 3 || i == currentPage + 3}">
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                </c:if>
+                            </c:forEach>
+                            
+                            <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
+                                <a class="page-link" href="?page=${currentPage + 1}&pageSize=${pageSize}">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </c:if>
+            </c:otherwise>
+        </c:choose>
+        
+        <!-- Các trang sản phẩm khác -->
+        <div class="row mt-5">
+            <div class="col-md-4 mb-3">
+                <div class="card border-warning h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-star text-warning fa-3x mb-3"></i>
+                        <h5 class="card-title">Sản Phẩm Nổi Bật</h5>
+                        <p class="card-text">Xem các sản phẩm được yêu thích nhất</p>
+                        <a href="${pageContext.request.contextPath}/featured-products" class="btn btn-warning">
+                            Xem ngay <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card border-danger h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-fire text-danger fa-3x mb-3"></i>
+                        <h5 class="card-title">Sản Phẩm Bán Chạy</h5>
+                        <p class="card-text">Xem các sản phẩm được mua nhiều nhất</p>
+                        <a href="${pageContext.request.contextPath}/best-selling-products" class="btn btn-danger">
+                            Xem ngay <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card border-primary h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-th text-primary fa-3x mb-3"></i>
+                        <h5 class="card-title">Tất Cả Sản Phẩm</h5>
+                        <p class="card-text">Khám phá toàn bộ bộ sưu tập của chúng tôi</p>
+                        <a href="${pageContext.request.contextPath}/products" class="btn btn-primary">
+                            Khám phá <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <%@ include file="/View/includes/footer.jspf" %>
+    <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
