@@ -166,6 +166,12 @@
                     <!-- Thêm delay giữa các test để có thể xem -->
                     <forkCount>1</forkCount>
                     <reuseForks>false</reuseForks>
+                    
+                    <!-- Fix font encoding cho Vietnamese text -->
+                    <systemPropertyVariables>
+                        <file.encoding>UTF-8</file.encoding>
+                        <console.encoding>UTF-8</console.encoding>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
             <plugin>

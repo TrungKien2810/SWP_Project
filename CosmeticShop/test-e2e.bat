@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 echo ========================================
 echo Run All E2E Tests (Test on Web)
 echo ========================================

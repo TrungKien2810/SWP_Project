@@ -1,10 +1,11 @@
 package DAO;
 
+import E2E.TestDataHelper;
 import Model.user;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Assumptions;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -14,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  * Test class cho UserDB
  * 
  * Note: Các test này yêu cầu database connection thực tế.
- * Để chạy integration tests, cần cấu hình test database.
+ * Sử dụng TestDataHelper để lấy data động từ database thay vì hardcode.
  */
 @DisplayName("UserDB DAO Tests")
 class UserDBTest {
@@ -23,72 +24,74 @@ class UserDBTest {
 
     @BeforeEach
     void setUp() {
-        // Lưu ý: Cần cấu hình test database hoặc mock connection
-        // userDB = new UserDB();
+        userDB = new UserDB();
     }
 
     @Test
-    @DisplayName("Test getUserByEmail với email hợp lệ")
-    @Disabled("Requires database connection - enable for integration tests")
+    @DisplayName("Test getUserByEmail với email hợp lệ - lấy từ database")
     void testGetUserByEmail_ValidEmail() {
-        // Given
-        String email = "test@example.com";
+        // Given - Lấy user động từ database
+        user randomUser = TestDataHelper.getRandomUser();
+        Assumptions.assumeTrue(randomUser != null, "Database phải có ít nhất 1 user để test");
+        String email = randomUser.getEmail();
 
         // When
-        // user user = userDB.getUserByEmail(email);
+        user user = userDB.getUserByEmail(email);
 
         // Then
-        // assertNotNull(user);
-        // assertThat(user.getEmail()).isEqualTo(email);
+        assertNotNull(user, "User với email " + email + " phải tồn tại trong database");
+        assertThat(user.getEmail()).isEqualTo(email);
+        System.out.println("[UserDBTest] Tìm thấy user: " + user.getEmail() + " (ID: " + user.getUser_id() + ")");
     }
 
     @Test
     @DisplayName("Test getUserByEmail với email không tồn tại")
-    @Disabled("Requires database connection - enable for integration tests")
     void testGetUserByEmail_InvalidEmail() {
         // Given
-        String invalidEmail = "nonexistent@example.com";
+        String invalidEmail = "nonexistent_" + System.currentTimeMillis() + "@example.com";
 
         // When
-        // user user = userDB.getUserByEmail(invalidEmail);
+        user user = userDB.getUserByEmail(invalidEmail);
 
         // Then
-        // assertNull(user);
+        assertNull(user, "User với email không tồn tại phải trả về null");
     }
 
     @Test
-    @DisplayName("Test addUser")
-    @Disabled("Requires database connection - enable for integration tests")
-    void testAddUser() {
-        // Given
-        // user newUser = new user(0, "testuser", "newuser@example.com", 
-        //         "0123456789", "password123", "USER", LocalDateTime.now());
+    @DisplayName("Test getUserById với ID hợp lệ - lấy từ database")
+    void testGetUserById_ValidId() {
+        // Given - Lấy user động từ database
+        user randomUser = TestDataHelper.getRandomUser();
+        Assumptions.assumeTrue(randomUser != null, "Database phải có ít nhất 1 user để test");
+        int userId = randomUser.getUser_id();
 
         // When
-        // boolean result = userDB.addUser(newUser);
+        user user = userDB.getUserById(userId);
 
         // Then
-        // assertThat(result).isTrue();
+        assertNotNull(user, "User với ID " + userId + " phải tồn tại trong database");
+        assertThat(user.getUser_id()).isEqualTo(userId);
+        System.out.println("[UserDBTest] Tìm thấy user ID " + userId + ": " + user.getEmail());
     }
 
     @Test
-    @DisplayName("Test updateUser")
-    @Disabled("Requires database connection - enable for integration tests")
-    void testUpdateUser() {
-        // Given
-        // user user = userDB.getUserByEmail("test@example.com");
-        // user.setPhone("0999999999");
+    @DisplayName("Test getUserById với ID không tồn tại")
+    void testGetUserById_InvalidId() {
+        // Given - ID không tồn tại
+        int invalidId = 99999;
 
         // When
-        // boolean result = userDB.updateUser(user);
+        user user = userDB.getUserById(invalidId);
 
         // Then
-        // assertThat(result).isTrue();
+        assertNull(user, "User với ID không tồn tại phải trả về null");
     }
 
     // TODO: Thêm các test cases khác:
-    // - testGetUserById
+    // - testAddUser (cần cleanup sau test)
+    // - testUpdateUser (cần restore sau test)
     // - testGetAllUsers
+    // - testGetUsersByRole
     // - testDeleteUser
     // - testChangePassword
     // - testUpdateAvatar
