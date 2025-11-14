@@ -19,7 +19,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -39,7 +38,6 @@ import static org.mockito.Mockito.*;
  */
 @DisplayName("Checkout Flow Tests")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@Order(4)
 class CheckoutFlowTest {
 
     @Mock
@@ -64,20 +62,31 @@ class CheckoutFlowTest {
         MockitoAnnotations.openMocks(this);
         checkoutServlet = new Checkout();
 
-        // Setup test user
-        testUser = new user(1, "testuser", "test@gmail.com", "0123456789",
-                "password", "USER", LocalDateTime.now());
+        // Lấy test data động từ database
+        testUser = E2E.TestDataHelper.getRandomUser();
+        if (testUser == null) {
+            // Fallback nếu không có user trong DB
+            testUser = new user(1, "testuser", "test@gmail.com", "0123456789",
+                    "password", "USER", LocalDateTime.now());
+        }
 
         // Setup test cart
-        testCart = new Cart(1, 1, LocalDateTime.now(), LocalDateTime.now());
+        testCart = new Cart(1, testUser.getUser_id(), LocalDateTime.now(), LocalDateTime.now());
+
+        // Lấy product từ database để tạo checkout items
+        Model.Product sampleProduct = E2E.TestDataHelper.getRandomProductInStock();
+        if (sampleProduct == null) {
+            // Fallback nếu không có product trong DB
+            sampleProduct = new Model.Product(1, "Kem dưỡng ẩm", 250000.0, 10, "Description", "image.jpg", 1);
+        }
 
         // Setup test checkout items
         testCheckoutItems = new ArrayList<>();
         CheckoutItem item1 = new CheckoutItem();
-        item1.setProductId(1);
+        item1.setProductId(sampleProduct.getProductId());
         item1.setQuantity(2);
-        item1.setPrice(250000.0);
-        item1.setProductName("Kem dưỡng ẩm");
+        item1.setPrice(sampleProduct.getPrice());
+        item1.setProductName(sampleProduct.getName());
         testCheckoutItems.add(item1);
     }
 

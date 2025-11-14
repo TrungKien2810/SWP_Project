@@ -1,5 +1,11 @@
-<%@page import="Model.user"%>
-<%@page import="DAO.BannerDB, DAO.CategoryDB, DAO.ProductDB, java.util.List, Model.Banner, Model.Category, Model.Product" %>
+<%@page import="Model.user" %>
+<%@page import="DAO.BannerDB" %>
+<%@page import="DAO.CategoryDB" %>
+<%@page import="DAO.ProductDB" %>
+<%@page import="java.util.List" %>
+<%@page import="Model.Banner" %>
+<%@page import="Model.Category" %>
+<%@page import="Model.Product" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>

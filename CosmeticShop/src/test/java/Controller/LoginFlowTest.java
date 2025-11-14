@@ -7,42 +7,35 @@ import Model.Cart;
 import Model.CartItems;
 import Model.Product;
 import Model.user;
-import Util.CartCookieUtil;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.MockedConstruction;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Test class cho Login Flow
- * Test các scenarios: đăng nhập thành công, thất bại, merge guest cart, remember me
- * 
- * Flow Order: 1 - Bước đầu tiên trong shopping flow
+ * Use case tests cho servlet đăng nhập (UC-002: User Login).
+ * Bao phủ các luồng chính/ngoại lệ: email không hợp lệ, bỏ trống, user không tồn tại,
+ * đăng nhập thành công và hợp nhất giỏ hàng guest.
  */
-@DisplayName("Login Flow Tests")
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@Order(1)
+@ExtendWith(MockitoExtension.class)
+@DisplayName("UC-002: Login Servlet Use Cases")
 class LoginFlowTest {
 
     @Mock
@@ -55,197 +48,165 @@ class LoginFlowTest {
     private HttpSession session;
 
     @Mock
-    private RequestDispatcher requestDispatcher;
+    private RequestDispatcher dispatcher;
 
-    @Mock
-    private UserDB userDB;
-
-    @Mock
-    private CartDB cartDB;
-
-    @Mock
-    private ProductDB productDB;
-
-    private login loginServlet;
-    private user testUser;
-    private Cart testCart;
+    private login servlet;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        loginServlet = new login();
-
-        // Setup test user
-        testUser = new user(1, "testuser", "test@gmail.com", "0123456789",
-                "hashedpassword", "USER", LocalDateTime.now());
-
-        // Setup test cart
-        testCart = new Cart(1, 1, LocalDateTime.now(), LocalDateTime.now());
+        servlet = new login();
     }
 
     @Test
-    @DisplayName("Test doGet - should forward to login page")
-    void testDoGet_ShouldForwardToLoginPage() throws Exception {
-        // Given
-        when(request.getRequestDispatcher("/View/log.jsp")).thenReturn(requestDispatcher);
+    @DisplayName("GET /login -> forward tới trang đăng nhập")
+    void shouldForwardToLoginPageOnGet() throws Exception {
+        when(request.getRequestDispatcher("/View/log.jsp")).thenReturn(dispatcher);
 
-        // When
-        loginServlet.doGet(request, response);
+        servlet.doGet(request, response);
 
-        // Then
-        verify(request, times(1)).getRequestDispatcher("/View/log.jsp");
-        verify(requestDispatcher, times(1)).forward(request, response);
+        verify(request).getRequestDispatcher("/View/log.jsp");
+        verify(dispatcher).forward(request, response);
     }
 
     @Test
-    @DisplayName("Test doPost - login thành công với email và password hợp lệ")
-    void testDoPost_LoginSuccess_ValidCredentials() throws Exception {
-        // Given
-        when(request.getSession()).thenReturn(session);
-        when(request.getParameter("email")).thenReturn("test@gmail.com");
-        when(request.getParameter("password")).thenReturn("password123");
-        when(request.getParameter("remember")).thenReturn(null);
-        when(request.getRequestDispatcher(anyString())).thenReturn(requestDispatcher);
-        when(request.getCookies()).thenReturn(new Cookie[]{});
-
-        // Mock UserDB behavior - Note: This requires reflection or refactoring to inject
-        // For now, we test the flow assuming UserDB works correctly
-        // In real scenario, you'd need to inject UserDB as dependency
-
-        // When - Note: This test requires actual database connection
-        // loginServlet.doPost(request, response);
-
-        // Then - Verify expected behavior
-        // verify(session, times(1)).setAttribute(eq("user"), any(user.class));
-        // verify(request, times(1)).getRequestDispatcher("/View/home.jsp");
-    }
-
-    @Test
-    @DisplayName("Test doPost - login thất bại với email không tồn tại")
-    void testDoPost_LoginFailure_EmailNotExists() throws Exception {
-        // Given
-        when(request.getSession()).thenReturn(session);
-        when(request.getParameter("email")).thenReturn("nonexistent@gmail.com");
-        when(request.getParameter("password")).thenReturn("password123");
-        when(request.getRequestDispatcher("/View/log.jsp")).thenReturn(requestDispatcher);
-
-        // When - Note: Requires actual UserDB
-        // loginServlet.doPost(request, response);
-
-        // Then
-        // verify(request, times(1)).setAttribute(eq("error"), eq("Tài khoản không tồn tại, bạn đã đăng ký chưa?"));
-        // verify(request, times(1)).getRequestDispatcher("/View/log.jsp");
-    }
-
-    @Test
-    @DisplayName("Test doPost - login thất bại với password sai")
-    void testDoPost_LoginFailure_WrongPassword() throws Exception {
-        // Given
-        when(request.getSession()).thenReturn(session);
-        when(request.getParameter("email")).thenReturn("test@gmail.com");
-        when(request.getParameter("password")).thenReturn("wrongpassword");
-        when(request.getRequestDispatcher("/View/log.jsp")).thenReturn(requestDispatcher);
-
-        // When - Note: Requires actual UserDB
-        // loginServlet.doPost(request, response);
-
-        // Then
-        // verify(request, times(1)).setAttribute(eq("error"), eq("Email hoặc mật khẩu không đúng"));
-    }
-
-    @Test
-    @DisplayName("Test doPost - login thất bại với email format không hợp lệ")
-    void testDoPost_LoginFailure_InvalidEmailFormat() throws Exception {
-        // Given
+    @DisplayName("POST /login với email sai format -> đặt thông báo lỗi và redirect")
+    void shouldRejectInvalidEmailFormat() throws Exception {
         when(request.getSession()).thenReturn(session);
         when(request.getParameter("email")).thenReturn("invalid-email");
-        when(request.getParameter("password")).thenReturn("password123");
-        when(request.getRequestDispatcher("/View/log.jsp")).thenReturn(requestDispatcher);
+        when(request.getParameter("password")).thenReturn("pass");
+        when(request.getContextPath()).thenReturn("/app");
 
-        // When
-        loginServlet.doPost(request, response);
+        servlet.doPost(request, response);
 
-        // Then
-        verify(request, times(1)).setAttribute(eq("error"), eq("Sai cú pháp email"));
-        verify(request, times(1)).getRequestDispatcher("/View/log.jsp");
-        verify(requestDispatcher, times(1)).forward(request, response);
+        verify(session).setAttribute("loginErrorMsg", "Email không hợp lệ! Vui lòng nhập địa chỉ Gmail.");
+        verify(response).sendRedirect("/app/login");
+        verifyNoMoreInteractions(response);
     }
 
     @Test
-    @DisplayName("Test doPost - login thất bại với email hoặc password rỗng")
-    void testDoPost_LoginFailure_EmptyFields() throws Exception {
-        // Given
+    @DisplayName("POST /login với trường rỗng -> đặt thông báo lỗi và redirect")
+    void shouldRejectEmptyCredentials() throws Exception {
         when(request.getSession()).thenReturn(session);
-        when(request.getParameter("email")).thenReturn("");
+        when(request.getParameter("email")).thenReturn("test@gmail.com");
         when(request.getParameter("password")).thenReturn("");
-        when(request.getRequestDispatcher("/View/log.jsp")).thenReturn(requestDispatcher);
+        when(request.getContextPath()).thenReturn("/shop");
 
-        // When
-        loginServlet.doPost(request, response);
+        servlet.doPost(request, response);
 
-        // Then
-        verify(request, times(1)).setAttribute(eq("error"), eq("Không thể để trống thông tin"));
-        verify(request, times(1)).getRequestDispatcher("/View/log.jsp");
+        verify(session).setAttribute("loginErrorMsg", "Vui lòng nhập đầy đủ email và mật khẩu!");
+        verify(response).sendRedirect("/shop/login");
     }
 
     @Test
-    @DisplayName("Test doPost - remember me được set cookie")
-    void testDoPost_RememberMe_SetsCookies() throws Exception {
-        // Given
+    @DisplayName("POST /login với email chưa đăng ký -> trả về lỗi và redirect")
+    void shouldNotifyWhenUserNotFound() throws Exception {
         when(request.getSession()).thenReturn(session);
-        when(request.getParameter("email")).thenReturn("test@gmail.com");
-        when(request.getParameter("password")).thenReturn("password123");
-        when(request.getParameter("remember")).thenReturn("on");
-        when(request.getRequestDispatcher(anyString())).thenReturn(requestDispatcher);
-        when(request.getCookies()).thenReturn(new Cookie[]{});
+        when(request.getParameter("email")).thenReturn("missing@gmail.com");
+        when(request.getParameter("password")).thenReturn("secret123");
+        when(request.getContextPath()).thenReturn("/shop");
 
-        // When - Note: Requires actual UserDB for full test
-        // loginServlet.doPost(request, response);
+        try (MockedConstruction<UserDB> mockedUserDb = mockConstruction(UserDB.class, (mock, context) -> {
+            when(mock.getUserByEmail("missing@gmail.com")).thenReturn(null);
+        })) {
+            servlet.doPost(request, response);
+        }
 
-        // Then - Verify cookies are set
-        // verify(response, times(1)).addCookie(argThat(cookie -> 
-        //     "email".equals(cookie.getName()) && "test@gmail.com".equals(cookie.getValue())));
-        // verify(response, times(1)).addCookie(argThat(cookie -> 
-        //     "password".equals(cookie.getName()) && "password123".equals(cookie.getValue())));
+        verify(session).setAttribute("loginErrorMsg", "Tài khoản không tồn tại. Bạn đã đăng ký chưa?");
+        verify(response).sendRedirect("/shop/login");
     }
 
     @Test
-    @DisplayName("Test doPost - merge guest cart từ cookie khi login thành công")
-    void testDoPost_MergeGuestCart_OnLoginSuccess() throws Exception {
-        // Given
+    @DisplayName("POST /login thành công -> hợp nhất cart guest vào cart user")
+    void shouldMergeGuestCartOnSuccessfulLogin() throws Exception {
+        String email = "user@gmail.com";
+        String password = "secret123";
+        user account = new user(1, "tester", email, "0123456789", "hash", "USER", LocalDateTime.now());
+        Cart persistedCart = new Cart(10, account.getUser_id(), LocalDateTime.now(), LocalDateTime.now());
+        List<CartItems> emptyCartItems = new ArrayList<>();
+        List<CartItems> mergedItems = List.of(new CartItems(5, persistedCart.getCart_id(), 42, 3, 200_000d));
+        Product product = new Product(42, "Serum", 200_000d, 50, "Moisture", "serum.jpg", 1);
+
+        Cookie guestCartCookie = new Cookie("guest_cart", "42:3");
+
         when(request.getSession()).thenReturn(session);
-        when(request.getParameter("email")).thenReturn("test@gmail.com");
-        when(request.getParameter("password")).thenReturn("password123");
+        when(request.getContextPath()).thenReturn("/shop");
+        when(request.getParameter("email")).thenReturn(email);
+        when(request.getParameter("password")).thenReturn(password);
         when(request.getParameter("remember")).thenReturn(null);
-        when(request.getRequestDispatcher(anyString())).thenReturn(requestDispatcher);
-
-        // Mock guest cart cookie
-        Cookie guestCartCookie = new Cookie(CartCookieUtil.GUEST_CART_COOKIE, "1:2|3:5");
         when(request.getCookies()).thenReturn(new Cookie[]{guestCartCookie});
 
-        // When - Note: Requires actual database connection
-        // loginServlet.doPost(request, response);
+        try (MockedConstruction<UserDB> mockedUserDb = mockConstruction(UserDB.class, (mock, context) -> {
+                 when(mock.getUserByEmail(email)).thenReturn(account);
+                 when(mock.login(email, password)).thenReturn(true);
+             });
+             MockedConstruction<CartDB> mockedCartDb = mockConstruction(CartDB.class, (mock, context) -> {
+                 when(mock.getCartByUserId(account.getUser_id())).thenReturn(null, persistedCart);
+                 when(mock.getCartItemsByCartId(persistedCart.getCart_id()))
+                         .thenReturn(emptyCartItems, mergedItems);
+             });
+             MockedConstruction<ProductDB> mockedProductDb = mockConstruction(ProductDB.class, (mock, context) -> {
+                 when(mock.getProductById(42)).thenReturn(product);
+             })) {
 
-        // Then - Verify cart merge logic
-        // verify(cartDB, atLeastOnce()).getCartItemsByCartId(anyInt());
-        // verify(cartDB, atLeastOnce()).addCartItems(anyInt(), anyInt(), anyInt(), anyDouble());
+            servlet.doPost(request, response);
+
+            CartDB cartDbMock = mockedCartDb.constructed().get(0);
+            verify(cartDbMock).addNewCart(account.getUser_id());
+            verify(cartDbMock).addCartItems(eq(persistedCart.getCart_id()), eq(42), eq(3), eq(product.getDiscountedPrice()));
+        }
+
+        verify(session).setAttribute("user", account);
+        verify(session).setAttribute("cartItems", mergedItems);
+        verify(session).setAttribute(eq("loginSuccessMsg"), contains("Đăng nhập thành công"));
+
+        ArgumentCaptor<Cookie> cookieCaptor = ArgumentCaptor.forClass(Cookie.class);
+        verify(response, atLeastOnce()).addCookie(cookieCaptor.capture());
+        assertThat(cookieCaptor.getAllValues())
+                .anySatisfy(cookie -> {
+                    assertThat(cookie.getName()).isEqualTo("guest_cart");
+                    assertThat(cookie.getMaxAge()).isZero();
+                });
+
+        verify(response).sendRedirect("/shop/View/home.jsp");
     }
 
     @Test
-    @DisplayName("Test doPost - tạo cart mới nếu user chưa có cart")
-    void testDoPost_CreateNewCart_IfNotExists() throws Exception {
-        // Given
+    @DisplayName("POST /login với remember me -> lưu cookie đăng nhập")
+    void shouldSetRememberMeCookies() throws Exception {
         when(request.getSession()).thenReturn(session);
-        when(request.getParameter("email")).thenReturn("test@gmail.com");
-        when(request.getParameter("password")).thenReturn("password123");
-        when(request.getRequestDispatcher(anyString())).thenReturn(requestDispatcher);
+        when(request.getContextPath()).thenReturn("/shop");
+        when(request.getParameter("email")).thenReturn("remember@gmail.com");
+        when(request.getParameter("password")).thenReturn("secret123");
+        when(request.getParameter("remember")).thenReturn("on");
         when(request.getCookies()).thenReturn(new Cookie[]{});
 
-        // When - Note: Requires actual database connection
-        // loginServlet.doPost(request, response);
+        user account = new user(20, "remember", "remember@gmail.com", "000", "hash", "USER", LocalDateTime.now());
+        Cart cart = new Cart(33, 20, LocalDateTime.now(), LocalDateTime.now());
 
-        // Then - Verify cart creation
-        // verify(cartDB, atLeastOnce()).addNewCart(anyInt());
+        try (MockedConstruction<UserDB> mockedUserDb = mockConstruction(UserDB.class, (mock, context) -> {
+                 when(mock.getUserByEmail("remember@gmail.com")).thenReturn(account);
+                 when(mock.login("remember@gmail.com", "secret123")).thenReturn(true);
+             });
+             MockedConstruction<CartDB> mockedCartDb = mockConstruction(CartDB.class, (mock, context) -> {
+                 when(mock.getCartByUserId(account.getUser_id())).thenReturn(cart);
+                 when(mock.getCartItemsByCartId(cart.getCart_id())).thenReturn(new ArrayList<>());
+             });
+             MockedConstruction<ProductDB> ignored = mockConstruction(ProductDB.class)) {
+
+            servlet.doPost(request, response);
+        }
+
+        ArgumentCaptor<Cookie> cookieCaptor = ArgumentCaptor.forClass(Cookie.class);
+        verify(response, times(2)).addCookie(cookieCaptor.capture());
+        assertThat(cookieCaptor.getAllValues())
+                .anySatisfy(cookie -> {
+                    if (cookie.getName().equals("email")) {
+                        assertThat(cookie.getValue()).isEqualTo("remember@gmail.com");
+                        assertThat(cookie.getMaxAge()).isPositive();
+                    }
+                });
+
+        verify(response).sendRedirect("/shop/View/home.jsp");
     }
 }
 

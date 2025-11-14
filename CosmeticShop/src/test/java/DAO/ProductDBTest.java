@@ -1,10 +1,12 @@
 package DAO;
 
+import E2E.TestDataHelper;
 import Model.Product;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Assumptions;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -18,8 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  * Test class cho ProductDB
  * 
  * Note: Các test này yêu cầu database connection thực tế.
- * Để chạy integration tests, cần cấu hình test database.
- * Có thể sử dụng Testcontainers hoặc in-memory database cho unit tests.
+ * Sử dụng TestDataHelper để lấy data động từ database thay vì hardcode.
  */
 @DisplayName("ProductDB DAO Tests")
 class ProductDBTest {
@@ -28,13 +29,11 @@ class ProductDBTest {
 
     @BeforeEach
     void setUp() {
-        // Lưu ý: Cần cấu hình test database hoặc mock connection
-        // productDB = new ProductDB();
+        productDB = new ProductDB();
     }
 
     @Test
-    @DisplayName("Test getAllProducts - requires database")
-    @Disabled("Requires database connection - enable for integration tests")
+    @DisplayName("Test getAllProducts - lấy tất cả products từ database")
     void testGetAllProducts() {
         // Given
         // When
@@ -43,52 +42,69 @@ class ProductDBTest {
         // Then
         assertThat(products).isNotNull();
         // Kiểm tra nếu có dữ liệu trong database
-        // assertThat(products).isNotEmpty();
+        if (!products.isEmpty()) {
+            assertThat(products).isNotEmpty();
+            System.out.println("[ProductDBTest] Tìm thấy " + products.size() + " products trong database");
+        } else {
+            System.out.println("[ProductDBTest] Database chưa có products nào");
+        }
     }
 
     @Test
-    @DisplayName("Test getProductById với ID hợp lệ")
-    @Disabled("Requires database connection - enable for integration tests")
+    @DisplayName("Test getProductById với ID hợp lệ - lấy từ database")
     void testGetProductById_ValidId() {
-        // Given
-        int productId = 1;
+        // Given - Lấy product ID động từ database
+        Integer productId = TestDataHelper.getRandomProductId();
+        Assumptions.assumeTrue(productId != null, "Database phải có ít nhất 1 product để test");
 
         // When
         Product product = productDB.getProductById(productId);
 
         // Then
-        // Nếu có dữ liệu trong database
-        // assertNotNull(product);
-        // assertThat(product.getProductId()).isEqualTo(productId);
+        assertNotNull(product, "Product với ID " + productId + " phải tồn tại trong database");
+        assertThat(product.getProductId()).isEqualTo(productId);
+        System.out.println("[ProductDBTest] Tìm thấy product: " + product.getName() + " (ID: " + productId + ")");
     }
 
     @Test
     @DisplayName("Test getProductById với ID không tồn tại")
-    @Disabled("Requires database connection - enable for integration tests")
     void testGetProductById_InvalidId() {
-        // Given
+        // Given - ID không tồn tại
         int invalidId = 99999;
 
         // When
         Product product = productDB.getProductById(invalidId);
 
         // Then
-        assertNull(product);
+        assertNull(product, "Product với ID không tồn tại phải trả về null");
     }
 
     @Test
-    @DisplayName("Test searchProducts")
-    @Disabled("Requires database connection - enable for integration tests")
+    @DisplayName("Test searchProducts - tìm kiếm với keyword từ database")
     void testSearchProducts() {
-        // Given
-        String searchTerm = "kem";
+        // Given - Lấy keyword từ product thực tế trong DB
+        Product randomProduct = TestDataHelper.getRandomProduct();
+        Assumptions.assumeTrue(randomProduct != null, "Database phải có ít nhất 1 product để test");
+        
+        // Lấy một phần tên product làm search term
+        String productName = randomProduct.getName();
+        String searchTerm = productName.length() > 3 ? productName.substring(0, 3) : productName;
 
         // When
-        // List<Product> products = productDB.searchProducts(searchTerm);
+        List<Product> products = productDB.searchProducts(searchTerm);
 
         // Then
-        // assertThat(products).isNotNull();
-        // Kiểm tra kết quả tìm kiếm
+        assertThat(products).isNotNull();
+        if (!products.isEmpty()) {
+            System.out.println("[ProductDBTest] Tìm thấy " + products.size() + " products với keyword: " + searchTerm);
+            // Kiểm tra ít nhất 1 product chứa search term trong tên hoặc mô tả
+            boolean found = products.stream()
+                .anyMatch(p -> p.getName().toLowerCase().contains(searchTerm.toLowerCase()) 
+                    || (p.getDescription() != null && p.getDescription().toLowerCase().contains(searchTerm.toLowerCase())));
+            assertThat(found).isTrue();
+        } else {
+            System.out.println("[ProductDBTest] Không tìm thấy products với keyword: " + searchTerm);
+        }
     }
 
     // TODO: Thêm các test cases khác:

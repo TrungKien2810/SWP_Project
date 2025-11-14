@@ -62,16 +62,27 @@ class CartFlowTest {
         MockitoAnnotations.openMocks(this);
         cartServlet = new cart();
 
-        // Setup test user
-        testUser = new user(1, "testuser", "test@gmail.com", "0123456789",
-                "password", "USER", LocalDateTime.now());
+        // Lấy test data động từ database
+        testUser = E2E.TestDataHelper.getRandomUser();
+        if (testUser == null) {
+            // Fallback nếu không có user trong DB
+            testUser = new user(1, "testuser", "test@gmail.com", "0123456789",
+                    "password", "USER", LocalDateTime.now());
+        }
 
         // Setup test cart
-        testCart = new Cart(1, 1, LocalDateTime.now(), LocalDateTime.now());
+        testCart = new Cart(1, testUser.getUser_id(), LocalDateTime.now(), LocalDateTime.now());
+
+        // Lấy product từ database để tạo cart items
+        Model.Product sampleProduct = E2E.TestDataHelper.getRandomProductInStock();
+        if (sampleProduct == null) {
+            // Fallback nếu không có product trong DB
+            sampleProduct = new Model.Product(1, "Test Product", 250000.0, 10, "Description", "image.jpg", 1);
+        }
 
         // Setup test cart items
         testCartItems = new ArrayList<>();
-        CartItems item1 = new CartItems(1, 1, 1, 2, 250000.0);
+        CartItems item1 = new CartItems(1, testCart.getCart_id(), sampleProduct.getProductId(), 2, sampleProduct.getPrice());
         testCartItems.add(item1);
     }
 
