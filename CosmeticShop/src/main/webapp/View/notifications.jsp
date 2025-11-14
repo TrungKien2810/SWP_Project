@@ -23,6 +23,8 @@
         .notification-card .notification-message { color:#555; margin:0; white-space:pre-line; }
         .notification-card .tag { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; background:#f1f3f5; font-size:0.8rem; font-weight:600; text-transform:uppercase; color:#495057; letter-spacing:0.5px; }
         .notification-badge-icon { color:#f76c85; }
+        .notification-link { color:#f76c85 !important; transition:color 0.2s ease; }
+        .notification-link:hover { color:#d85a6f !important; text-decoration:underline !important; }
         .notification-empty { display:none; }
         .notification-empty.show { display:block; }
         @media (max-width: 576px) {

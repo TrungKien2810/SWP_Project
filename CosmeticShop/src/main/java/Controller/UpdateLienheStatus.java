@@ -57,16 +57,9 @@ public class UpdateLienheStatus extends HttpServlet {
         lienheDAO dao = new lienheDAO();
         boolean updated = dao.updateStatus(id, statusBool);
 
-//        String redirect = context + "/lienheManagerServlet";
-
-//        String location = response.encodeRedirectURL(redirect + (updated ? "?msg=Cập nhật thành công" : "?msg=Cập nhật thất bại"));
-if(updated){
-    request.getRequestDispatcher("/lienheManagerServlet?msg=Cập nhật thành công").forward(request, response);
-}
-else{
-        request.getRequestDispatcher("/lienheManagerServlet?msg=Cập nhật thất bại").forward(request, response);
-
-}
+        // Redirect về admin panel
+        String msg = updated ? "Cập nhật trạng thái thành công" : "Cập nhật trạng thái thất bại";
+        response.sendRedirect(context + "/admin?action=contact&msg=" + java.net.URLEncoder.encode(msg, "UTF-8"));
     }
 
     @Override
