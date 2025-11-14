@@ -467,6 +467,23 @@ public class DiscountDB {
             return false;
         }
     }
+    
+    // Hoàn lại voucher khi hủy đơn hàng
+    public boolean restoreUserVoucher(int userId, int discountId, int orderId) {
+        // Cập nhật voucher về trạng thái UNUSED và xóa used_date, order_id
+        String sql = "UPDATE UserVouchers " +
+                     "SET status = 'UNUSED', used_date = NULL, order_id = NULL " +
+                     "WHERE user_id = ? AND discount_id = ? AND order_id = ? AND status = 'USED'";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setInt(2, discountId);
+            ps.setInt(3, orderId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
     // Assign all due auto-assign discounts to a specific user, idempotent
     public void assignDueForUser(int userId) {

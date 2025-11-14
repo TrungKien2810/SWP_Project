@@ -23,7 +23,6 @@ import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
 import Util.CartCookieUtil;
-import jakarta.servlet.http.Cookie;
 
 /**
  *
@@ -190,14 +189,22 @@ public class addToCart extends HttpServlet {
                 for (CartItems c : cartItems) {
                     int quantity = c.getQuantity();
                     if (p_id != 0 && p_id == c.getProduct_id()) {
-                        // Increase by requested quantity with simple stock clamp
+                        // Kiểm tra tồn kho trước khi thêm
                         int maxAvailable = product.getStock() > 0 ? product.getStock() : Integer.MAX_VALUE;
                         long requestedTotal = (long) quantity + (long) addQuantity;
                         if (requestedTotal > maxAvailable) {
-                            quantity = maxAvailable;
-                        } else {
-                            quantity = (int) requestedTotal;
+                            // Báo lỗi nếu vượt quá tồn kho
+                            session.setAttribute("cartErrorMsg", 
+                                "Số lượng yêu cầu (" + requestedTotal + ") vượt quá tồn kho hiện có (" + maxAvailable + "). Vui lòng chọn số lượng nhỏ hơn.");
+                            String referer = request.getHeader("referer");
+                            if (referer != null && !referer.isEmpty()) {
+                                response.sendRedirect(referer);
+                            } else {
+                                response.sendRedirect(request.getContextPath() + "/products");
+                            }
+                            return;
                         }
+                        quantity = (int) requestedTotal;
                         c.setQuantity(quantity);
                         cd.updateQuantityAddToCart(cart.getCart_id(), p_id, c.getQuantity());
                         isExist = true;
@@ -206,12 +213,21 @@ public class addToCart extends HttpServlet {
 
             }
             if (isExist == false) {
-                int createQty = addQuantity;
+                // Kiểm tra tồn kho trước khi thêm sản phẩm mới
                 int maxAvailable = product.getStock() > 0 ? product.getStock() : Integer.MAX_VALUE;
-                if (createQty > maxAvailable) {
-                    createQty = maxAvailable;
+                if (addQuantity > maxAvailable) {
+                    // Báo lỗi nếu vượt quá tồn kho
+                    session.setAttribute("cartErrorMsg", 
+                        "Số lượng yêu cầu (" + addQuantity + ") vượt quá tồn kho hiện có (" + maxAvailable + "). Vui lòng chọn số lượng nhỏ hơn.");
+                    String referer = request.getHeader("referer");
+                    if (referer != null && !referer.isEmpty()) {
+                        response.sendRedirect(referer);
+                    } else {
+                        response.sendRedirect(request.getContextPath() + "/products");
+                    }
+                    return;
                 }
-                cd.addCartItems(cart.getCart_id(), p_id, createQty, product.getDiscountedPrice());
+                cd.addCartItems(cart.getCart_id(), p_id, addQuantity, product.getDiscountedPrice());
             }
             cartItems.clear();
             cartItems = cd.getCartItemsByCartId(cart.getCart_id());
@@ -243,9 +259,35 @@ public class addToCart extends HttpServlet {
             }
             // Read cookie map, increment, write back
             java.util.Map<Integer, Integer> cookieCart = CartCookieUtil.readCartMap(request);
-            int newQty = cookieCart.getOrDefault(p_id, 0) + addQuantity;
+            int currentQty = cookieCart.getOrDefault(p_id, 0);
+            int newQty = currentQty + addQuantity;
+            
+            // Kiểm tra tồn kho cho guest user
+            int maxAvailable = product.getStock() > 0 ? product.getStock() : Integer.MAX_VALUE;
+            if (newQty > maxAvailable) {
+                // Báo lỗi nếu vượt quá tồn kho
+                session.setAttribute("cartErrorMsg", 
+                    "Số lượng yêu cầu (" + newQty + ") vượt quá tồn kho hiện có (" + maxAvailable + "). Vui lòng chọn số lượng nhỏ hơn.");
+                String referer = request.getHeader("referer");
+                if (referer != null && !referer.isEmpty()) {
+                    response.sendRedirect(referer);
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/products");
+                }
+                return;
+            }
+            
             cookieCart.put(p_id, newQty);
             CartCookieUtil.writeCartMap(response, cookieCart);
+            
+            // ✅ Cập nhật session cartItems từ cookie để đồng bộ
+            List<CartItems> guestCartItems = new ArrayList<>();
+            for (java.util.Map.Entry<Integer, Integer> e : cookieCart.entrySet()) {
+                Product p = pd.getProductById(e.getKey());
+                if (p == null) continue;
+                guestCartItems.add(new CartItems(0, 0, p.getProductId(), e.getValue(), p.getDiscountedPrice()));
+            }
+            session.setAttribute("cartItems", guestCartItems);
             
             // Nếu là "Mua ngay", chuyển hướng đến giỏ hàng
             if ("true".equals(buyNow)) {

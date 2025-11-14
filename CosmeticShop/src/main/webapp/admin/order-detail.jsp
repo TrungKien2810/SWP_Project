@@ -71,7 +71,7 @@
     <div class="card mb-3">
         <div class="card-body">
             <p><strong>Tên:</strong> ${shippingMethod.name}</p>
-            <p><strong>Phí vận chuyển:</strong> ${String.format("%,.0f", shippingMethod.cost)} đ</p>
+            <p><strong>Phí vận chuyển:</strong> ${String.format("%,.0f", shippingMethod.cost)} ₫</p>
             <c:if test="${not empty shippingMethod.estimatedDays}">
                 <p><strong>Thời gian giao hàng:</strong> ${shippingMethod.estimatedDays} ngày</p>
             </c:if>
@@ -101,25 +101,31 @@
                     </td>
                     <td>${item.productName}</td>
                     <td>${item.quantity}</td>
-                    <td>${String.format("%,.0f", item.price)} đ</td>
-                    <td>${String.format("%,.0f", item.quantity * item.price)} đ</td>
+                    <td>${String.format("%,.0f", item.price)} ₫</td>
+                    <td>${String.format("%,.0f", item.quantity * item.price)} ₫</td>
                 </tr>
             </c:forEach>
         </tbody>
         <tfoot>
             <tr>
                 <td colspan="4" class="text-end"><strong>Tổng tiền sản phẩm:</strong></td>
-                <td><strong>${String.format("%,.0f", order.totalAmount - order.shippingCost)} đ</strong></td>
+                <td><strong>${String.format("%,.0f", order.totalAmount - order.shippingCost + order.discountAmount)} ₫</strong></td>
             </tr>
+            <c:if test="${not empty order.discountCode && order.discountAmount > 0}">
+                <tr>
+                    <td colspan="4" class="text-end"><strong>Giảm giá (${order.discountCode}):</strong></td>
+                    <td><strong style="color:#198754;">-${String.format("%,.0f", order.discountAmount)} ₫</strong></td>
+                </tr>
+            </c:if>
             <c:if test="${not empty shippingMethod}">
                 <tr>
                     <td colspan="4" class="text-end"><strong>Phí vận chuyển:</strong></td>
-                    <td><strong>${String.format("%,.0f", order.shippingCost)} đ</strong></td>
+                    <td><strong>${String.format("%,.0f", order.shippingCost)} ₫</strong></td>
                 </tr>
             </c:if>
             <tr style="background-color:#fdf1f4;">
                 <td colspan="4" class="text-end"><strong>TỔNG CỘNG:</strong></td>
-                <td><strong style="color:#f76c85; font-size:1.2em;">${String.format("%,.0f", order.totalAmount)} đ</strong></td>
+                <td><strong style="color:#f76c85; font-size:1.2em;">${String.format("%,.0f", order.totalAmount)} ₫</strong></td>
             </tr>
         </tfoot>
     </table>

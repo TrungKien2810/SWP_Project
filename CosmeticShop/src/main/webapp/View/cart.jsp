@@ -4,6 +4,7 @@
 <%@ page import="java.util.*" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -12,6 +13,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/cart.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/toast-notification.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
           crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
@@ -45,15 +47,6 @@
 %>
 
 <div class="cart-page container mt-5">
-    <!-- Hiển thị thông báo -->
-    <c:if test="${not empty requestScope.msg}">
-        <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin-bottom: 20px;">
-            <i class="fas fa-check-circle me-2"></i>
-            ${requestScope.msg}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    </c:if>
-    
     <h2 class="text-center mb-4">GIỎ HÀNG CỦA BẠN</h2>
 
     <div id="cartContent">
@@ -74,20 +67,20 @@
                     ProductDB pd = new ProductDB();
                     product = pd.getProductById(p.getProduct_id());
                     %>
-                    <div class="cart-item d-flex align-items-center mb-4 p-3 border rounded shadow-sm">
-                        <input type="checkbox" class="cart-item-checkbox me-2" checked
+                    <div class="cart-item">
+                        <input type="checkbox" class="cart-item-checkbox" checked
                                data-price="<%=p.getPrice()%>" data-quantity="<%=p.getQuantity()%>">
                         <img src="${pageContext.request.contextPath}<%=product.getImageUrl()%>"
-                             alt="<%=product.getName()%>" class="me-3" style="width:100px; height:100px; object-fit:cover;">
-                        <div class="item-info flex-grow-1">
+                             alt="<%=product.getName()%>">
+                        <div class="item-info">
                             <h5><%=product.getName()%></h5>
-                            <p class="item-price"><%=p.getPrice()%>₫ x <span class="item-qty"><%=p.getQuantity()%></span></p>
-                            <input type="number" value="<%=p.getQuantity()%>" min="1" class="form-control w-25 text-center quantity-input" data-product-id="<%=p.getProduct_id()%>">
+                            <p class="item-price"><%=String.format("%,.0f", p.getPrice())%>₫ x <span class="item-qty"><%=p.getQuantity()%></span></p>
+                            <input type="number" value="<%=p.getQuantity()%>" min="1" max="<%=product.getStock()%>" class="form-control quantity-input" data-product-id="<%=p.getProduct_id()%>" data-stock="<%=product.getStock()%>">
                         </div>
-                        <div class="item-total ms-3">
-                            <p class="fw-bold item-total-text"><%=String.format("%,.0f", p.getPrice() * p.getQuantity())%>₫</p>
+                        <div class="item-total">
+                            <p class="item-total-text"><%=String.format("%,.0f", p.getPrice() * p.getQuantity())%>₫</p>
                             <a href="${pageContext.request.contextPath}/removeFromCart?productId=<%=p.getProduct_id()%>">
-                            <button class="btn btn-sm btn-outline-danger mt-2 delete-btn">Xóa</button>
+                                <button class="btn delete-btn"><i class="fas fa-trash-alt"></i> Xóa</button>
                             </a>
                         </div>
                     </div>
@@ -95,8 +88,8 @@
                 </div>
 
                 <!-- CART SUMMARY -->
-                <div class="col-md-4 cart-summary bg-light p-4 rounded shadow-sm">
-                    <h4 class="fw-bold mb-3">Tổng cộng</h4>
+                <div class="col-md-4 cart-summary">
+                    <h4>Tổng cộng</h4>
                     <div class="d-flex justify-content-between mb-2">
                         <span>Tạm tính:</span>
                         <span id="subtotalDisplay"><%=String.format("%,.0f", totalPrice)%>₫</span>
@@ -108,8 +101,8 @@
                     <hr>
 
                     <div class="mb-3">
-                        <form id="promoForm" class="d-flex" method="post" action="${pageContext.request.contextPath}/apply-promo">
-                            <select class="form-select me-2" id="promoSelect" onchange="onSelectPromo(this)">
+                        <form id="promoForm" method="post" action="${pageContext.request.contextPath}/apply-promo">
+                            <select class="form-select" id="promoSelect" onchange="onSelectPromo(this)">
                                 <option value="">-- Chọn mã của bạn (nếu có) --</option>
                                 <c:forEach var="d" items="${requestScope.assignedDiscounts}">
                                     <option value="${d.code}" ${sessionScope.appliedDiscountCode eq d.code ? 'selected' : ''}>${d.code}</option>
@@ -139,39 +132,42 @@
                                     </c:if>
                                 </c:if>
                             </select>
-                            <input type="text" name="promoCode" id="promoCodeInput" class="form-control me-2" placeholder="Nhập mã khuyến mãi" value="${sessionScope.appliedDiscountCode}">
-                            <button type="submit" class="btn btn-outline-danger me-2">Áp dụng</button>
-                            <c:if test="${not empty sessionScope.appliedDiscountCode}">
-                                <button type="button" class="btn btn-outline-secondary" onclick="removeDiscount()">Xóa mã</button>
-                            </c:if>
+                            <input type="text" name="promoCode" id="promoCodeInput" class="form-control" placeholder="Nhập mã khuyến mãi" value="${sessionScope.appliedDiscountCode}">
+                            <div class="promo-buttons">
+                                <button type="submit" class="btn btn-outline-danger">Áp dụng</button>
+                                <c:if test="${not empty sessionScope.appliedDiscountCode}">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="removeDiscount()">Xóa mã</button>
+                                </c:if>
+                            </div>
                         </form>
                         <div class="mt-2 d-flex justify-content-between">
-                            <a class="small" href="${pageContext.request.contextPath}/my-promos">My Vouchers</a>
-                            <a class="small" href="${pageContext.request.contextPath}/products">Tiếp tục mua sắm</a>
+                            <a href="${pageContext.request.contextPath}/my-promos"><i class="fas fa-ticket-alt"></i> My Vouchers</a>
+                            <a href="${pageContext.request.contextPath}/products"><i class="fas fa-shopping-bag"></i> Tiếp tục mua sắm</a>
                         </div>
                         <c:if test="${not empty sessionScope.appliedDiscountCode}">
-                            <small class="text-success">Đã áp dụng: ${sessionScope.appliedDiscountCode} (-${sessionScope.appliedDiscountAmount})</small>
-                        </c:if>
-                        <c:if test="${not empty requestScope.msg}">
-                            <small class="text-success">${requestScope.msg}</small>
-                        </c:if>
-                        <c:if test="${not empty requestScope.error}">
-                            <small class="text-danger">${requestScope.error}</small>
+                            <small class="text-success"><i class="fas fa-check-circle"></i> Đã áp dụng: ${sessionScope.appliedDiscountCode} (-<fmt:formatNumber value="${sessionScope.appliedDiscountAmount}" type="number" maxFractionDigits="0" /> ₫)</small>
                         </c:if>
                     </div>
 
                     <div class="d-flex justify-content-between mb-2">
                         <span>Giảm giá:</span>
-                        <span id="discountDisplay">${sessionScope.appliedDiscountAmount != null ? sessionScope.appliedDiscountAmount : 0}</span>
+                        <span id="discountDisplay" data-discount-amount="<%= appliedDiscount != null ? appliedDiscount : 0.0 %>">
+                            <c:choose>
+                                <c:when test="${not empty sessionScope.appliedDiscountAmount}">
+                                    -<fmt:formatNumber value="${sessionScope.appliedDiscountAmount}" type="number" maxFractionDigits="0" /> ₫
+                                </c:when>
+                                <c:otherwise>0 ₫</c:otherwise>
+                            </c:choose>
+                        </span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <span class="fw-bold">Tổng thanh toán:</span>
-                        <strong style="color:#f76c85;" id="totalDisplay"><%=
+                        <span id="totalDisplay"><%=
                             String.format("%,.0f", (totalPrice - appliedDiscount) > 0 ? (totalPrice - appliedDiscount) : 0)
-                        %>₫</strong>
+                        %>₫</span>
                     </div>
 
-                    <a href="${pageContext.request.contextPath}/checkout" class="btn btn-danger w-100 fw-bold">THANH TOÁN NGAY</a>
+                    <a href="${pageContext.request.contextPath}/checkout" id="checkoutBtn" class="btn btn-danger w-100"><i class="fas fa-credit-card"></i> THANH TOÁN NGAY</a>
                 </div>
             </div>
         <% } %>
@@ -179,6 +175,16 @@
 </div>
 
 <script>
+    // Khởi tạo giá trị discount từ server khi trang load
+    let serverDiscount = 0;
+    (function() {
+        const discountEl = document.getElementById('discountDisplay');
+        if (discountEl) {
+            const discountAmount = parseFloat(discountEl.getAttribute('data-discount-amount') || '0');
+            serverDiscount = isNaN(discountAmount) ? 0 : discountAmount;
+        }
+    })();
+    
     function updateCartUI() {
         const cartItems = document.querySelectorAll('.cart-item');
         const cartContentDiv = document.getElementById('cartContent');
@@ -193,11 +199,25 @@
     }
 
     function getServerDiscount() {
-        const el = document.getElementById('discountDisplay');
-        if (!el) return 0;
-        const raw = (el.textContent || '0').toString();
-        const num = Number(raw.replace(/[^0-9.\-]/g, ''));
-        return isNaN(num) ? 0 : num;
+        // Trả về giá trị discount đã được lưu từ server
+        return serverDiscount || 0;
+    }
+    
+    // Hàm để cập nhật giá trị discount khi có thay đổi từ server (sau khi áp dụng/xóa mã)
+    function updateServerDiscount(newDiscount) {
+        serverDiscount = newDiscount || 0;
+    }
+
+    function hasSelectedItems() {
+        return Array.from(document.querySelectorAll('.cart-item-checkbox')).some(cb => cb.checked);
+    }
+
+    function toggleCheckoutButton() {
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        if (!checkoutBtn) return;
+        const hasItem = hasSelectedItems();
+        checkoutBtn.classList.toggle('disabled', !hasItem);
+        checkoutBtn.setAttribute('aria-disabled', !hasItem);
     }
 
     function updateTotal() {
@@ -224,22 +244,51 @@
         const discount = getServerDiscount();
         const total = Math.max(0, subtotal - discount);
         if (totalDisplay) totalDisplay.textContent = total.toLocaleString() + '₫';
+        toggleCheckoutButton();
     }
 
     // Event checkbox & quantity input
     document.querySelectorAll('.quantity-input').forEach(input => {
+        var oldValue = parseInt(input.value); // Lưu giá trị cũ
+        
         input.addEventListener('input', updateTotal);
+        input.addEventListener('focus', function() {
+            oldValue = parseInt(this.value); // Cập nhật giá trị cũ khi focus
+        });
         input.addEventListener('change', function(){
             var qty = parseInt(this.value);
-            if (!qty || qty < 1) { qty = 1; this.value = 1; }
+            if (!qty || qty < 1) { 
+                qty = 1; 
+                this.value = 1; 
+                oldValue = 1;
+            }
             var productId = this.getAttribute('data-product-id');
             fetch('${pageContext.request.contextPath}/cart/update-quantity', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: 'productId=' + encodeURIComponent(productId) + '&quantity=' + encodeURIComponent(qty)
-            }).then(r => r.json()).then(function(){
-                // server refreshed session cart; totals already updated client-side
-            }).catch(function(){ /* ignore */ });
+            }).then(r => r.json()).then(function(data){
+                if (data.ok === false && data.error) {
+                    // Hiển thị thông báo lỗi
+                    if (typeof showErrorToast === 'function') {
+                        showErrorToast(data.error);
+                    } else {
+                        alert(data.error);
+                    }
+                    // Khôi phục giá trị cũ
+                    input.value = oldValue;
+                    updateTotal();
+                } else {
+                    // Cập nhật giá trị cũ thành công
+                    oldValue = qty;
+                    // server refreshed session cart; totals already updated client-side
+                }
+            }).catch(function(err){ 
+                console.error('Error updating cart quantity:', err);
+                // Khôi phục giá trị cũ nếu có lỗi network
+                input.value = oldValue;
+                updateTotal();
+            });
         });
     });
     document.querySelectorAll('.cart-item-checkbox').forEach(cb => {
@@ -266,8 +315,33 @@
         });
     });
 
-    // Khởi tạo tính tổng ban đầu
+    // Khởi tạo tính tổng ban đầu (đảm bảo discount đã được load)
+    // Đảm bảo serverDiscount được khởi tạo trước khi tính tổng
+    if (typeof serverDiscount === 'undefined') {
+        const discountEl = document.getElementById('discountDisplay');
+        if (discountEl) {
+            const discountAmount = parseFloat(discountEl.getAttribute('data-discount-amount') || '0');
+            serverDiscount = isNaN(discountAmount) ? 0 : discountAmount;
+        } else {
+            serverDiscount = 0;
+        }
+    }
     updateTotal();
+    toggleCheckoutButton();
+
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', function(e) {
+            if (!hasSelectedItems()) {
+                e.preventDefault();
+                if (typeof showToast === 'function') {
+                    showToast('Vui lòng chọn ít nhất một sản phẩm để thanh toán.', 'error', 3500);
+                } else {
+                    alert('Vui lòng chọn ít nhất một sản phẩm để thanh toán.');
+                }
+            }
+        });
+    }
 
     // Mã giảm giá: xử lý phía server (không cập nhật client-side tại đây)
     function onSelectPromo(sel){
@@ -334,5 +408,40 @@
 
 <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
 <script src="${pageContext.request.contextPath}/Js/home.js"></script>
+<script src="${pageContext.request.contextPath}/Js/toast-notification.js"></script>
+<script>
+    // Hiển thị toast notification từ URL parameter
+    window.addEventListener('load', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const msg = urlParams.get('msg');
+        const error = urlParams.get('error');
+        
+        if (msg) {
+            try {
+                const decodedMsg = decodeURIComponent(msg);
+                setTimeout(function() {
+                    if (typeof showToast === 'function') {
+                        showToast(decodedMsg, 'success', 4000);
+                    }
+                }, 200);
+            } catch (e) {
+                console.error('Error decoding message:', e);
+            }
+        }
+        
+        if (error) {
+            try {
+                const decodedError = decodeURIComponent(error);
+                setTimeout(function() {
+                    if (typeof showToast === 'function') {
+                        showToast(decodedError, 'error', 4000);
+                    }
+                }, 200);
+            } catch (e) {
+                console.error('Error decoding error:', e);
+            }
+        }
+    });
+</script>
 </body>
 </html>

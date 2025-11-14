@@ -205,7 +205,7 @@ public class Checkout extends HttpServlet {
             NotificationDB notificationDB = new NotificationDB();
             String title = "Đơn hàng mới #" + orderId;
             String formattedTotal = String.format("%,.0f", totalAmount);
-            String message = String.format("Khách hàng %s vừa tạo đơn #%d với tổng giá trị %s đ.", 
+            String message = String.format("Khách hàng %s vừa tạo đơn #%d với tổng giá trị %s ₫.", 
                     currentUser.getUsername(), orderId, formattedTotal);
             String linkUrl = req.getContextPath() + "/admin?action=orderDetail&orderId=" + orderId + "&fullPage=true";
             notificationDB.createNotificationsForAdmins("NEW_ORDER", title, message, linkUrl);

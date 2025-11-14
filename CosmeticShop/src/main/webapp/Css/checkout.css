@@ -1,0 +1,493 @@
+/* ============ CHECKOUT PAGE - MODERN DESIGN ============ */
+
+/* Thiết lập cơ bản cho trang thanh toán */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa;
+  color: #333;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #f76c85;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ff8fa3;
+}
+
+/* Container chính */
+.container-sm {
+  max-width: 1200px;
+  padding: 0 20px;
+}
+
+main {
+  margin: 30px auto;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Tiêu đề trang */
+.checkout-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #f76c85;
+  margin-bottom: 24px;
+  text-align: center;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Alert messages */
+.alert {
+  border-radius: 10px;
+  border: none;
+  padding: 12px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  animation: slideDown 0.4s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.alert-danger {
+  background-color: #fee;
+  color: #c33;
+  border-left: 4px solid #f44;
+}
+
+/* Cards */
+.card {
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  background: white;
+  padding: 16px;
+  margin-bottom: 14px;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.card h5 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #f5f5f5;
+}
+
+/* Form elements */
+.form-select {
+  height: 40px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  padding: 8px 12px;
+  transition: all 0.3s ease;
+  background-color: #fff;
+}
+
+.form-select:focus {
+  border-color: #f76c85;
+  box-shadow: 0 0 0 3px rgba(247, 108, 133, 0.1);
+  outline: none;
+}
+
+.form-control {
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: #f76c85;
+  box-shadow: 0 0 0 3px rgba(247, 108, 133, 0.1);
+  outline: none;
+}
+
+textarea.form-control {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Radio buttons */
+.form-check {
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.form-check:hover {
+  background: #fff5f7;
+  border-color: #ffe0e6;
+}
+
+.form-check-input {
+  width: 18px;
+  height: 18px;
+  margin-top: 0.15em;
+  cursor: pointer;
+  border: 2px solid #d0d0d0;
+}
+
+.form-check-input:checked {
+  background-color: #f76c85;
+  border-color: #f76c85;
+}
+
+.form-check-input:focus {
+  box-shadow: 0 0 0 3px rgba(247, 108, 133, 0.15);
+  border-color: #f76c85;
+}
+
+.form-check-label {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  margin-left: 6px;
+}
+
+.form-text {
+  color: #888;
+  font-size: 12px;
+  margin-top: 6px;
+  padding-left: 14px;
+}
+
+/* Highlight price */
+.highlight {
+  color: #f76c85;
+  font-weight: 700;
+}
+
+/* Địa chỉ giao hàng */
+.address-select-container {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.address-select-container .form-select {
+  flex: 1;
+}
+
+.address-select-container .btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Buttons */
+.btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.btn-outline-primary {
+  background-color: transparent;
+  border: 2px solid #f76c85;
+  color: #f76c85;
+}
+
+.btn-outline-primary:hover {
+  background-color: #f76c85;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(247, 108, 133, 0.3);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #f76c85 0%, #ff8fa3 100%);
+  border: none;
+  color: white;
+  box-shadow: 0 4px 15px rgba(247, 108, 133, 0.3);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #ff8fa3 0%, #f76c85 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(247, 108, 133, 0.4);
+}
+
+/* Order summary card (bên phải) */
+.order-summary-card {
+  position: sticky;
+  top: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.order-summary-card h5 {
+  font-size: 18px;
+  color: #333;
+  text-align: center;
+}
+
+/* List group items */
+.list-group {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.list-group-item {
+  border: none;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 12px 10px;
+  background: #fafafa;
+  transition: all 0.3s ease;
+}
+
+.list-group-item:last-child {
+  border-bottom: none;
+}
+
+.list-group-item:hover {
+  background: #fff5f7;
+  transform: translateX(3px);
+}
+
+.list-group-item img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-right: 12px;
+  border: 2px solid #f5f5f5;
+}
+
+.list-group-item .fw-semibold {
+  font-size: 14px;
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.list-group-item .text-muted {
+  font-size: 13px;
+  color: #888;
+}
+
+/* Price summary */
+.price-line {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 14px;
+}
+
+.price-line span:first-child {
+  color: #666;
+  font-weight: 500;
+}
+
+.price-line strong {
+  color: #333;
+  font-weight: 600;
+}
+
+.price-line.text-success strong {
+  color: #28a745;
+}
+
+.price-line hr {
+  margin: 12px 0;
+  border-color: #e8e8e8;
+}
+
+/* Total price */
+.total-price-line {
+  padding: 12px 0;
+  margin-top: 6px;
+  border-top: 2px solid #f5f5f5;
+}
+
+.total-price-line span {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+}
+
+#grandTotal {
+  font-size: 22px;
+  color: #f76c85;
+  font-weight: 700;
+}
+
+/* Nút đặt hàng */
+.btn-place-order {
+  width: 100%;
+  padding: 13px;
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 16px;
+  background: linear-gradient(135deg, #f76c85 0%, #ff8fa3 100%);
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(247, 108, 133, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-place-order:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(247, 108, 133, 0.4);
+  background: linear-gradient(135deg, #ff8fa3 0%, #f76c85 100%);
+}
+
+.btn-place-order i {
+  margin-right: 6px;
+}
+
+/* Icon trong các section */
+.card h5 i {
+  margin-right: 8px;
+  color: #f76c85;
+}
+
+/* Empty state cho địa chỉ */
+.empty-address {
+  text-align: center;
+  padding: 24px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 2px dashed #ddd;
+}
+
+.empty-address p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.empty-address a {
+  color: #f76c85;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.empty-address a:hover {
+  text-decoration: underline;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 992px) {
+  .order-summary-card {
+    position: static;
+    margin-top: 30px;
+  }
+
+  .card {
+    padding: 20px;
+  }
+
+  .checkout-title {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 768px) {
+  .checkout-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+
+  .card h5 {
+    font-size: 18px;
+  }
+
+  .address-select-container {
+    flex-direction: column;
+  }
+
+  .address-select-container .btn {
+    width: 100%;
+  }
+
+  .list-group-item img {
+    width: 60px;
+    height: 60px;
+  }
+
+  .list-group-item .fw-semibold {
+    font-size: 14px;
+  }
+
+  #grandTotal {
+    font-size: 22px;
+  }
+
+  .btn-place-order {
+    font-size: 16px;
+    padding: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  main {
+    margin: 20px auto;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .form-check {
+    padding: 10px 12px;
+  }
+
+  .list-group-item {
+    padding: 12px 8px;
+  }
+
+  .list-group-item img {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+  }
+}
+

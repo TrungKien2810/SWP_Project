@@ -286,9 +286,11 @@ public class OrderDB {
     // Lấy chi tiết đầy đủ của 1 đơn hàng
     public Order getFullOrderDetails(int orderId) {
         String sql =
-            "SELECT o.*, u.full_name as customer_name, u.email as customer_email, u.phone as customer_phone " +
+            "SELECT o.*, u.full_name as customer_name, u.email as customer_email, u.phone as customer_phone, " +
+            "d.code as discount_code " +
             "FROM Orders o " +
             "JOIN Users u ON o.user_id = u.user_id " +
+            "LEFT JOIN Discounts d ON o.discount_id = d.discount_id " +
             "WHERE o.order_id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, orderId);
@@ -309,6 +311,7 @@ public class OrderDB {
                     o.setTrackingNumber(rs.getString("tracking_number"));
                     if (!rs.wasNull()) o.setDiscountId(rs.getInt("discount_id"));
                     o.setDiscountAmount(rs.getDouble("discount_amount"));
+                    o.setDiscountCode(rs.getString("discount_code"));
                     o.setNotes(rs.getString("notes"));
                     return o;
                 }

@@ -171,6 +171,13 @@
                     <div class="action-title">Đổi mật khẩu</div>
                 </div>
 
+                <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/View/forgot-password.jsp'">
+                    <div class="action-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="action-title">Quên mật khẩu</div>
+                </div>
+
                 <div class="action-card" onclick="location.href='${pageContext.request.contextPath}/shipping-address'">
                     <div class="action-icon">
                         <i class="fas fa-location-dot"></i>

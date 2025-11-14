@@ -731,6 +731,77 @@ body {
   order: 3;
 }
 
+/* ===== SALE COUNTDOWN PROGRESS BAR ===== */
+.sale-countdown-container {
+  width: 100%;
+  padding: 8px 10px;
+  background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+  border-radius: 10px;
+  border: 1px solid #ffcdd2;
+}
+
+.countdown-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #ff2d6b;
+  margin-bottom: 6px;
+}
+
+.countdown-label i {
+  font-size: 0.8rem;
+}
+
+.countdown-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.countdown-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4caf50, #8bc34a);
+  border-radius: 10px;
+  transition: width 0.3s ease, background 0.5s ease;
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.countdown-progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 30px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4));
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.sale-countdown-container.sale-ended {
+  background: #f5f5f5;
+  border-color: #ddd;
+}
+
+.sale-countdown-container.sale-ended .countdown-label {
+  color: #999;
+}
+
 .action-buttons {
   display: none;
 }
