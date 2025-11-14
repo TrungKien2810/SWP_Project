@@ -11,15 +11,16 @@
     <title>Sản Phẩm Khuyến Mại - PinkyCloud</title>
     
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css?v=2.1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" 
           integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
           crossorigin="anonymous" referrerpolicy="no-referrer">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/collection.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/collection.css?v=2.1">
 </head>
 
 <body>
     <%@ include file="/View/includes/header.jspf" %>
+    <%@ include file="/View/includes/mobile-search.jspf" %>
     
     <main class="container my-5">
         <div class="text-center mb-5">

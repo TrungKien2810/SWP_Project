@@ -1,0 +1,198 @@
+/* ===== Common Responsive Styles for All Pages ===== */
+
+/* Reset and Base Styles for Mobile */
+@media (max-width: 768px) {
+  /* Prevent horizontal scroll */
+  html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+  
+  /* Container adjustments */
+  .container {
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+    max-width: 100% !important;
+  }
+  
+  /* Images responsive */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Tables responsive */
+  .table-responsive {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  table {
+    font-size: 14px;
+  }
+  
+  /* Forms responsive */
+  .form-control, .form-select {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+  
+  /* Buttons responsive */
+  .btn {
+    padding: 10px 20px;
+    font-size: 14px;
+    white-space: normal;
+  }
+  
+  .btn-sm {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+  
+  /* Cards responsive */
+  .card {
+    margin-bottom: 15px;
+  }
+  
+  /* Modals responsive */
+  .modal-dialog {
+    margin: 10px;
+    max-width: calc(100% - 20px);
+  }
+  
+  .modal-content {
+    border-radius: 10px;
+  }
+  
+  /* Text adjustments */
+  h1 { font-size: 28px; }
+  h2 { font-size: 24px; }
+  h3 { font-size: 20px; }
+  h4 { font-size: 18px; }
+  h5 { font-size: 16px; }
+  h6 { font-size: 14px; }
+  
+  p, div {
+    word-wrap: break-word;
+  }
+  
+  /* Spacing adjustments */
+  .mt-5 { margin-top: 2rem !important; }
+  .mb-5 { margin-bottom: 2rem !important; }
+  .pt-5 { padding-top: 2rem !important; }
+  .pb-5 { padding-bottom: 2rem !important; }
+  
+  /* Hide elements that take too much space on mobile */
+  .hide-mobile {
+    display: none !important;
+  }
+  
+  /* Stack columns on mobile */
+  .row > [class*='col-'] {
+    margin-bottom: 15px;
+  }
+  
+  /* Flex utilities */
+  .d-flex {
+    flex-wrap: wrap;
+  }
+  
+  .gap-3 {
+    gap: 1rem !important;
+  }
+  
+  .gap-4 {
+    gap: 1.5rem !important;
+  }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+  .container {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+  
+  /* Even smaller text */
+  h1 { font-size: 24px; }
+  h2 { font-size: 20px; }
+  h3 { font-size: 18px; }
+  h4 { font-size: 16px; }
+  h5 { font-size: 15px; }
+  h6 { font-size: 14px; }
+  
+  .btn {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  
+  .btn-group .btn {
+    width: auto;
+  }
+}
+
+/* Utility classes for mobile */
+@media (max-width: 768px) {
+  .mobile-center {
+    text-align: center !important;
+  }
+  
+  .mobile-full-width {
+    width: 100% !important;
+  }
+  
+  .mobile-stack {
+    display: block !important;
+    width: 100% !important;
+  }
+  
+  .mobile-margin-top {
+    margin-top: 15px !important;
+  }
+  
+  .mobile-padding {
+    padding: 15px !important;
+  }
+  
+  .mobile-no-padding {
+    padding: 0 !important;
+  }
+  
+  .mobile-small-text {
+    font-size: 14px !important;
+  }
+}
+
+/* Touch-friendly elements */
+@media (hover: none) and (pointer: coarse) {
+  /* Make clickable elements larger for touch */
+  a, button, .btn, input[type="submit"], input[type="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Remove hover effects on touch devices */
+  a:hover, button:hover, .btn:hover {
+    transform: none !important;
+  }
+}
+
+/* Landscape mode adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+  .menu {
+    min-height: 60px;
+  }
+  
+  .mobile-menu-toggle {
+    top: 10px;
+  }
+  
+  .menu_search_cart {
+    top: 10px;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print, .menu, .header, .footer, .mobile-menu-toggle, .menu_search_cart {
+    display: none !important;
+  }
+}

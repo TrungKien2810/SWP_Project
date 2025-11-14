@@ -16,11 +16,11 @@
                 <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
                 
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
-                <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css?v=2.1">
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" 
                       integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
                       crossorigin="anonymous" referrerpolicy="no-referrer">
-                <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/collection.css">
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/collection.css?v=2.1">
                 
             </head>
 
@@ -31,6 +31,7 @@
               <c:remove var="cartSuccessMsg" scope="session" />
               <c:remove var="cartErrorMsg" scope="session" />
               <%@ include file="/View/includes/header.jspf" %>
+              <%@ include file="/View/includes/mobile-search.jspf" %>
                     <main class="container-fluid my-5">
                         
                         <div class="text-center mb-4">
@@ -241,11 +242,11 @@
                                                                     alt="${fn:escapeXml(product.name)}" 
                                                                     loading="lazy"
                                                                     decoding="async"
-                                                                    onerror="this.onerror=null; this.src='${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png';"
+                                                                    onerror="this.onerror=null; this.src='${pageContext.request.contextPath}/IMG/logo.png';"
                                                                     style="background-color: #f8f9fa;">
                                                             </c:when>
                                                             <c:otherwise>
-                                                                <img src="${pageContext.request.contextPath}/IMG/hinhnen-placeholder.png"
+                                                                <img src="${pageContext.request.contextPath}/IMG/logo.png"
                                                                     alt="${fn:escapeXml(product.name)}" 
                                                                     loading="lazy"
                                                                     decoding="async"

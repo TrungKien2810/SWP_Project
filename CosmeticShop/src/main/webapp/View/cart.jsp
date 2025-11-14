@@ -11,9 +11,9 @@
     <meta charset="UTF-8">
     <title>Giỏ hàng của bạn - PinkyCloud</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/bootstrap.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/cart.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/home.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/toast-notification.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Css/cart.css?v=2.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
           crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
@@ -24,6 +24,7 @@
 <c:remove var="cartSuccessMsg" scope="session" />
 <c:remove var="cartErrorMsg" scope="session" />
 <%@ include file="/View/includes/header.jspf" %>
+<%@ include file="/View/includes/mobile-search.jspf" %>
 
 <%
     List<CartItems> cartItems = new ArrayList<CartItems>();
@@ -442,6 +443,42 @@
             }
         }
     });
+    
+    // Mobile cart summary expand/collapse
+    if (window.innerWidth <= 768) {
+        document.addEventListener('DOMContentLoaded', function() {
+            const cartSummary = document.querySelector('.cart-summary');
+            if (cartSummary) {
+                // Start collapsed
+                cartSummary.classList.add('collapsed');
+                
+                // Click on summary header or before element to toggle
+                const toggleSummary = function(e) {
+                    // Don't toggle if clicking on interactive elements
+                    if (e.target.tagName === 'BUTTON' || 
+                        e.target.tagName === 'INPUT' || 
+                        e.target.tagName === 'SELECT' ||
+                        e.target.tagName === 'A' ||
+                        e.target.closest('button') ||
+                        e.target.closest('input') ||
+                        e.target.closest('select') ||
+                        e.target.closest('a') ||
+                        e.target.closest('#checkoutBtn')) {
+                        return;
+                    }
+                    
+                    // Toggle collapsed class
+                    cartSummary.classList.toggle('collapsed');
+                };
+                
+                // Click on summary to expand/collapse
+                cartSummary.addEventListener('click', toggleSummary);
+                
+                // Click on ::before element (drag handle)
+                cartSummary.style.cursor = 'pointer';
+            }
+        });
+    }
 </script>
 </body>
 </html>

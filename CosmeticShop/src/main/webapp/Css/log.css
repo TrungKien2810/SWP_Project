@@ -227,3 +227,246 @@ footer li a:hover {
   right: 20px;
   z-index: 1050;
 }
+
+/* ===== MOBILE RESPONSIVE STYLES ===== */
+@media (max-width: 768px) {
+  /* Header adjustments */
+  .header {
+    height: auto;
+    flex-direction: column;
+    padding: 10px;
+    gap: 10px;
+  }
+  
+  .header_text {
+    font-size: 12px;
+    margin-top: 5px;
+  }
+  
+  .header_social {
+    gap: 10px;
+  }
+  
+  .header_social_img {
+    width: 30px;
+    height: 30px;
+  }
+  
+  /* Menu adjustments */
+  .menu {
+    flex-direction: column;
+    height: auto;
+    padding: 10px 0;
+  }
+  
+  .menu_logo {
+    position: relative;
+    bottom: 0;
+    margin: 10px auto;
+    text-align: center;
+  }
+  
+  .menu_logo img {
+    max-width: 150px;
+    height: auto;
+  }
+  
+  /* Hide menu list on mobile - handled by mobile menu */
+  .menu_list {
+    display: none;
+  }
+  
+  /* Login Section */
+  .login-section {
+    min-height: 100vh;
+    height: auto;
+    padding: 20px 0;
+  }
+  
+  .login-section .container {
+    padding: 20px;
+  }
+  
+  .login-section h1 {
+    font-size: 35px;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  
+  .login-section h2 {
+    font-size: 30px;
+    margin-bottom: 15px;
+  }
+  
+  .login-section p {
+    font-size: 14px;
+    text-align: center;
+  }
+  
+  /* Form adjustments */
+  .login-section .form-label {
+    font-size: 14px;
+  }
+  
+  .login-section .form-control {
+    font-size: 14px;
+    padding: 10px;
+  }
+  
+  .login-section .form-check-label {
+    font-size: 13px;
+  }
+  
+  /* Buttons */
+  .login-section .btn-signin,
+  .login-section .btn-signup {
+    padding: 12px;
+    font-size: 14px;
+  }
+  
+  /* Social icons */
+  .login-section .social-icons {
+    text-align: center;
+    margin-top: 20px;
+  }
+  
+  .login-section .social-icons a {
+    margin: 0 10px;
+    font-size: 20px;
+  }
+  
+  /* Forgot password link */
+  .login-section .forgot-password {
+    font-size: 13px;
+    margin-top: 10px;
+  }
+  
+  /* Terms */
+  .login-section .terms {
+    font-size: 11px;
+    margin-top: 15px;
+  }
+  
+  /* Row and column adjustments */
+  .login-section .row {
+    margin: 0;
+  }
+  
+  .login-section .col-md-6 {
+    margin-bottom: 20px;
+  }
+  
+  /* Toast adjustments */
+  .toast {
+    right: 10px;
+    left: 10px;
+    width: auto;
+  }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+  /* Header */
+  .header_social_img {
+    width: 25px;
+    height: 25px;
+  }
+  
+  /* Login Section */
+  .login-section .container {
+    padding: 15px;
+  }
+  
+  .login-section h1 {
+    font-size: 28px;
+  }
+  
+  .login-section h2 {
+    font-size: 24px;
+  }
+  
+  .login-section p {
+    font-size: 13px;
+  }
+  
+  /* Form elements smaller */
+  .login-section .form-control {
+    font-size: 13px;
+    padding: 8px;
+  }
+  
+  .login-section .btn-signin,
+  .login-section .btn-signup {
+    padding: 10px;
+    font-size: 13px;
+  }
+  
+  /* Social icons smaller */
+  .login-section .social-icons a {
+    font-size: 18px;
+    margin: 0 8px;
+  }
+  
+  /* Footer adjustments */
+  footer {
+    padding: 20px 15px;
+  }
+  
+  .info {
+    padding-left: 15px;
+  }
+  
+  footer h5 {
+    font-size: 16px;
+  }
+  
+  footer p,
+  footer a {
+    font-size: 13px;
+  }
+}
+
+/* Landscape mode adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+  .login-section {
+    min-height: auto;
+    padding: 10px 0;
+  }
+  
+  .login-section h1 {
+    font-size: 30px;
+  }
+  
+  .login-section h2 {
+    font-size: 26px;
+  }
+  
+  .login-section .container {
+    max-width: 600px;
+  }
+}
+
+/* Ensure form is readable on all screens */
+@media (max-width: 768px) {
+  .login-section {
+    background-attachment: scroll;
+    background-position: center;
+  }
+  
+  /* Add semi-transparent overlay for better readability */
+  .login-section::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1;
+  }
+  
+  .login-section .container {
+    position: relative;
+    z-index: 2;
+  }
+}

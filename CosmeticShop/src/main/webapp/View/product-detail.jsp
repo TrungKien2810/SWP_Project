@@ -33,6 +33,7 @@
     <c:remove var="cartSuccessMsg" scope="session" />
     <c:remove var="cartErrorMsg" scope="session" />
     <%@ include file="/View/includes/header.jspf" %>
+    <%@ include file="/View/includes/mobile-search.jspf" %>
 
     <div class="container" style="margin-top: 20px;">
         <!-- Hiển thị thông báo -->
