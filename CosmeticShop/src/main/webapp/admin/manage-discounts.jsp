@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ include file="/admin/includes/header.jspf" %>
 
 <div class="container-fluid">
@@ -49,7 +50,12 @@
                 <td>${d.code}</td>
                 <td>${d.name}</td>
                 <td>${d.type}</td>
-                <td>${d.value}</td>
+                <td>
+                    <c:choose>
+                        <c:when test="${d.type == 'PERCENTAGE'}">${d.value}%</c:when>
+                        <c:otherwise><fmt:formatNumber value="${d.value}" type="number" maxFractionDigits="0" /> ₫</c:otherwise>
+                    </c:choose>
+                </td>
                 <td>${d.startDate}</td>
                 <td>${d.endDate}</td>
                 <td><c:out value="${d.active ? 'Đang kích hoạt' : 'Tắt'}"/></td>

@@ -83,17 +83,17 @@
                     %>
                     <div class="price-section">
                         <% if (hasDiscount) { %>
-                            <span class="price-original"><%= String.format("%,.0f", originalPrice) %> VND</span>
-                            <span class="price-discounted"><%= String.format("%,.0f", discountedPrice) %> VND</span>
+                            <span class="price-original"><%= String.format("%,.0f", originalPrice) %> ₫</span>
+                            <span class="price-discounted"><%= String.format("%,.0f", discountedPrice) %> ₫</span>
                             <span class="price-badge">
                                 <% if (activeDiscount != null && "PERCENTAGE".equalsIgnoreCase(activeDiscount.getType())) { %>
                                     -<%= String.format("%.0f", activeDiscount.getValue()) %>%
                                 <% } else if (activeDiscount != null) { %>
-                                    -<%= String.format("%,.0f", activeDiscount.getValue()) %> VND
+                                    -<%= String.format("%,.0f", activeDiscount.getValue()) %> ₫
                                 <% } %>
                             </span>
                         <% } else { %>
-                            <span class="price"><%= String.format("%,.0f", originalPrice) %> VND</span>
+                            <span class="price"><%= String.format("%,.0f", originalPrice) %> ₫</span>
                         <% } %>
                     </div>
                     <div class="product-info">

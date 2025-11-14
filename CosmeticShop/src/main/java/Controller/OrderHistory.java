@@ -45,6 +45,15 @@ public class OrderHistory extends HttpServlet {
                 r.put("totalAmount", o.getTotalAmount());
                 r.put("orderStatus", o.getOrderStatus());
                 r.put("paymentStatus", o.getPaymentStatus());
+                // Thông tin giảm giá
+                r.put("discountId", o.getDiscountId());
+                r.put("discountAmount", o.getDiscountAmount());
+                // Tính tổng tiền trước giảm giá (nếu có giảm giá)
+                if (o.getDiscountAmount() > 0) {
+                    r.put("originalAmount", o.getTotalAmount() + o.getDiscountAmount());
+                } else {
+                    r.put("originalAmount", o.getTotalAmount());
+                }
                 var its = orderIdToItems.getOrDefault(o.getOrderId(), new ArrayList<>());
                 // Names and quantities (pairs for display)
                 List<Map<String, Object>> nameQtys = new ArrayList<>();

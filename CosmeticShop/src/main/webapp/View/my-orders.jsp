@@ -33,6 +33,31 @@
         .order-thumb { width:50px; height:50px; object-fit:cover; border-radius:8px; }
         .order-items-list { display:flex; flex-direction:column; gap:6px; }
         .order-items-list div { line-height:1.3; }
+        .price-with-discount { display:flex; flex-direction:column; gap:4px; }
+        .original-price { 
+            text-decoration: line-through; 
+            color: #999; 
+            font-size: 0.9em;
+        }
+        .discounted-price { 
+            color: #f76c85; 
+            font-weight: 700; 
+            font-size: 1.1em;
+        }
+        .discount-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff6f91 0%, #ff9eb7 100%);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+        .discount-badge i {
+            margin-right: 3px;
+            font-size: 0.85em;
+        }
     </style>
 </head>
 <body>
@@ -89,7 +114,26 @@
                                         </div>
                                     </td>
                                     <td>${r.orderDateStr}</td>
-                                    <td><fmt:formatNumber value="${r.totalAmount}" type="number" maxFractionDigits="0"/> đ</td>
+                                    <td>
+                                        <c:choose>
+                                            <c:when test="${r.discountAmount > 0}">
+                                                <div class="price-with-discount">
+                                                    <div class="original-price">
+                                                        <fmt:formatNumber value="${r.originalAmount}" type="number" maxFractionDigits="0"/> ₫
+                                                    </div>
+                                                    <div class="discounted-price">
+                                                        <fmt:formatNumber value="${r.totalAmount}" type="number" maxFractionDigits="0"/> ₫
+                                                    </div>
+                                                    <div class="discount-badge">
+                                                        <i class="fas fa-tag"></i> Giảm <fmt:formatNumber value="${r.discountAmount}" type="number" maxFractionDigits="0"/> ₫
+                                                    </div>
+                                                </div>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <strong><fmt:formatNumber value="${r.totalAmount}" type="number" maxFractionDigits="0"/> ₫</strong>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </td>
                                     <td><span class="status-badge status-${r.orderStatus}">${r.orderStatus}</span></td>
                                     <td><span class="status-badge pay-${r.paymentStatus}">${r.paymentStatus}</span></td>
                                     <td>

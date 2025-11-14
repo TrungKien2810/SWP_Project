@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -64,12 +65,12 @@
                                             <td>
                                                 <c:choose>
                                                     <c:when test="${d.type == 'PERCENTAGE'}">${d.value}%</c:when>
-                                                    <c:otherwise>${d.value}</c:otherwise>
+                                                    <c:otherwise><fmt:formatNumber value="${d.value}" type="number" maxFractionDigits="0" /> ₫</c:otherwise>
                                                 </c:choose>
                                             </td>
                                             <td>
-                                                <c:if test="${d.minOrderAmount > 0}">ĐH tối thiểu: ${d.minOrderAmount}</c:if>
-                                                <c:if test="${d.maxDiscountAmount != null}"><br/>Giảm tối đa: ${d.maxDiscountAmount}</c:if>
+                                                <c:if test="${d.minOrderAmount > 0}">ĐH tối thiểu: <fmt:formatNumber value="${d.minOrderAmount}" type="number" maxFractionDigits="0" /> ₫</c:if>
+                                                <c:if test="${d.maxDiscountAmount != null}"><br/>Giảm tối đa: <fmt:formatNumber value="${d.maxDiscountAmount}" type="number" maxFractionDigits="0" /> ₫</c:if>
                                             </td>
                                             <td><small>${d.startDate} → ${d.endDate}</small></td>
                                             <td><span class="badge bg-success">${d.remainingUses}</span></td>

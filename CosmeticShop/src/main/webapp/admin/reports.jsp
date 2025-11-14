@@ -70,9 +70,9 @@
         <div class="stat-value">
           <c:choose>
             <c:when test="${not empty data.totalRevenue}">
-              ${String.format("%,.0f", data.totalRevenue)} đ
+              ${String.format("%,.0f", data.totalRevenue)} ₫
             </c:when>
-            <c:otherwise>0 đ</c:otherwise>
+            <c:otherwise>0 ₫</c:otherwise>
           </c:choose>
         </div>
       </div>
@@ -89,9 +89,9 @@
         <div class="stat-value">
           <c:choose>
             <c:when test="${not empty data.averageOrderValue}">
-              ${String.format("%,.0f", data.averageOrderValue)} đ
+              ${String.format("%,.0f", data.averageOrderValue)} ₫
             </c:when>
-            <c:otherwise>0 đ</c:otherwise>
+            <c:otherwise>0 ₫</c:otherwise>
           </c:choose>
         </div>
       </div>
@@ -102,9 +102,9 @@
         <div class="stat-value">
           <c:choose>
             <c:when test="${not empty data.totalDiscount}">
-              ${String.format("%,.0f", data.totalDiscount)} đ
+              ${String.format("%,.0f", data.totalDiscount)} ₫
             </c:when>
-            <c:otherwise>0 đ</c:otherwise>
+            <c:otherwise>0 ₫</c:otherwise>
           </c:choose>
         </div>
       </div>
@@ -225,7 +225,7 @@
               <td>${status.index + 1}</td>
               <td><strong>${customer.fullName}</strong></td>
               <td>${customer.email}</td>
-              <td><strong class="text-success">${String.format("%,.0f", customer.totalSpent)} đ</strong></td>
+              <td><strong class="text-success">${String.format("%,.0f", customer.totalSpent)} ₫</strong></td>
               <td><span class="badge bg-primary">${customer.orderCount}</span></td>
             </tr>
           </c:forEach>
@@ -268,7 +268,7 @@
                   <td><strong class="text-primary">${discount.code}</strong></td>
                   <td>${discount.name}</td>
                   <td><span class="badge bg-info">${discount.usageCount}</span></td>
-                  <td class="text-success">${String.format("%,.0f", discount.totalDiscount)} đ</td>
+                  <td class="text-success">${String.format("%,.0f", discount.totalDiscount)} ₫</td>
                 </tr>
               </c:forEach>
               <c:if test="${empty data.topDiscounts}">

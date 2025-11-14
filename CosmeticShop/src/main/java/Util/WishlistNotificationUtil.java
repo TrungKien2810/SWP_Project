@@ -48,7 +48,7 @@ public class WishlistNotificationUtil {
             if ("PERCENTAGE".equalsIgnoreCase(discount.getType())) {
                 discountInfo = String.format("giảm %.0f%%", discount.getValue());
             } else {
-                discountInfo = String.format("giảm %,.0f VND", discount.getValue());
+                discountInfo = String.format("giảm %,.0f ₫", discount.getValue());
             }
         }
         
@@ -157,10 +157,10 @@ public class WishlistNotificationUtil {
             productsHtml.append("<div style=\"border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; margin: 15px 0; background: #fff;\">");
             productsHtml.append("<h3 style=\"margin: 0 0 10px 0; color: #333;\">").append(escapeHtml(product.getName())).append("</h3>");
             productsHtml.append("<p style=\"margin: 5px 0; color: #e91e63; font-size: 18px; font-weight: bold;\">");
-            productsHtml.append(String.format("%,.0f VND", product.getDiscountedPrice()));
+            productsHtml.append(String.format("%,.0f ₫", product.getDiscountedPrice()));
             if (product.isDiscountActive()) {
                 productsHtml.append(" <span style=\"text-decoration: line-through; color: #999; font-size: 14px;\">");
-                productsHtml.append(String.format("%,.0f VND", product.getPrice()));
+                productsHtml.append(String.format("%,.0f ₫", product.getPrice()));
                 productsHtml.append("</span>");
             }
             productsHtml.append("</p>");

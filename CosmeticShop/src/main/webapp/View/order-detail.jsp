@@ -136,7 +136,7 @@
                         <h6><i class="fas fa-truck"></i> Phương thức vận chuyển</h6>
                         <p><strong>Tên:</strong> ${shippingMethod.name}</p>
                         <p><strong>Phí vận chuyển:</strong> 
-                            <fmt:formatNumber value="${shippingMethod.cost}" type="number" maxFractionDigits="0"/> đ
+                            <fmt:formatNumber value="${shippingMethod.cost}" type="number" maxFractionDigits="0"/> ₫
                         </p>
                         <c:if test="${not empty shippingMethod.estimatedDays}">
                             <p><strong>Thời gian giao hàng:</strong> ${shippingMethod.estimatedDays} ngày</p>
@@ -171,26 +171,26 @@
                                         </td>
                                         <td>${item.productName}</td>
                                         <td>${item.quantity}</td>
-                                        <td><fmt:formatNumber value="${item.price}" type="number" maxFractionDigits="0"/> đ</td>
-                                        <td><fmt:formatNumber value="${item.quantity * item.price}" type="number" maxFractionDigits="0"/> đ</td>
+                                        <td><fmt:formatNumber value="${item.price}" type="number" maxFractionDigits="0"/> ₫</td>
+                                        <td><fmt:formatNumber value="${item.quantity * item.price}" type="number" maxFractionDigits="0"/> ₫</td>
                                     </tr>
                                 </c:forEach>
                             </tbody>
                             <tfoot>
                                 <tr>
                                     <td colspan="4" class="text-end"><strong>Tổng tiền sản phẩm:</strong></td>
-                                    <td><strong><fmt:formatNumber value="${order.totalAmount - order.shippingCost}" type="number" maxFractionDigits="0"/> đ</strong></td>
+                                    <td><strong><fmt:formatNumber value="${order.totalAmount - order.shippingCost}" type="number" maxFractionDigits="0"/> ₫</strong></td>
                                 </tr>
                                 <c:if test="${not empty shippingMethod}">
                                     <tr>
                                         <td colspan="4" class="text-end"><strong>Phí vận chuyển:</strong></td>
-                                        <td><strong><fmt:formatNumber value="${order.shippingCost}" type="number" maxFractionDigits="0"/> đ</strong></td>
+                                        <td><strong><fmt:formatNumber value="${order.shippingCost}" type="number" maxFractionDigits="0"/> ₫</strong></td>
                                     </tr>
                                 </c:if>
                                 <tr style="background-color:#fdf1f4;">
                                     <td colspan="4" class="text-end"><strong>TỔNG CỘNG:</strong></td>
                                     <td><strong style="color:#f76c85; font-size:1.2em;">
-                                        <fmt:formatNumber value="${order.totalAmount}" type="number" maxFractionDigits="0"/> đ
+                                        <fmt:formatNumber value="${order.totalAmount}" type="number" maxFractionDigits="0"/> ₫
                                     </strong></td>
                                 </tr>
                             </tfoot>

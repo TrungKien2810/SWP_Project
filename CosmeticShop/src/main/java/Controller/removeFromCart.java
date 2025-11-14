@@ -7,7 +7,6 @@ package Controller;
 import DAO.CartDB;
 import Model.Cart;
 import Model.CartItems;
-import Model.CartItems;
 import Model.user;
 import DAO.ProductDB;
 import Model.Product;
@@ -86,7 +85,9 @@ public class removeFromCart extends HttpServlet {
                 cartItems = cd.getCartItemsByCartId(cart.getCart_id());
             }
             session.setAttribute("cartItems", cartItems);
-            request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
+            // Thông báo thành công khi xóa sản phẩm
+            String successMsg = java.net.URLEncoder.encode("Đã xóa sản phẩm khỏi giỏ hàng thành công! ✓", "UTF-8");
+            response.sendRedirect(request.getContextPath() + "/View/cart.jsp?msg=" + successMsg);
         } else {
             // Guest: remove from cookie
             java.util.Map<Integer, Integer> cookieCart = CartCookieUtil.readCartMap(request);
@@ -101,7 +102,9 @@ public class removeFromCart extends HttpServlet {
                 cartItems.add(new CartItems(0, 0, p.getProductId(), e.getValue(), p.getDiscountedPrice()));
             }
             session.setAttribute("cartItems", cartItems);
-            request.getRequestDispatcher("/View/cart.jsp").forward(request, response);
+            // Thông báo thành công khi xóa sản phẩm
+            String successMsg = java.net.URLEncoder.encode("Đã xóa sản phẩm khỏi giỏ hàng thành công! ✓", "UTF-8");
+            response.sendRedirect(request.getContextPath() + "/View/cart.jsp?msg=" + successMsg);
         }
     }
 

@@ -1,92 +1,635 @@
-/* Tổng thể trang */
-body {
-    background-color: #fff5f7;
-    font-family: "Poppins", sans-serif;
+/* ===== CONTACT MANAGER CSS ===== */
+/* Tổng thể wrapper */
+.contact-manager-wrapper {
+    padding: 30px;
+    background: linear-gradient(135deg, #fff5f7 0%, #ffe5e9 100%);
+    min-height: 100vh;
+}
+
+/* Page Header */
+.page-header {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(255, 105, 180, 0.15);
+    border-left: 4px solid #ff69b4;
+}
+
+.page-header h2 {
+    color: #c2185b;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.page-header h2 i {
+    color: #ff69b4;
+    margin-right: 10px;
+}
+
+.page-header p {
     margin: 0;
-    padding: 0;
+    font-size: 14px;
 }
 
-/* Khung chứa bảng */
-.table-wrapper {
-    width: 95%;
-    margin: 40px auto;
-    background: #ffffff;
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(255, 105, 180, 0.2);
-    overflow-x: auto;
-    padding: 20px 25px;
+/* Stat Cards */
+.stats-row {
+  display: flex;
+  gap: 20px;
+  align-items: stretch;
 }
 
-/* Tiêu đề bảng */
-.feedback-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 15px;
+.stats-row > [class*="col-"] {
+  display: flex;
 }
 
-.feedback-table thead {
-    background: linear-gradient(90deg, #ff99b9, #ffa7c4);
+.stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border-left: 4px solid;
+  width: 100%;
+  height: 100%;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.stat-card.stat-total {
+    border-left-color: #ff69b4;
+}
+
+.stat-card.stat-pending {
+    border-left-color: #ff1493;
+}
+
+.stat-card.stat-completed {
+    border-left-color: #ff6fa8;
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.stat-total .stat-icon {
+    background: linear-gradient(135deg, #ff99b9 0%, #ffa7c4 100%);
     color: white;
 }
 
-.feedback-table th {
-    padding: 14px 12px;
-    text-align: left;
+.stat-pending .stat-icon {
+    background: linear-gradient(135deg, #ff1493 0%, #ff69b4 100%);
+    color: white;
+}
+
+.stat-completed .stat-icon {
+    background: linear-gradient(135deg, #ff6fa8 0%, #ffa8c5 100%);
+    color: white;
+}
+
+.stat-content h6 {
+    color: #7f8c8d;
+    font-size: 13px;
     font-weight: 600;
-    letter-spacing: 0.3px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.feedback-table td {
-    padding: 12px 10px;
-    border-bottom: 1px solid #f1d1da;
-    color: #555;
+.stat-content h2 {
+  color: #2c3e50;
+  font-weight: 700;
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
-/* Hiệu ứng hover */
-.feedback-table tbody tr:hover {
-    background-color: #ffeaf0;
-    transition: 0.3s ease;
+/* Filter Section */
+.filter-section {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(255, 105, 180, 0.15);
+    border-top: 3px solid #ff69b4;
 }
 
-/* Select trạng thái */
-.status-select {
-    border: 1px solid #ff9bb5;
+.search-box {
+    position: relative;
+}
+
+.search-box i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #ff69b4;
+    font-size: 16px;
+}
+
+.search-box input {
+    padding-left: 45px;
+    border: 2px solid #ffcdd2;
     border-radius: 8px;
-    padding: 5px 10px;
-    background-color: #fff;
-    color: #444;
-    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.search-box input:focus {
+    border-color: #ff69b4;
+    box-shadow: 0 0 0 0.2rem rgba(255, 105, 180, 0.15);
+}
+
+.filter-section .form-select {
+    border: 2px solid #ffcdd2;
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.filter-section .form-select:focus {
+    border-color: #ff69b4;
+    box-shadow: 0 0 0 0.2rem rgba(255, 105, 180, 0.15);
+}
+
+.filter-section .btn-primary {
+    background: linear-gradient(135deg, #ff1493 0%, #ff69b4 100%);
+    border: none;
+    color: white;
+    transition: all 0.3s;
+}
+
+.filter-section .btn-primary:hover {
+    background: linear-gradient(135deg, #e6127a 0%, #ff5aa8 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 105, 180, 0.4);
+}
+
+/* Contact Table Card */
+.contact-table-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(255, 105, 180, 0.15);
+    overflow: hidden;
+}
+
+.contact-table-card .card-header {
+    background: linear-gradient(135deg, #ff1493 0%, #ff69b4 100%);
+    color: white;
+    padding: 20px 25px;
+    border: none;
+}
+
+.contact-table-card .card-header h5 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.contact-table-card .card-header i {
+    margin-right: 10px;
+}
+
+/* Contact Table */
+.contact-table {
+    margin-bottom: 0;
     font-size: 14px;
-    font-weight: 500;
-    outline: none;
-    transition: 0.2s;
+}
+
+.contact-table thead {
+    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+}
+
+.contact-table thead th {
+    border: none;
+    padding: 15px 12px;
+    font-weight: 600;
+    color: #2c3e50;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.contact-table thead th i {
+    margin-right: 5px;
+    color: #ff69b4;
+}
+
+.contact-table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.contact-table tbody tr:hover {
+    background: #f8f9fa;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.contact-table tbody td {
+    padding: 15px 12px;
+    vertical-align: middle;
+    border-bottom: 1px solid #e9ecef;
+}
+
+/* Row Status Styling */
+.contact-row.unprocessed {
+    background: #fff0f5;
+    border-left: 3px solid #ff1493;
+}
+
+.contact-row.processed {
+    background: #ffe5f0;
+    border-left: 3px solid #ff6fa8;
+}
+
+/* ID Cell */
+.id-cell {
+    font-weight: 700;
+    color: #ff1493;
+    font-size: 15px;
+}
+
+/* Customer Cell */
+.customer-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.customer-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff1493 0%, #ff69b4 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+}
+
+.customer-name {
+    color: #2c3e50;
+    font-size: 14px;
+    display: block;
+    margin-bottom: 3px;
+}
+
+.customer-address {
+    font-size: 12px;
+    color: #7f8c8d;
+}
+
+.customer-address i {
+    font-size: 11px;
+}
+
+/* Contact Cell */
+.contact-info {
+    font-size: 13px;
+}
+
+.contact-link {
+    color: #ff1493;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.contact-link:hover {
+    color: #c2185b;
+    text-decoration: underline;
+}
+
+/* Subject Cell */
+.subject-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    background: linear-gradient(135deg, #ff6f91 0%, #ff9eb7 100%);
+    color: white;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.subject-badge i {
+    margin-right: 5px;
+}
+
+/* Message Cell */
+.message-preview {
+    color: #7f8c8d;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 5px;
+}
+
+.view-detail-btn {
+    padding: 2px 8px;
+    font-size: 12px;
+    color: #ff6f91;
+    text-decoration: none;
+}
+
+.view-detail-btn:hover {
+    color: #ff5c8a;
+    text-decoration: underline;
+}
+
+/* Date Cell */
+.date-info {
+    font-size: 13px;
+    color: #2c3e50;
+}
+
+.date-info i {
+    margin-right: 5px;
+    color: #ff6f91;
+}
+
+.date-info small {
+    font-size: 12px;
+    color: #7f8c8d;
+}
+
+/* Status Cell */
+.status-form {
+    margin: 0;
+}
+
+.status-select {
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 2px solid;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: white;
+}
+
+.status-select.status-pending {
+    border-color: #ff9eb7;
+    color: #ff9eb7;
+}
+
+.status-select.status-completed {
+    border-color: #66d9a6;
+    color: #66d9a6;
 }
 
 .status-select:hover {
-    border-color: #ff6f9f;
-    box-shadow: 0 0 6px rgba(255, 99, 132, 0.3);
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(255, 111, 145, 0.2);
 }
 
-/* Màu tùy theo trạng thái */
-.status-select option[value="Đã xử lý"] {
-    background-color: #eaffea;
-    color: #2e7d32;
+.status-select:focus {
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(255, 111, 145, 0.25);
 }
 
-.status-select option[value="Chưa xử lý"] {
-    background-color: #ffeaea;
-    color: #c62828;
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.btn-action {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    color: white;
+    text-decoration: none;
+}
+
+.btn-view {
+    background: linear-gradient(135deg, #ff6f91 0%, #ff9eb7 100%);
+}
+
+.btn-email {
+    background: linear-gradient(135deg, #ff9eb7 0%, #ffc3d4 100%);
+}
+
+.btn-phone {
+    background: linear-gradient(135deg, #ff5c8a 0%, #ff8fab 100%);
+}
+
+.btn-action:hover {
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Empty State */
+.empty-state i {
+    opacity: 0.3;
+}
+
+/* Modal Styling */
+.modal-content {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #ff6f91 0%, #ff9eb7 100%);
+    color: white;
+    border-radius: 12px 12px 0 0;
+    padding: 20px 25px;
+}
+
+.modal-title {
+    font-weight: 600;
+}
+
+.modal-header .btn-close {
+    filter: brightness(0) invert(1);
+}
+
+.modal-body {
+    padding: 25px;
+}
+
+.detail-section {
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.detail-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.detail-section h6 {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 15px;
+    font-size: 15px;
+}
+
+.detail-section h6 i {
+    color: #ff6f91;
+    margin-right: 8px;
+}
+
+.detail-section p {
+    color: #7f8c8d;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.detail-section strong {
+    color: #2c3e50;
+    display: inline-block;
+    min-width: 120px;
+}
+
+.subject-text {
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: 15px;
+    padding: 10px 15px;
+    background: #fff5f7;
+    border-radius: 8px;
+    border-left: 4px solid #ff6f91;
+}
+
+.message-content {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    line-height: 1.8;
+    color: #2c3e50;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.modal-footer {
+    padding: 20px 25px;
+    border-top: 1px solid #e9ecef;
+}
+
+/* Alert Styling */
+.alert {
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.alert i {
+    margin-right: 8px;
 }
 
 /* Responsive */
-@media (max-width: 768px) {
-    .feedback-table th, .feedback-table td {
-        padding: 10px 6px;
+@media (max-width: 1200px) {
+    .contact-table {
         font-size: 13px;
     }
+    
+    .stat-content h2 {
+        font-size: 28px;
+    }
+}
 
-    .table-wrapper {
-        padding: 10px;
-        margin: 20px auto;
+@media (max-width: 992px) {
+    .stats-row {
+        flex-direction: column;
+    }
+    
+    .stat-card {
+        width: 100%;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 768px) {
+    .contact-manager-wrapper {
+        padding: 15px;
+    }
+    
+    .page-header {
+        padding: 15px;
+    }
+    
+    .page-header h2 {
+        font-size: 22px;
+    }
+    
+    .stat-card {
+        padding: 15px;
+        gap: 15px;
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+    
+    .stat-content h2 {
+        font-size: 24px;
+    }
+    
+    .filter-section {
+        padding: 15px;
+    }
+    
+    .contact-table thead th {
+        padding: 10px 8px;
+        font-size: 11px;
+    }
+    
+    .contact-table tbody td {
+        padding: 10px 8px;
+        font-size: 12px;
+    }
+    
+    .customer-info {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .btn-action {
+        width: 30px;
+        height: 30px;
+        font-size: 12px;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .filter-section,
+    .action-buttons,
+    .stat-card,
+    .page-header p {
+        display: none !important;
+    }
+    
+    .contact-manager-wrapper {
+        background: white;
+    }
+    
+    .contact-table-card {
+        box-shadow: none;
     }
 }

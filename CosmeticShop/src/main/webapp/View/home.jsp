@@ -354,6 +354,19 @@
                                                 <h5>${fn:escapeXml(product.name)}</h5>
                                                 <c:choose>
                                                     <c:when test="${product.discountActive}">
+                                                        <c:if test="${not empty product.activeDiscount.endDate}">
+                                                            <div class="sale-countdown-container mb-2" 
+                                                                 data-end-time="${product.activeDiscount.endDate.time}"
+                                                                 data-start-time="${product.activeDiscount.startDate.time}">
+                                                                <div class="countdown-label">
+                                                                    <i class="far fa-clock"></i>
+                                                                    <span class="countdown-text">Đang tải...</span>
+                                                                </div>
+                                                                <div class="countdown-progress-bar">
+                                                                    <div class="countdown-progress-fill"></div>
+                                                                </div>
+                                                            </div>
+                                                        </c:if>
                                                         <div class="price-wrapper">
                                                             <span class="price-old">
                                                                 <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> ₫
@@ -455,6 +468,12 @@
                                             <h5>${fn:escapeXml(product.name)}</h5>
                                             <c:choose>
                                                 <c:when test="${product.discountActive}">
+                                                    <c:if test="${not empty product.activeDiscount.endDate}">
+                                                        <div class="sale-countdown-badge mb-2" data-end-time="${product.activeDiscount.endDate.time}">
+                                                            <i class="far fa-clock"></i>
+                                                            <span class="countdown-text">Đang tải...</span>
+                                                        </div>
+                                                    </c:if>
                                                     <div class="price-wrapper">
                                                         <span class="price-old">
                                                             <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> ₫
@@ -559,6 +578,19 @@
                                                 <h5>${fn:escapeXml(product.name)}</h5>
                                                 <c:choose>
                                                     <c:when test="${product.discountActive}">
+                                                        <c:if test="${not empty product.activeDiscount.endDate}">
+                                                            <div class="sale-countdown-container mb-2" 
+                                                                 data-end-time="${product.activeDiscount.endDate.time}"
+                                                                 data-start-time="${product.activeDiscount.startDate.time}">
+                                                                <div class="countdown-label">
+                                                                    <i class="far fa-clock"></i>
+                                                                    <span class="countdown-text">Đang tải...</span>
+                                                                </div>
+                                                                <div class="countdown-progress-bar">
+                                                                    <div class="countdown-progress-fill"></div>
+                                                                </div>
+                                                            </div>
+                                                        </c:if>
                                                         <div class="price-wrapper">
                                                             <span class="price-old">
                                                                 <fmt:formatNumber value="${product.price}" type="number" maxFractionDigits="0" /> ₫
@@ -651,5 +683,74 @@
         <%@ include file="/View/includes/footer.jspf" %>
         <script src="${pageContext.request.contextPath}/Js/bootstrap.bundle.min.js"></script>
         <script src="${pageContext.request.contextPath}/Js/home.js"></script>
+        <script>
+            // ===== COUNTDOWN PROGRESS BAR CHO SALE =====
+            function initSaleCountdown() {
+                const countdowns = document.querySelectorAll('.sale-countdown-container');
+                if (countdowns.length === 0) return;
+                
+                function updateCountdowns() {
+                    countdowns.forEach(function(elem) {
+                        const endTime = parseInt(elem.dataset.endTime);
+                        const startTime = parseInt(elem.dataset.startTime);
+                        const now = new Date().getTime();
+                        const distance = endTime - now;
+                        
+                        const textElem = elem.querySelector('.countdown-text');
+                        const progressFill = elem.querySelector('.countdown-progress-fill');
+                        if (!textElem || !progressFill) return;
+                        
+                        if (distance < 0) {
+                            textElem.innerHTML = '<strong>Hết hạn</strong>';
+                            progressFill.style.width = '0%';
+                            progressFill.style.background = '#999';
+                            elem.classList.add('sale-ended');
+                            return;
+                        }
+                        
+                        // Tính phần trăm thời gian còn lại
+                        const totalDuration = endTime - startTime;
+                        const percentRemaining = (distance / totalDuration) * 100;
+                        progressFill.style.width = Math.max(0, Math.min(100, percentRemaining)) + '%';
+                        
+                        // Đổi màu theo % còn lại
+                        if (percentRemaining > 50) {
+                            progressFill.style.background = 'linear-gradient(90deg, #4caf50, #8bc34a)';
+                        } else if (percentRemaining > 20) {
+                            progressFill.style.background = 'linear-gradient(90deg, #ff9800, #ffc107)';
+                        } else {
+                            progressFill.style.background = 'linear-gradient(90deg, #f44336, #ff5722)';
+                        }
+                        
+                        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                        
+                        let displayText = 'Còn ';
+                        if (days > 0) {
+                            displayText += days + 'd ' + hours + 'h';
+                        } else if (hours > 0) {
+                            displayText += hours + 'h ' + minutes + 'm';
+                        } else {
+                            displayText += minutes + 'm ' + seconds + 's';
+                        }
+                        textElem.textContent = displayText;
+                    });
+                }
+                
+                // Update immediately
+                updateCountdowns();
+                // Update every second
+                setInterval(updateCountdowns, 1000);
+            }
+            
+            // Initialize on DOM ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initSaleCountdown);
+            } else {
+                initSaleCountdown();
+            }
+        </script>
     </body>
 </html>

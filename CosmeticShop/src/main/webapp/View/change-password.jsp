@@ -26,7 +26,6 @@
                     <div class="card">
                         <div class="card-body">
                             <h2 class="text-center mb-4">Đổi mật khẩu</h2>
-                            <p class="text-center text-muted mb-4">Chỉ hỗ trợ đổi mật khẩu cho tài khoản Gmail (@gmail.com)</p>
                             
                             <form method="post" action="${pageContext.request.contextPath}/change-password">
                                 <div class="mb-3">
