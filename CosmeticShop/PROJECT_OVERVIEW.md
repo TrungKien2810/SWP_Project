@@ -7,6 +7,7 @@
 ## 🎯 Key Features
 
 ### Customer Features
+
 - **Product Browsing & Search**: Browse cosmetics with filtering and search suggestions
 - **Shopping Cart**: Add/remove products with quantity management
 - **Wishlist**: Save favorite products for later purchase
@@ -21,6 +22,7 @@
 - **Discount System**: Apply promotional codes and view available discounts
 
 ### Admin Features
+
 - **Dashboard**: Overview of key metrics and business analytics
 - **Product Management**: Create, edit, delete products with gallery support
 - **Category Management**: Organize products into multiple categories
@@ -34,6 +36,7 @@
 ## 🏗️ Architecture
 
 ### Technology Stack
+
 - **Backend**: Java Jakarta EE 11
 - **Build Tool**: Maven
 - **Database**: SQL Server (MSSQL)
@@ -72,7 +75,9 @@ CosmeticShop/
 ## 📦 Core Components
 
 ### Controllers (41 servlets)
+
 Key controllers handling business logic:
+
 - **AccountManagement**: User account operations
 - **ProductController**: Product listing and management
 - **Checkout**: Order processing flow
@@ -84,6 +89,7 @@ Key controllers handling business logic:
 - **CommentServlet**: Product reviews and comments
 
 ### Database Access Objects (16 DAOs)
+
 - ProductDB, CategoryDB, OrderDB
 - UserDB, CartDB, WishlistDB
 - DiscountDB, NotificationDB
@@ -91,12 +97,14 @@ Key controllers handling business logic:
 - CommentDB, and more...
 
 ### Data Models (20+ entities)
+
 - Product, Category, Order, OrderDetail
 - User, Cart, Wishlist, Notification
 - Discount, Banner, Comment, CommentReply
 - ShippingAddress, and others
 
 ### User Interface
+
 - **Customer Pages** (30+ JSP pages):
   - Home, Product Detail, Collection
   - Shopping Cart, Checkout, Order Confirmation
@@ -113,6 +121,7 @@ Key controllers handling business logic:
 ## 🔌 Integration Features
 
 ### Payment Integration
+
 - **VNPay**: Vietnamese payment gateway with:
   - Payment creation (VnPayCreate.java)
   - IPN callback handling (VnPayIpn.java)
@@ -120,12 +129,14 @@ Key controllers handling business logic:
   - Bank payment option (BankPayment.java)
 
 ### Email System
+
 - Order confirmation emails
 - Password reset notifications
 - Promotional notifications
 - Order status updates
 
 ### Authentication & Authorization
+
 - User login/signup
 - Google OAuth2 integration
 - Role-based access (User/Admin/Manager)
@@ -134,6 +145,7 @@ Key controllers handling business logic:
 ## 💾 Database Features
 
 ### Core Tables
+
 - Users (with role-based system)
 - Products (with multi-category support)
 - Categories, ProductCategories
@@ -146,6 +158,7 @@ Key controllers handling business logic:
 - Contact Forms (Liên Hệ)
 
 ### Key Database Capabilities
+
 - Multi-category product support
 - Discount assignment to specific users
 - Notification tracking system
@@ -156,6 +169,7 @@ Key controllers handling business logic:
 ## 🎨 User Interface Highlights
 
 ### Frontend Technologies
+
 - Bootstrap 5.x for responsive design
 - Bootstrap Icons for UI elements
 - Custom CSS for styling:
@@ -164,6 +178,7 @@ Key controllers handling business logic:
   - Mobile-optimized views
 
 ### Key Pages
+
 - **Home Page**: Feature products, best sellers, promotional banners
 - **Product Detail**: Gallery, comments, wishlist, related products
 - **Shopping Experience**: Cart management, checkout wizard
